@@ -115,7 +115,7 @@ metadata:
   namespace: {{ .Namespace }}
 spec:
   type: ExternalName
-  externalName: karmada-search.{{ .Namespace }}.svc.cluster.local
+  externalName: karmada-search.{{ .Namespace }}.svc.{{ .ServiceDnsDomain }}
 `
 )
 
@@ -144,5 +144,6 @@ type AAApiServiceReplace struct {
 // AAServiceReplace is a struct to help to concrete
 // the karamda-search AA Service bytes with the AAService template
 type AAServiceReplace struct {
-	Namespace string
+	Namespace        string
+	ServiceDNSDomain string
 }
