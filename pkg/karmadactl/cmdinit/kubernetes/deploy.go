@@ -95,6 +95,7 @@ type CommandInitOption struct {
 	CertAndKeyFileData                 map[string][]byte
 	RestConfig                         *rest.Config
 	KarmadaAPIServerIP                 []net.IP
+	WaitPodReadyTimeout                int
 }
 
 // Validate Check that there are enough flags to run the command.
@@ -333,10 +334,10 @@ func (i *CommandInitOption) initKarmadaAPIServer() error {
 	if _, err := i.KubeClientSet.AppsV1().StatefulSets(i.Namespace).Create(context.TODO(), i.makeETCDStatefulSet(), metav1.CreateOptions{}); err != nil {
 		klog.Warning(err)
 	}
-	if err := WaitEtcdReplicasetInDesired(i.EtcdReplicas, i.KubeClientSet, i.Namespace, utils.MapToString(etcdLabels), 30); err != nil {
+	if err := WaitEtcdReplicasetInDesired(i.EtcdReplicas, i.KubeClientSet, i.Namespace, utils.MapToString(etcdLabels), i.WaitPodReadyTimeout); err != nil {
 		klog.Warning(err)
 	}
-	if err := WaitPodReady(i.KubeClientSet, i.Namespace, utils.MapToString(etcdLabels), 30); err != nil {
+	if err := WaitPodReady(i.KubeClientSet, i.Namespace, utils.MapToString(etcdLabels), i.WaitPodReadyTimeout); err != nil {
 		klog.Warning(err)
 	}
 
@@ -347,7 +348,7 @@ func (i *CommandInitOption) initKarmadaAPIServer() error {
 	if _, err := i.KubeClientSet.AppsV1().Deployments(i.Namespace).Create(context.TODO(), i.makeKarmadaAPIServerDeployment(), metav1.CreateOptions{}); err != nil {
 		klog.Warning(err)
 	}
-	if err := WaitPodReady(i.KubeClientSet, i.Namespace, utils.MapToString(apiServerLabels), 120); err != nil {
+	if err := WaitPodReady(i.KubeClientSet, i.Namespace, utils.MapToString(apiServerLabels), i.WaitPodReadyTimeout); err != nil {
 		return err
 	}
 
@@ -360,15 +361,13 @@ func (i *CommandInitOption) initKarmadaAPIServer() error {
 	if _, err := i.KubeClientSet.AppsV1().Deployments(i.Namespace).Create(context.TODO(), i.makeKarmadaAggregatedAPIServerDeployment(), metav1.CreateOptions{}); err != nil {
 		klog.Warning(err)
 	}
-	if err := WaitPodReady(i.KubeClientSet, i.Namespace, utils.MapToString(aggregatedAPIServerLabels), 30); err != nil {
+	if err := WaitPodReady(i.KubeClientSet, i.Namespace, utils.MapToString(aggregatedAPIServerLabels), i.WaitPodReadyTimeout); err != nil {
 		klog.Warning(err)
 	}
 	return nil
 }
 
 func (i *CommandInitOption) initKarmadaComponent() error {
-	// wait pod ready timeout 30s
-	waitPodReadyTimeout := 30
 
 	deploymentClient := i.KubeClientSet.AppsV1().Deployments(i.Namespace)
 	// Create karmada-kube-controller-manager
@@ -380,7 +379,7 @@ func (i *CommandInitOption) initKarmadaComponent() error {
 	if _, err := deploymentClient.Create(context.TODO(), i.makeKarmadaKubeControllerManagerDeployment(), metav1.CreateOptions{}); err != nil {
 		klog.Warning(err)
 	}
-	if err := WaitPodReady(i.KubeClientSet, i.Namespace, utils.MapToString(kubeControllerManagerLabels), waitPodReadyTimeout); err != nil {
+	if err := WaitPodReady(i.KubeClientSet, i.Namespace, utils.MapToString(kubeControllerManagerLabels), i.WaitPodReadyTimeout); err != nil {
 		klog.Warning(err)
 	}
 
@@ -390,7 +389,7 @@ func (i *CommandInitOption) initKarmadaComponent() error {
 	if _, err := deploymentClient.Create(context.TODO(), i.makeKarmadaSchedulerDeployment(), metav1.CreateOptions{}); err != nil {
 		klog.Warning(err)
 	}
-	if err := WaitPodReady(i.KubeClientSet, i.Namespace, utils.MapToString(schedulerLabels), waitPodReadyTimeout); err != nil {
+	if err := WaitPodReady(i.KubeClientSet, i.Namespace, utils.MapToString(schedulerLabels), i.WaitPodReadyTimeout); err != nil {
 		klog.Warning(err)
 	}
 
@@ -400,7 +399,7 @@ func (i *CommandInitOption) initKarmadaComponent() error {
 	if _, err := deploymentClient.Create(context.TODO(), i.makeKarmadaControllerManagerDeployment(), metav1.CreateOptions{}); err != nil {
 		klog.Warning(err)
 	}
-	if err := WaitPodReady(i.KubeClientSet, i.Namespace, utils.MapToString(controllerManagerLabels), waitPodReadyTimeout); err != nil {
+	if err := WaitPodReady(i.KubeClientSet, i.Namespace, utils.MapToString(controllerManagerLabels), i.WaitPodReadyTimeout); err != nil {
 		klog.Warning(err)
 	}
 
@@ -413,7 +412,7 @@ func (i *CommandInitOption) initKarmadaComponent() error {
 	if _, err := deploymentClient.Create(context.TODO(), i.makeKarmadaWebhookDeployment(), metav1.CreateOptions{}); err != nil {
 		klog.Warning(err)
 	}
-	if err := WaitPodReady(i.KubeClientSet, i.Namespace, utils.MapToString(webhookLabels), waitPodReadyTimeout); err != nil {
+	if err := WaitPodReady(i.KubeClientSet, i.Namespace, utils.MapToString(webhookLabels), i.WaitPodReadyTimeout); err != nil {
 		klog.Warning(err)
 	}
 	return nil

@@ -134,6 +134,7 @@ func NewCmdInit(parentCommand string) *cobra.Command {
 	flags.Int32VarP(&opts.KarmadaWebhookReplicas, "karmada-webhook-replicas", "", 1, "Karmada webhook replica set")
 	flags.StringVarP(&opts.KarmadaAggregatedAPIServerImage, "karmada-aggregated-apiserver-image", "", fmt.Sprintf("swr.ap-southeast-1.myhuaweicloud.com/karmada/karmada-aggregated-apiserver:%s", releaseVer.PatchRelease()), "Karmada aggregated apiserver image")
 	flags.Int32VarP(&opts.KarmadaAggregatedAPIServerReplicas, "karmada-aggregated-apiserver-replicas", "", 1, "Karmada aggregated apiserver replica set")
+	flags.IntVar(&opts.WaitPodReadyTimeout, "pod-timeout", 60, "Wait pod ready timeout.")
 
 	return cmd
 }
