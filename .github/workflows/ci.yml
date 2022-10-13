@@ -82,6 +82,7 @@ jobs:
         run: make test
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
+        if: github.repository == 'karmada-io/karmada'
         with:
           files: ./_output/coverage/coverage_pkg.txt,./_output/coverage/coverage_cmd.txt,./_output/coverage/coverage_examples.txt
           flags: unittests
