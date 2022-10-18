@@ -368,7 +368,6 @@ func (i *CommandInitOption) initKarmadaAPIServer() error {
 }
 
 func (i *CommandInitOption) initKarmadaComponent() error {
-
 	deploymentClient := i.KubeClientSet.AppsV1().Deployments(i.Namespace)
 	// Create karmada-kube-controller-manager
 	// https://github.com/karmada-io/karmada/blob/master/artifacts/deploy/kube-controller-manager.yaml
