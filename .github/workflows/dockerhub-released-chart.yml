@@ -26,7 +26,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: package chart
         env:
-          VERSION: ${{ github.ref_name }}
+          VERSION: 0.0.1
         run: make package-chart
       - name: push chart
         env:
