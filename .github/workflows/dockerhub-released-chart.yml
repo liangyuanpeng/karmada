@@ -30,5 +30,5 @@ jobs:
         run: make package-chart
       - name: push chart
         env:
-          VERSION: ${{ github.ref_name }}
+          VERSION: v0.0.1
         run: make push-chart
