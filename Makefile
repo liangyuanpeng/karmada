@@ -73,6 +73,7 @@ $(MP_TARGET):
 	target=$$(echo $(subst mp-image-,,$@));\
 	make $$target GOOS=linux GOARCH=amd64;\
 	make $$target GOOS=linux GOARCH=arm64;\
+	echo "==============================" $$target;\
 	VERSION=$(VERSION) REGISTRY=$(REGISTRY) \
 		OUTPUT_TYPE=registry \
 		BUILD_PLATFORMS=linux/amd64,linux/arm64 \
