@@ -27,8 +27,10 @@ jobs:
       - name: package chart
         env:
           VERSION: 0.0.1
+          REGISTRY: docker.io/lypgcs
         run: make package-chart
       - name: push chart
         env:
           VERSION: 0.0.1
+          REGISTRY: docker.io/lypgcs
         run: make push-chart
