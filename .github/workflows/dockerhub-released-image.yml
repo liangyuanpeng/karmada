@@ -3,6 +3,10 @@ on:
   release:
     types:
       - published
+  push:
+    branches:
+      - cosign
+
 jobs:
   publish-image-to-dockerhub:
     name: publish to DockerHub
