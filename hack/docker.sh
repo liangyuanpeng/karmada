@@ -101,6 +101,7 @@ function build_cross_image() {
           --tag "${image_name}" \
           --file "${REPO_ROOT}/cluster/images/buildx.Dockerfile" \
           "${REPO_ROOT}/_output/bin"
+  cosignImage "${image_name}"
   set +x
 }
 
