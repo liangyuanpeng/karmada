@@ -99,7 +99,7 @@ package-chart:
 
 .PHONY: push-chart
 push-chart:
-	helm push _output/charts/karmada-chart-${VERSION}.tgz oci://docker.io/karmada
+	helm push _output/charts/karmada-chart-${VERSION}.tgz oci://docker.io/gcslyp
 
 .PHONY: test
 test:
