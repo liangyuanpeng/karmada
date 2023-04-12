@@ -48,6 +48,6 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: build and publish images
         env:
-          REGISTRY: karmada
+          REGISTRY: lypgcs
           VERSION: latest
         run: make mp-image-${{ matrix.target }}
