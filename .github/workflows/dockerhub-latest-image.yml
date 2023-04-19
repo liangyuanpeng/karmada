@@ -8,6 +8,7 @@ jobs:
 
   cosign:
     name: cosign
+    runs-on: ubuntu-20.04
     steps:
       - name: build and publish images
         env:
