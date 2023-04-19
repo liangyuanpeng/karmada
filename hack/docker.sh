@@ -74,14 +74,14 @@ function cosignImage(){
 
 echo "====================begin cosign for :"$1
 
-echo "github.sha:" ${{ github.sha }}
-echo "github.run_id:" ${{ github.run_id }}
-echo "github.run_attempt:" ${{ github.run_attempt }}
+echo "github.sha:" $GH_SHA
+echo "github.run_id:" $GH_RUN_ID
+echo "github.run_attempt:" $GH_RUN_ATTEMPT
 
 cosign sign --yes \
-            -a sha=${{ github.sha }} \
-            -a run_id=${{ github.run_id }} \
-            -a run_attempt=${{ github.run_attempt }} \
+            -a sha=$GH_SHA \
+            -a run_id=$GH_RUN_ID \
+            -a run_attempt=$GH_RUN_ATTEMPT \
             $1
 }
 
