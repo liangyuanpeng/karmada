@@ -22,7 +22,7 @@ jobs:
         env:
           COSIGN_EXPERIMENTAL: 1
         run: |
-          cosign sign ghcr.io -u  ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+          cosign login ghcr.io -u  ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
           cosign sign lypgcs/kramada-search:latest
 
   publish-image-to-dockerhub:
