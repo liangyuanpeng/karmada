@@ -46,6 +46,10 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USER_NAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@main
+#        with:
+#          cosign-release: 'v2.0.1'
       - name: build and publish images
         env:
           REGISTRY: lypgcs
