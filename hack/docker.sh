@@ -79,9 +79,7 @@ echo "github.run_id:" $GH_RUN_ID
 echo "github.run_attempt:" $GH_RUN_ATTEMPT
 
 cosign sign --yes \
-            -a sha=$GH_SHA \
             -a run_id=$GH_RUN_ID \
-            -a run_attempt=$GH_RUN_ATTEMPT \
             $1
 }
 
