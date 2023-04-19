@@ -3,9 +3,9 @@ on:
   release:
     types:
       - published
-  push:
-    branches:
-      - cosign
+#  push:
+#    branches:
+#      - cosign
 
 jobs:
   publish-chart-to-dockerhub:

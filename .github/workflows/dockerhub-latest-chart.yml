@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - master
-      - cosign
+#      - cosign
 jobs:
   publish-chart-to-dockerhub:
     name: publish to DockerHub
