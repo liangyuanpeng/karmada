@@ -3,9 +3,9 @@ on:
   release:
     types:
       - published
-#  push:
-#    branches:
-#      - cosign
+  push:
+    branches:
+      - cosign
 
 jobs:
   publish-image-to-dockerhub:
@@ -24,6 +24,8 @@ jobs:
           - karmada-search
           - karmada-operator
     runs-on: ubuntu-20.04
+    permissions:
+      id-token: write # To be able to get OIDC ID token to sign images.
     steps:
       - name: checkout code
         uses: actions/checkout@v3
