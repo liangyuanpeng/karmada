@@ -58,4 +58,6 @@ jobs:
           GH_RUN_ID: ${{ github.run_id }}
           GH_RUN_ATTEMPT: ${{ github.run_attempt }}
           COSIGN_EXPERIMENTAL: 1
-        run: make mp-image-${{ matrix.target }}
+        run: |
+          cosign sign lypgcs/kramada-search:latest
+          make mp-image-${{ matrix.target }}
