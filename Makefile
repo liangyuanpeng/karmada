@@ -99,7 +99,9 @@ package-chart:
 
 .PHONY: push-chart
 push-chart:
-	helm push _output/charts/karmada-chart-${VERSION}.tgz oci://docker.io/lypgcs
+	hack/push-helm-chart.sh $REGISTRY $(VERSION)
+
+#helm push _output/charts/karmada-chart-${VERSION}.tgz oci://docker.io/lypgcs
 
 .PHONY: test
 test:
