@@ -77,9 +77,7 @@ jobs:
         env:
           REGISTRY: lypgcs
           VERSION: latest
-          GH_SHA: ${{ github.sha }}
-          GH_RUN_ID: ${{ github.run_id }}
-          GH_RUN_ATTEMPT: ${{ github.run_attempt }}
+#          GH_RUN_ID: ${{ github.run_id }}
           COSIGN_EXPERIMENTAL: 1
         run: |
           make mp-image-${{ matrix.target }}
