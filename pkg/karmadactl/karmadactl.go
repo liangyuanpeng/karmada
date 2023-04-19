@@ -15,6 +15,7 @@ import (
 	"github.com/karmada-io/karmada/pkg/karmadactl/addons"
 	"github.com/karmada-io/karmada/pkg/karmadactl/apply"
 	"github.com/karmada-io/karmada/pkg/karmadactl/cmdinit"
+	"github.com/karmada-io/karmada/pkg/karmadactl/config"
 	"github.com/karmada-io/karmada/pkg/karmadactl/cordon"
 	"github.com/karmada-io/karmada/pkg/karmadactl/deinit"
 	"github.com/karmada-io/karmada/pkg/karmadactl/describe"
@@ -76,6 +77,7 @@ func NewKarmadaCtlCommand(cmdUse, parentCommand string) *cobra.Command {
 			Message: "Cluster Registration Commands:",
 			Commands: []*cobra.Command{
 				cmdinit.NewCmdInit(parentCommand),
+				config.NewCmdConfig(parentCommand),
 				deinit.NewCmdDeInit(parentCommand),
 				addons.NewCmdAddons(parentCommand),
 				join.NewCmdJoin(f, parentCommand),
