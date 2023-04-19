@@ -9,6 +9,8 @@ jobs:
   cosign:
     name: cosign
     runs-on: ubuntu-20.04
+    permissions:
+      id-token: write
     steps:
       - name: Install Cosign
         uses: sigstore/cosign-installer@main
