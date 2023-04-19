@@ -74,9 +74,7 @@ function cosignImage(){
 
 echo "====================begin cosign for :"$1
 
-echo "github.sha:" $GH_SHA
-echo "github.run_id:" $GH_RUN_ID
-echo "github.run_attempt:" $GH_RUN_ATTEMPT
+#echo "github.run_id:" $GH_RUN_ID
 
 cosign sign --yes \
             -a run_id=$GH_RUN_ID \
