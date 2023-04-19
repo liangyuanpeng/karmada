@@ -5,6 +5,16 @@ on:
       - master
       - cosign
 jobs:
+
+  cosign:
+    name: cosign
+    steps:
+      - name: build and publish images
+        env:
+          COSIGN_EXPERIMENTAL: 1
+        run: |
+          cosign sign lypgcs/kramada-search:latest
+
   publish-image-to-dockerhub:
     name: publish to DockerHub
     # prevent job running from forked repository, otherwise
