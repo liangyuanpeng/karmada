@@ -21,9 +21,25 @@ var (
 		`)
 )
 
+type CommandConfigOptions struct {
+}
+
+func (i *CommandConfigOptions) Validate(parentCommand string) error {
+	return nil
+}
+
+func (i *CommandConfigOptions) Complete() error {
+	log.Println("print karmada images:", kubernetes.DefaultKarmadaAggregatedAPIServerImage)
+	return nil
+}
+
+func (i *CommandConfigOptions) RunInit(parentCommand string) error {
+	return nil
+}
+
 // NewCmdInit install Karmada on Kubernetes
 func NewCmdConfig(parentCommand string) *cobra.Command {
-	opts := kubernetes.CommandInitOption{}
+	opts := CommandConfigOptions{}
 	cmd := &cobra.Command{
 		Use:                   "config",
 		Short:                 "karmadactl config",
@@ -35,7 +51,6 @@ func NewCmdConfig(parentCommand string) *cobra.Command {
 			if err := opts.Validate(parentCommand); err != nil {
 				return err
 			}
-			log.Println("aa:", kubernetes.DefaultKarmadaAggregatedAPIServerImage)
 			if err := opts.Complete(); err != nil {
 				return err
 			}
