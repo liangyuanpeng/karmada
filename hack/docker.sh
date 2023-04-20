@@ -66,6 +66,7 @@ function build_local_image() {
 
   if [[ "$output_type" == "registry" ]]; then
     docker push "${image_name}"
+    signImage ${image_name}
   fi
 }
 
@@ -85,7 +86,14 @@ function build_cross_image() {
           --tag "${image_name}" \
           --file "${REPO_ROOT}/cluster/images/buildx.Dockerfile" \
           "${REPO_ROOT}/_output/bin"
+  signImage ${image_name}
   set +x
+}
+
+function signImage(){
+  local -r target=$1
+  echo "signing image: "${target}
+  cosign sign --yes ${target}
 }
 
 function isCross() {
