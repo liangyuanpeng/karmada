@@ -23,7 +23,6 @@ jobs:
 
       - name: run discussion event
         env:
-          GH_EVENT: ${{ toJSON(github.event) }}
           GH_TOKEN: ${{ github.token }}
           ISSUE_COMMENT: ${{ github.event.comment.body }}
           PR_NUM: ${{ github.event.issue.number }}
