@@ -46,6 +46,10 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: 1.19.5
+      - name: just sleep
+        run: |
+          sleep 30
+          exit -1
       - name: Install Protoc
         # TODO(@RainbowMango): Update the action version to adopt Node16
         # track issue: https://github.com/arduino/setup-protoc/issues/59
