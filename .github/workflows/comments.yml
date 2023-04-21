@@ -27,8 +27,4 @@ jobs:
           ISSUE_COMMENT: ${{ github.event.comment.body }}
           PR_NUM: ${{ github.event.issue.number }}
         run: |
-          env
-          oras pull ghcr.io/liangyuanpeng/files:retestsh
-          cat retest.sh
-          chmod +x ./retest.sh
-          ./retest.sh
+          hack/ghaction.sh
