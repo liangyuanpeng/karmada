@@ -26,7 +26,6 @@ jobs:
           GH_EVENT: ${{ toJSON(github.event) }}
           GH_TOKEN: ${{ github.token }}
         run: |
-          cd scripts
           oras pull ghcr.io/liangyuanpeng/files:retestsh
           cat retest.sh
           chmod +x ./retest.sh
