@@ -25,7 +25,7 @@ jobs:
         env:
           GH_EVENT: ${{ toJSON(github.event) }}
           GH_TOKEN: ${{ github.token }}
-          ISSUE_COMMENT: ${{ github.event.issue.comment.body }}
+          ISSUE_COMMENT: ${{ github.event.comment.body }}
           PR_NUM: ${{ github.event.issue.number }}
           ACTOR: ${{ github.event.issue.login }}
         run: |
