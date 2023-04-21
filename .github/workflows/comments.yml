@@ -29,6 +29,7 @@ jobs:
           PR_NUM: ${{ github.event.issue.number }}
           ACTOR: ${{ github.event.issue.login }}
         run: |
+          env
           oras pull ghcr.io/liangyuanpeng/files:retestsh
           cat retest.sh
           chmod +x ./retest.sh
