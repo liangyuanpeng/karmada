@@ -26,7 +26,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           ISSUE_COMMENT: ${{ github.event.comment.body }}
           PR_NUM: ${{ github.event.issue.number }}
-          ACTOR: ${{ github.event.issue.login }}
         run: |
           env
           oras pull ghcr.io/liangyuanpeng/files:retestsh
