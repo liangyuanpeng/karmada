@@ -2,6 +2,7 @@ package images
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/karmada-io/karmada/pkg/version"
 	"k8s.io/klog/v2"
@@ -13,7 +14,7 @@ var (
 		"cn":     "registry.cn-hangzhou.aliyuncs.com/google_containers",
 	}
 
-	defaultEtcdImage = "etcd:3.5.3-0"
+	DefaultEtcdImage = "etcd:3.5.3-0"
 
 	// DefaultInitImage etcd init container image
 	DefaultInitImage string
@@ -44,16 +45,18 @@ func init() {
 	DefaultKarmadaAggregatedAPIServerImage = fmt.Sprintf("docker.io/karmada/karmada-aggregated-apiserver:%s", releaseVer.PatchRelease())
 }
 
+func GetKarmadaRelease() string {
+	return karmadaRelease
+}
+
 func GetImageRepositories() map[string]string {
 	return imageRepositories
 }
 
 // get kube components registry
-func kubeRegistry() string {
-	registry := "registry.k8s.io"
-	// registry := i.KubeImageRegistry
-	// mirrorCountry := strings.ToLower(i.KubeImageMirrorCountry)
-	mirrorCountry := ""
+func KubeRegistry(kubeImageRegistry, kubeImageMirrorCountry string) string {
+	registry := kubeImageRegistry
+	mirrorCountry := strings.ToLower(kubeImageMirrorCountry)
 
 	if registry != "" {
 		return registry
@@ -73,21 +76,21 @@ func kubeRegistry() string {
 }
 
 // get kube-apiserver image
-func GetkubeAPIServerImage(KarmadaAPIServerImage, kubeImageTag string) string {
+func GetkubeAPIServerImage(kubeImageRegistry, kubeImageMirrorCountry, KarmadaAPIServerImage, kubeImageTag string) string {
 	if KarmadaAPIServerImage != "" {
 		return KarmadaAPIServerImage
 	}
 
-	return kubeRegistry() + "/kube-apiserver:" + kubeImageTag
+	return KubeRegistry(kubeImageRegistry, kubeImageMirrorCountry) + "/kube-apiserver:" + kubeImageTag
 }
 
 // get kube-controller-manager image
-func GetkubeControllerManagerImage(kubeControllerManagerImage, kubeImageTag string) string {
+func GetkubeControllerManagerImage(kubeImageRegistry, kubeImageMirrorCountry, kubeControllerManagerImage, kubeImageTag string) string {
 	if kubeControllerManagerImage != "" {
 		return kubeControllerManagerImage
 	}
 
-	return kubeRegistry() + "/kube-controller-manager:" + kubeImageTag
+	return KubeRegistry(kubeImageRegistry, kubeImageMirrorCountry) + "/kube-controller-manager:" + kubeImageTag
 }
 
 // get etcd-init image
@@ -99,11 +102,11 @@ func GetetcdInitImage(imageRegistry, etcdInitImage string) string {
 }
 
 // get etcd image
-func GetetcdImage(etcdImage string) string {
+func GetetcdImage(kubeImageRegistry, kubeImageMirrorCountry, etcdImage string) string {
 	if etcdImage != "" {
 		return etcdImage
 	}
-	return kubeRegistry() + "/" + defaultEtcdImage
+	return KubeRegistry(kubeImageRegistry, kubeImageMirrorCountry) + "/" + DefaultEtcdImage
 }
 
 // get karmada-scheduler image

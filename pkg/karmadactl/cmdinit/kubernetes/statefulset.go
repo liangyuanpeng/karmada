@@ -240,7 +240,7 @@ func (i *CommandInitOption) makeETCDStatefulSet() *appsv1.StatefulSet {
 		Containers: []corev1.Container{
 			{
 				Name:  etcdStatefulSetAndServiceName,
-				Image: images.GetetcdImage(i.EtcdImage),
+				Image: images.GetetcdImage(i.KubeImageRegistry, i.KubeImageMirrorCountry, i.EtcdImage),
 				Command: []string{
 					"/usr/local/bin/etcd",
 					fmt.Sprintf("--config-file=%s/%s", etcdContainerConfigDataMountPath, etcdConfigName),
