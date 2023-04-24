@@ -640,8 +640,8 @@ function util::get_macos_ipaddress() {
 }
 
 function util::get_version() {
-  echo "1.0.0-g8ec9d6c9"
-  #git describe --tags --dirty
+  # echo "1.0.0-g8ec9d6c9"
+  git describe --tags --dirty
 }
 
 function util::version_ldflags() {
