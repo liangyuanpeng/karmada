@@ -2,6 +2,7 @@ package images
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/karmada-io/karmada/pkg/version"
@@ -38,6 +39,8 @@ func init() {
 	}
 	karmadaRelease = releaseVer.PatchRelease()
 
+	log.Println("================================version:", releaseVer.PatchRelease(), karmadaRelease)
+
 	DefaultInitImage = "docker.io/alpine:3.15.1"
 	DefaultKarmadaSchedulerImage = fmt.Sprintf("docker.io/karmada/karmada-scheduler:%s", releaseVer.PatchRelease())
 	DefaultKarmadaControllerManagerImage = fmt.Sprintf("docker.io/karmada/karmada-controller-manager:%s", releaseVer.PatchRelease())
@@ -69,9 +72,9 @@ func KubeRegistry(kubeImageRegistry, kubeImageMirrorCountry string) string {
 		}
 	}
 
-	// if i.ImageRegistry != "" {
-	// 	return i.ImageRegistry
-	// }
+	if kubeImageRegistry != "" {
+		return kubeImageRegistry
+	}
 	return imageRepositories["global"]
 }
 
