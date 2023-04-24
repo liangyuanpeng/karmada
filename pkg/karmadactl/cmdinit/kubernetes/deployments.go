@@ -12,6 +12,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	"github.com/karmada-io/karmada/pkg/karmadactl/cmdinit/options"
+	"github.com/karmada-io/karmada/pkg/karmadactl/images"
 )
 
 const (
@@ -161,7 +162,7 @@ func (i *CommandInitOption) makeKarmadaAPIServerDeployment() *appsv1.Deployment 
 		Containers: []corev1.Container{
 			{
 				Name:    karmadaAPIServerDeploymentAndServiceName,
-				Image:   i.kubeAPIServerImage(),
+				Image:   images.GetkubeAPIServerImage(i.KarmadaAPIServerImage, i.KubeImageTag),
 				Command: i.karmadaAPIServerContainerCommand(),
 				Ports: []corev1.ContainerPort{
 					{
@@ -275,7 +276,7 @@ func (i *CommandInitOption) makeKarmadaKubeControllerManagerDeployment() *appsv1
 		Containers: []corev1.Container{
 			{
 				Name:  kubeControllerManagerClusterRoleAndDeploymentAndServiceName,
-				Image: i.kubeControllerManagerImage(),
+				Image: images.GetkubeControllerManagerImage(i.KubeControllerManagerImage, i.KubeImageTag),
 				Command: []string{
 					"kube-controller-manager",
 					"--allocate-node-cidrs=true",
@@ -420,7 +421,7 @@ func (i *CommandInitOption) makeKarmadaSchedulerDeployment() *appsv1.Deployment 
 		Containers: []corev1.Container{
 			{
 				Name:  schedulerDeploymentNameAndServiceAccountName,
-				Image: i.karmadaSchedulerImage(),
+				Image: images.GetkarmadaSchedulerImage(i.ImageRegistry, i.KarmadaSchedulerImage),
 				Command: []string{
 					"/bin/karmada-scheduler",
 					"--kubeconfig=/etc/kubeconfig",
@@ -535,7 +536,7 @@ func (i *CommandInitOption) makeKarmadaControllerManagerDeployment() *appsv1.Dep
 		Containers: []corev1.Container{
 			{
 				Name:  controllerManagerDeploymentAndServiceName,
-				Image: i.karmadaControllerManagerImage(),
+				Image: images.GetkarmadaControllerManagerImage(i.ImageRegistry, i.KarmadaControllerManagerImage),
 				Command: []string{
 					"/bin/karmada-controller-manager",
 					"--kubeconfig=/etc/kubeconfig",
@@ -653,7 +654,7 @@ func (i *CommandInitOption) makeKarmadaWebhookDeployment() *appsv1.Deployment {
 		Containers: []corev1.Container{
 			{
 				Name:  webhookDeploymentAndServiceAccountAndServiceName,
-				Image: i.karmadaWebhookImage(),
+				Image: images.GetkarmadaWebhookImage(i.ImageRegistry, i.KarmadaWebhookImage),
 				Command: []string{
 					"/bin/karmada-webhook",
 					"--kubeconfig=/etc/kubeconfig",
@@ -799,7 +800,7 @@ func (i *CommandInitOption) makeKarmadaAggregatedAPIServerDeployment() *appsv1.D
 		Containers: []corev1.Container{
 			{
 				Name:  karmadaAggregatedAPIServerDeploymentAndServiceName,
-				Image: i.karmadaAggregatedAPIServerImage(),
+				Image: images.GetkarmadaAggregatedAPIServerImage(i.ImageRegistry, i.KarmadaAggregatedAPIServerImage),
 				Command: []string{
 					"/bin/karmada-aggregated-apiserver",
 					"--kubeconfig=/etc/kubeconfig",

@@ -29,7 +29,15 @@ func (i *CommandConfigOptions) Validate(parentCommand string) error {
 }
 
 func (i *CommandConfigOptions) Complete() error {
-	log.Println("print karmada images:", kubernetes.DefaultKarmadaAggregatedAPIServerImage)
+	opts := kubernetes.CommandInitOption{}
+	log.Println("len:", len(opts.GetImages()))
+	imageStr := ""
+	for _, v := range opts.GetImages() {
+		log.Println("v:", v)
+		imageStr += v + "\n"
+	}
+	log.Println("imageStr:", imageStr)
+	log.Printf("%s\n %s", "karmada images :", imageStr)
 	return nil
 }
 
