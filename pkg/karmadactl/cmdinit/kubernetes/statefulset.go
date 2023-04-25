@@ -12,6 +12,7 @@ import (
 
 	"github.com/karmada-io/karmada/pkg/karmadactl/cmdinit/options"
 	"github.com/karmada-io/karmada/pkg/karmadactl/cmdinit/utils"
+	"github.com/karmada-io/karmada/pkg/karmadactl/images"
 )
 
 const (
@@ -239,7 +240,7 @@ func (i *CommandInitOption) makeETCDStatefulSet() *appsv1.StatefulSet {
 		Containers: []corev1.Container{
 			{
 				Name:  etcdStatefulSetAndServiceName,
-				Image: i.etcdImage(),
+				Image: images.GetetcdImage(i.KubeImageRegistry, i.KubeImageMirrorCountry, i.EtcdImage),
 				Command: []string{
 					"/usr/local/bin/etcd",
 					fmt.Sprintf("--config-file=%s/%s", etcdContainerConfigDataMountPath, etcdConfigName),
@@ -291,7 +292,7 @@ func (i *CommandInitOption) makeETCDStatefulSet() *appsv1.StatefulSet {
 	podSpec.InitContainers = []corev1.Container{
 		{
 			Name:    "etcd-init-conf",
-			Image:   i.etcdInitImage(),
+			Image:   images.GetetcdInitImage(i.ImageRegistry, i.EtcdInitImage),
 			Command: i.etcdInitContainerCommand(),
 			VolumeMounts: []corev1.VolumeMount{
 				{

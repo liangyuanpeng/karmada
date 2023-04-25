@@ -29,11 +29,6 @@ import (
 )
 
 var (
-	imageRepositories = map[string]string{
-		"global": "registry.k8s.io",
-		"cn":     "registry.cn-hangzhou.aliyuncs.com/google_containers",
-	}
-
 	certList = []string{
 		options.CaCertAndKeyName,
 		options.EtcdCaCertAndKeyName,
@@ -44,29 +39,8 @@ var (
 		options.FrontProxyCaCertAndKeyName,
 		options.FrontProxyClientCertAndKeyName,
 	}
-
-	karmadaRelease string
-
-	defaultEtcdImage = "etcd:3.5.3-0"
-
 	// DefaultCrdURL Karmada crds resource
 	DefaultCrdURL string
-	// DefaultInitImage etcd init container image
-	DefaultInitImage string
-	// DefaultKarmadaSchedulerImage Karmada scheduler image
-	DefaultKarmadaSchedulerImage string
-	// DefaultKarmadaControllerManagerImage Karmada controller manager image
-	DefaultKarmadaControllerManagerImage string
-	// DefualtKarmadaWebhookImage Karmada webhook image
-	DefualtKarmadaWebhookImage string
-	// DefaultKarmadaAggregatedAPIServerImage Karmada aggregated apiserver image
-	DefaultKarmadaAggregatedAPIServerImage string
-)
-
-const (
-	etcdStorageModePVC      = "PVC"
-	etcdStorageModeEmptyDir = "emptyDir"
-	etcdStorageModeHostPath = "hostPath"
 )
 
 func init() {
@@ -75,15 +49,14 @@ func init() {
 		klog.Infof("No default release version found. build version: %s", version.Get().String())
 		releaseVer = &version.ReleaseVersion{} // initialize to avoid panic
 	}
-	karmadaRelease = releaseVer.PatchRelease()
-
 	DefaultCrdURL = fmt.Sprintf("https://github.com/karmada-io/karmada/releases/download/%s/crds.tar.gz", releaseVer.FirstMinorRelease())
-	DefaultInitImage = "docker.io/alpine:3.15.1"
-	DefaultKarmadaSchedulerImage = fmt.Sprintf("docker.io/karmada/karmada-scheduler:%s", releaseVer.PatchRelease())
-	DefaultKarmadaControllerManagerImage = fmt.Sprintf("docker.io/karmada/karmada-controller-manager:%s", releaseVer.PatchRelease())
-	DefualtKarmadaWebhookImage = fmt.Sprintf("docker.io/karmada/karmada-webhook:%s", releaseVer.PatchRelease())
-	DefaultKarmadaAggregatedAPIServerImage = fmt.Sprintf("docker.io/karmada/karmada-aggregated-apiserver:%s", releaseVer.PatchRelease())
 }
+
+const (
+	etcdStorageModePVC      = "PVC"
+	etcdStorageModeEmptyDir = "emptyDir"
+	etcdStorageModeHostPath = "hostPath"
+)
 
 // CommandInitOption holds all flags options for init.
 type CommandInitOption struct {
@@ -532,92 +505,9 @@ func (i *CommandInitOption) createKarmadaConfig() error {
 	return err
 }
 
-// get kube components registry
-func (i *CommandInitOption) kubeRegistry() string {
-	registry := i.KubeImageRegistry
-	mirrorCountry := strings.ToLower(i.KubeImageMirrorCountry)
-
-	if registry != "" {
-		return registry
-	}
-
-	if mirrorCountry != "" {
-		value, ok := imageRepositories[mirrorCountry]
-		if ok {
-			return value
-		}
-	}
-
-	if i.ImageRegistry != "" {
-		return i.ImageRegistry
-	}
-	return imageRepositories["global"]
-}
-
-// get kube-apiserver image
-func (i *CommandInitOption) kubeAPIServerImage() string {
-	if i.KarmadaAPIServerImage != "" {
-		return i.KarmadaAPIServerImage
-	}
-
-	return i.kubeRegistry() + "/kube-apiserver:" + i.KubeImageTag
-}
-
-// get kube-controller-manager image
-func (i *CommandInitOption) kubeControllerManagerImage() string {
-	if i.KubeControllerManagerImage != "" {
-		return i.KubeControllerManagerImage
-	}
-
-	return i.kubeRegistry() + "/kube-controller-manager:" + i.KubeImageTag
-}
-
-// get etcd-init image
-func (i *CommandInitOption) etcdInitImage() string {
-	if i.ImageRegistry != "" && i.EtcdInitImage == DefaultInitImage {
-		return i.ImageRegistry + "/alpine:3.15.1"
-	}
-	return i.EtcdInitImage
-}
-
-// get etcd image
-func (i *CommandInitOption) etcdImage() string {
-	if i.EtcdImage != "" {
-		return i.EtcdImage
-	}
-	return i.kubeRegistry() + "/" + defaultEtcdImage
-}
-
-// get karmada-scheduler image
-func (i *CommandInitOption) karmadaSchedulerImage() string {
-	if i.ImageRegistry != "" && i.KarmadaSchedulerImage == DefaultKarmadaSchedulerImage {
-		return i.ImageRegistry + "/karmada-scheduler:" + karmadaRelease
-	}
-	return i.KarmadaSchedulerImage
-}
-
-// get karmada-controller-manager
-func (i *CommandInitOption) karmadaControllerManagerImage() string {
-	if i.ImageRegistry != "" && i.KarmadaControllerManagerImage == DefaultKarmadaControllerManagerImage {
-		return i.ImageRegistry + "/karmada-controller-manager:" + karmadaRelease
-	}
-	return i.KarmadaControllerManagerImage
-}
-
-// get karmada-webhook image
-func (i *CommandInitOption) karmadaWebhookImage() string {
-	if i.ImageRegistry != "" && i.KarmadaWebhookImage == DefualtKarmadaWebhookImage {
-		return i.ImageRegistry + "/karmada-webhook:" + karmadaRelease
-	}
-	return i.KarmadaWebhookImage
-}
-
-// get karmada-aggregated-apiserver image
-func (i *CommandInitOption) karmadaAggregatedAPIServerImage() string {
-	if i.ImageRegistry != "" && i.KarmadaAggregatedAPIServerImage == DefaultKarmadaAggregatedAPIServerImage {
-		return i.ImageRegistry + "/karmada-aggregated-apiserver:" + karmadaRelease
-	}
-	return i.KarmadaAggregatedAPIServerImage
+func (i *CommandInitOption) GetImages() []string {
+	strs := []string{}
+	return strs
 }
 
 // get image pull secret

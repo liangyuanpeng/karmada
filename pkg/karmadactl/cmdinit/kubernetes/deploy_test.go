@@ -11,6 +11,7 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 
 	"github.com/karmada-io/karmada/pkg/karmadactl/cmdinit/utils"
+	"github.com/karmada-io/karmada/pkg/karmadactl/images"
 )
 
 func Test_initializeDirectory(t *testing.T) {
@@ -254,14 +255,14 @@ func TestKubeRegistry(t *testing.T) {
 			opt: &CommandInitOption{
 				KubeImageMirrorCountry: "CN",
 			},
-			expectedKubeRegistry: imageRepositories["cn"],
+			expectedKubeRegistry: images.GetImageRepositories()["cn"],
 		},
 		{
 			name: "KubeImageMirrorCountry is set to an unsupported value",
 			opt: &CommandInitOption{
 				KubeImageMirrorCountry: "unsupported",
 			},
-			expectedKubeRegistry: imageRepositories["global"],
+			expectedKubeRegistry: images.GetImageRepositories()["global"],
 		},
 		{
 			name: "KubeImageRegistry and KubeImageMirrorCountry are not set, but ImageRegistry is set",
@@ -273,13 +274,13 @@ func TestKubeRegistry(t *testing.T) {
 		{
 			name:                 "Neither KubeImageRegistry nor ImageRegistry are set, and KubeImageMirrorCountry is not set",
 			opt:                  &CommandInitOption{},
-			expectedKubeRegistry: imageRepositories["global"],
+			expectedKubeRegistry: images.GetImageRepositories()["global"],
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := tt.opt.kubeRegistry()
+			result := images.KubeRegistry(tt.opt.KubeImageRegistry, tt.opt.KubeImageMirrorCountry)
 			if result != tt.expectedKubeRegistry {
 				t.Errorf("Unexpected result: %s", result)
 			}
@@ -305,13 +306,13 @@ func TestKubeAPIServerImage(t *testing.T) {
 			opt: &CommandInitOption{
 				KubeImageTag: "1.20.1",
 			},
-			expected: imageRepositories["global"] + "/kube-apiserver:1.20.1",
+			expected: images.GetImageRepositories()["global"] + "/kube-apiserver:1.20.1",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := tt.opt.kubeAPIServerImage()
+			result := images.GetkubeAPIServerImage(tt.opt.KubeImageRegistry, tt.opt.KubeImageMirrorCountry, tt.opt.KarmadaAPIServerImage, tt.opt.KubeImageTag)
 			if result != tt.expected {
 				t.Errorf("Unexpected result: %s, expected: %s", result, tt.expected)
 			}
@@ -337,13 +338,14 @@ func TestKubeControllerManagerImage(t *testing.T) {
 			opt: &CommandInitOption{
 				KubeImageTag: "1.20.1",
 			},
-			expected: imageRepositories["global"] + "/kube-controller-manager:1.20.1",
+			expected: images.GetImageRepositories()["global"] + "/kube-controller-manager:1.20.1",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := tt.opt.kubeControllerManagerImage()
+
+			got := images.GetkubeControllerManagerImage(tt.opt.KubeImageRegistry, tt.opt.KubeImageMirrorCountry, tt.opt.KubeControllerManagerImage, tt.opt.KubeImageTag)
 			if got != tt.expected {
 				t.Errorf("CommandInitOption.kubeControllerManagerImage() = %v, want %v", got, tt.expected)
 			}
@@ -361,7 +363,7 @@ func TestEtcdInitImage(t *testing.T) {
 			name: "ImageRegistry is set and EtcdInitImage is set to default value",
 			opt: &CommandInitOption{
 				ImageRegistry: "my-registry",
-				EtcdInitImage: DefaultInitImage,
+				EtcdInitImage: images.DefaultInitImage,
 			},
 			expected: "my-registry/alpine:3.15.1",
 		},
@@ -375,15 +377,15 @@ func TestEtcdInitImage(t *testing.T) {
 		{
 			name: "ImageRegistry is not set and EtcdInitImage is set to default value",
 			opt: &CommandInitOption{
-				EtcdInitImage: DefaultInitImage,
+				EtcdInitImage: images.DefaultInitImage,
 			},
-			expected: DefaultInitImage,
+			expected: images.DefaultInitImage,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := tt.opt.etcdInitImage()
+			result := images.GetetcdImage(tt.opt.KubeImageRegistry, tt.opt.KubeImageMirrorCountry, images.DefaultEtcdImage)
 			if result != tt.expected {
 				t.Errorf("Unexpected result: %s, expected: %s", result, tt.expected)
 			}
@@ -407,13 +409,14 @@ func TestEtcdImage(t *testing.T) {
 		{
 			name:     "EtcdImage is not set",
 			opt:      &CommandInitOption{},
-			expected: imageRepositories["global"] + "/" + defaultEtcdImage,
+			expected: images.GetImageRepositories()["global"] + "/" + images.DefaultEtcdImage,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := tt.opt.etcdImage()
+			opt := tt.opt
+			result := images.GetetcdImage(opt.ImageRegistry, opt.KubeImageMirrorCountry, opt.EtcdImage)
 			if result != tt.expected {
 				t.Errorf("Unexpected result: %s, expected: %s", result, tt.expected)
 			}
@@ -431,9 +434,9 @@ func TestKarmadaSchedulerImage(t *testing.T) {
 			name: "ImageRegistry is set and KarmadaSchedulerImage is set to default value",
 			opt: &CommandInitOption{
 				ImageRegistry:         "my-registry",
-				KarmadaSchedulerImage: DefaultKarmadaSchedulerImage,
+				KarmadaSchedulerImage: images.DefaultKarmadaSchedulerImage,
 			},
-			expected: "my-registry/karmada-scheduler:" + karmadaRelease,
+			expected: "my-registry/karmada-scheduler:" + images.GetKarmadaRelease(),
 		},
 		{
 			name: "KarmadaSchedulerImage is set to a non-default value",
@@ -445,15 +448,15 @@ func TestKarmadaSchedulerImage(t *testing.T) {
 		{
 			name: "ImageRegistry is not set and KarmadaSchedulerImage is set to default value",
 			opt: &CommandInitOption{
-				KarmadaSchedulerImage: DefaultKarmadaSchedulerImage,
+				KarmadaSchedulerImage: images.DefaultKarmadaSchedulerImage,
 			},
-			expected: DefaultKarmadaSchedulerImage,
+			expected: images.DefaultKarmadaSchedulerImage,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := tt.opt.karmadaSchedulerImage()
+			result := images.GetkarmadaSchedulerImage(tt.opt.ImageRegistry, tt.opt.KarmadaSchedulerImage)
 
 			if result != tt.expected {
 				t.Errorf("Unexpected result: %s, expected: %s", result, tt.expected)
