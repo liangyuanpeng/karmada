@@ -58,8 +58,7 @@ echo "Start init karmada control plane..."
 ${BUILD_PATH}/karmadactl init --kubeconfig=${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config \
     --karmada-data=${HOME}/karmada \
     --karmada-pki=${HOME}/karmada/pki \
-    --crds=./crds.tar.gz \
-    --kube-image-mirror-country=cn
+    --crds=./crds.tar.gz
 
 # join cluster
 echo "Join member clusters..."
