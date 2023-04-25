@@ -28,7 +28,7 @@ cd -
 
 # make karmadactl binary
 make karmadactl
-karmadactl
+${BUILD_PATH}/karmadactl
 exit -1
 
 # create host/member1/member2 cluster
