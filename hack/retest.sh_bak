@@ -1,0 +1,67 @@
+#!/bin/bash
+
+function rerunwf(){
+
+  PR_NUM=${PR_NUM:-0}
+
+#  branch=${branch:-"master"}
+
+#  ACTOR=${ACTOR:-"liangyuanpeng"}
+
+  echo "PR_NUM:"$PR_NUM
+
+  if [ $PR_NUM -le 0 ];then
+    echo "invalid pr num:"$PR_NUM
+    exit 0
+  fi
+
+#  if [ "$branch" == "master" ];then
+#    echo "please set branch and exclude master."
+#    exit -1
+#  fi
+
+  REPO=${REPO:-"liangyuanpeng/karmada"}
+
+  echo "REPO:"$REPO
+
+  PRHEAD=`gh api repos/$REPO/pulls/$PR_NUM | jq .head`
+
+  SHA=$(echo $PRHEAD | jq .sha | sed 's/\"//g')
+  echo "SHA:"$SHA
+  branch=$(echo $PRHEAD | jq .ref | sed 's/\"//g')
+  echo "branch:"$branch
+  ACTOR=$(echo $PRHEAD | jq .user.login | sed 's/\"//g')
+  echo "ACTOR:"$ACTOR
+
+#  SHA=`gh api repos/$REPO/pulls/$PR_NUM | jq .head.sha | sed 's/\"//g'`
+#  echo "SHA:"$SHA
+#  branch=`gh api repos/$REPO/pulls/$PR_NUM | jq .head.ref | sed 's/\"//g'`
+#  echo "branch:"$branch
+#  ACTOR=`gh api repos/$REPO/pulls/$PR_NUM | jq .head.user.login | sed 's/\"//g'`
+#  echo "ACTOR:"$ACTOR
+
+  echo $SHA
+  datas=$(gh api "repos/$REPO/actions/runs?actor="$ACTOR"&branch="$branch"&status=failure" | jq ".workflow_runs[] | select(.head_sha==\"$SHA\") | [{id,name}] ")
+
+  echo $datas | jq -r '.[] | "\(.id)\t\(.name)"' | while read -r id name; do
+      echo "id:$id workflow run name:$name"
+      gh run rerun -R $REPO $id
+  done
+}
+
+ISSUE_COMMENT=${ISSUE_COMMENT:-""}
+
+if [ -z "$ISSUE_COMMENT" ];then
+    echo "have not issue comment,exit..."
+    exit -1
+fi
+
+echo -e $ISSUE_COMMENT |sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'| while read line
+do
+  echo "line:"$line
+  if [[ "$line" == "/retest" ]]; then
+    echo "matching /retest and rerun workflow..."
+    rerunwf
+    break
+  fi
+done
