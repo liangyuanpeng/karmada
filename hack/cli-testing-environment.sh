@@ -28,6 +28,7 @@ cd -
 
 # make karmadactl binary
 make karmadactl
+exit -1
 
 # create host/member1/member2 cluster
 echo "Start create clusters..."
