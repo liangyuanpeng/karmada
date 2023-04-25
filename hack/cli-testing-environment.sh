@@ -28,7 +28,7 @@ cd -
 
 # make karmadactl binary
 make karmadactl
-${BUILD_PATH}/karmadactl
+${BUILD_PATH}/karmadactl init -h
 
 # create host/member1/member2 cluster
 echo "Start create clusters..."

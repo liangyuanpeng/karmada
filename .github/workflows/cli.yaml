@@ -34,7 +34,6 @@ jobs:
           version: "v0.17.0"
       - name: run karmadactl init test
         run: |
-          env
           export CLUSTER_VERSION=kindest/node:${{ matrix.k8s }}
 
           # init e2e environment
