@@ -39,7 +39,7 @@ func init() {
 	}
 	karmadaRelease = releaseVer.PatchRelease()
 
-	log.Println("================================version:", releaseVer.PatchRelease(), karmadaRelease)
+	log.Println("================================version:", version.Get().GitVersion, version.Get().GitCommit, releaseVer.PatchRelease(), karmadaRelease)
 
 	DefaultInitImage = "docker.io/alpine:3.15.1"
 	DefaultKarmadaSchedulerImage = fmt.Sprintf("docker.io/karmada/karmada-scheduler:%s", releaseVer.PatchRelease())
