@@ -24,8 +24,8 @@ jobs:
           - karmada-search
           - karmada-operator
     runs-on: ubuntu-20.04
-    permissions:
-      id-token: write # To be able to get OIDC ID token to sign images.
+    # permissions:
+    #   id-token: write # To be able to get OIDC ID token to sign images.
     steps:
       - name: checkout code
         uses: actions/checkout@v3
