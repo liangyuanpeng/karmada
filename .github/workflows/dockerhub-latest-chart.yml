@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+#      - cosign
 jobs:
   publish-chart-to-dockerhub:
     name: publish to DockerHub
@@ -27,8 +28,10 @@ jobs:
       - name: package chart
         env:
           VERSION: 0.0.0
+          REGISTRY: lypgcs
         run: make package-chart
       - name: push chart
         env:
           VERSION: 0.0.0
+          REGISTRY: lypgcs
         run: make push-chart

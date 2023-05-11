@@ -66,7 +66,19 @@ function build_local_image() {
 
   if [[ "$output_type" == "registry" ]]; then
     docker push "${image_name}"
+    signImage "${image_name}"
   fi
+}
+
+function signImage(){
+
+echo "====================begin cosign for :"$1
+
+#echo "github.run_id:" $GH_RUN_ID
+
+cosign sign --yes \
+            -a run_id=$GH_RUN_ID \
+            $1
 }
 
 function build_cross_image() {
@@ -85,6 +97,7 @@ function build_cross_image() {
           --tag "${image_name}" \
           --file "${REPO_ROOT}/cluster/images/buildx.Dockerfile" \
           "${REPO_ROOT}/_output/bin"
+  signImage "${image_name}"
   set +x
 }
 

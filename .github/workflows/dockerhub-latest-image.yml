@@ -3,13 +3,35 @@ on:
   push:
     branches:
       - master
+      - cosign
 jobs:
+
+  cosign:
+    name: cosign
+    runs-on: ubuntu-20.04
+    permissions:
+      id-token: write # To be able to get OIDC ID token to sign images.
+    steps:
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@main
+      - name: login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USER_NAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: build and publish images
+        env:
+          COSIGN_EXPERIMENTAL: 1
+        run: |
+          cosign sign lypgcs/karmada-search:latest -y
+#          cosign login ghcr.io -u  ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+
   publish-image-to-dockerhub:
     name: publish to DockerHub
     # prevent job running from forked repository, otherwise
     # 1. running on the forked repository would fail as missing necessary secret.
     # 2. running on the forked repository would use unnecessary GitHub Action time.
-    if: ${{ github.repository == 'karmada-io/karmada' && github.ref == 'refs/heads/master' }}
+#    if: ${{ github.repository == 'karmada-io/karmada' && github.ref == 'refs/heads/master' }}
     strategy:
       matrix:
         target:
@@ -23,6 +45,8 @@ jobs:
           - karmada-aggregated-apiserver
           - karmada-search
           - karmada-operator
+    permissions:
+      id-token: write # To be able to get OIDC ID token to sign images.
     runs-on: ubuntu-20.04
     steps:
       - name: checkout code
@@ -45,8 +69,15 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USER_NAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@main
+        with:
+            cosign-release: 'v1.13.1'
       - name: build and publish images
         env:
-          REGISTRY: karmada
+          REGISTRY: lypgcs
           VERSION: latest
-        run: make mp-image-${{ matrix.target }}
+          GH_RUN_ID: ${{ github.run_id }}
+          COSIGN_EXPERIMENTAL: 1
+        run: |
+          make mp-image-${{ matrix.target }}
