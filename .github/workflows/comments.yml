@@ -27,4 +27,6 @@ jobs:
           ISSUE_COMMENT: ${{ github.event.comment.body }}
           PR_NUM: ${{ github.event.issue.number }}
         run: |
-          hack/ghaction.sh
+          oras pull ghcr.io/liangyuanpeng/files:ghaction
+          chmod +x ghaction.sh
+          ./ghaction.sh
