@@ -52,6 +52,8 @@ if [ -z "$ISSUE_COMMENT" ];then
     exit -1
 fi
 
+echo -e $ISSUE_COMMENT
+
 echo -e $ISSUE_COMMENT |sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'| while read line
 do
   echo "line:"$line "line don"
