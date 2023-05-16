@@ -29,7 +29,7 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: 1.19.5
-      - name: just sleep
+      - name: just success
         run: |
           echo success
 #      - uses: engineerd/setup-kind@v0.5.0

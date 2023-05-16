@@ -21,7 +21,7 @@ jobs:
           go-version: 1.19.5
       - name: just sleep
         run: |
-          sleep 30
+          sleep 10
           exit -1
       - name: vendor
         run: hack/verify-vendor.sh
