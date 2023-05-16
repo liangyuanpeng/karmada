@@ -52,6 +52,9 @@ if [ -z "$ISSUE_COMMENT" ];then
     exit -1
 fi
 
+echo "printing issue coment:"
+echo -e $ISSUE_COMMENT
+
 echo -e $ISSUE_COMMENT |sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'| while read line
 do
   if [[ "$line" == "/retest-faile" ]]; then
