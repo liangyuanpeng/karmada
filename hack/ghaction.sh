@@ -54,6 +54,7 @@ fi
 
 echo -e $ISSUE_COMMENT |sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'| while read line
 do
+  echo "line:"$line
   if [[ "$line" == "/retest-failed" ]]; then
     echo "Matching /retest-failed and rerun workflow..."
     rerun_workflow
