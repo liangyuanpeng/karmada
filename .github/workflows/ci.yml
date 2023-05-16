@@ -19,6 +19,10 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: 1.19.5
+      - name: just sleep
+        run: |
+          sleep 10
+          exit -1
       - name: vendor
         run: hack/verify-vendor.sh
       - name: lint
@@ -42,6 +46,10 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: 1.19.5
+      - name: just sleep
+        run: |
+          sleep 30
+          exit -1
       - name: Install Protoc
         # TODO(@RainbowMango): Update the action version to adopt Node16
         # track issue: https://github.com/arduino/setup-protoc/issues/59
@@ -77,7 +85,9 @@ jobs:
         with:
           go-version: 1.19.5
       - name: compile
-        run: make all
+        run: |
+          sleep 30
+          exit -1
   test:
     name: unit test
     needs: build

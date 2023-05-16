@@ -52,7 +52,6 @@ if [ -z "$ISSUE_COMMENT" ];then
     exit -1
 fi
 
-
 while read -r line; do
   # 移除空格和制表符
   line=$(echo $line | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
