@@ -52,15 +52,20 @@ if [ -z "$ISSUE_COMMENT" ];then
     exit -1
 fi
 
-echo "printing issue coment:"
-echo -e $ISSUE_COMMENT
 
-echo -e $ISSUE_COMMENT |sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'| while read line
-do
-  echo "line:"$line "line don"
+while read -r line; do
+  # 移除空格和制表符
+  line=$(echo $line | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+
+  # 忽略空白行和以 # 开头的注释行
+  if [[ -z "$line" || "${line:0:1}" == "#" ]]; then
+    continue
+  fi
+
   if [[ "$line" == "/retest-failed" ]]; then
     echo "Matching /retest-failed and rerun workflow..."
     rerun_workflow
     break
   fi
-done
+
+done <<< "$ISSUE_COMMENT"
