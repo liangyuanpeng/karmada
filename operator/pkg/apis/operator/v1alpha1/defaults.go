@@ -11,13 +11,14 @@ import (
 )
 
 var (
-	etcdImageRepository                        = fmt.Sprintf("%s/%s", constants.KubeDefaultRepository, constants.Etcd)
-	karmadaAPIServiceImageRepository           = fmt.Sprintf("%s/%s", constants.KubeDefaultRepository, constants.KarmadaAPIServer)
-	karmadaAggregratedAPIServerImageRepository = fmt.Sprintf("%s/%s", constants.KarmadaDefaultRepository, constants.KarmadaAggregatedAPIServer)
-	kubeControllerManagerImageRepository       = fmt.Sprintf("%s/%s", constants.KubeDefaultRepository, constants.KubeControllerManager)
-	karmadaControllerManagerImageRepository    = fmt.Sprintf("%s/%s", constants.KarmadaDefaultRepository, constants.KarmadaControllerManager)
-	karmadaSchedulerImageRepository            = fmt.Sprintf("%s/%s", constants.KarmadaDefaultRepository, constants.KarmadaScheduler)
-	karmadaWebhookImageRepository              = fmt.Sprintf("%s/%s", constants.KarmadaDefaultRepository, constants.KarmadaWebhook)
+	etcdImageRepository                       = fmt.Sprintf("%s/%s", constants.KubeDefaultRepository, constants.Etcd)
+	karmadaAPIServiceImageRepository          = fmt.Sprintf("%s/%s", constants.KubeDefaultRepository, constants.KubeAPIServer)
+	karmadaAggregatedAPIServerImageRepository = fmt.Sprintf("%s/%s", constants.KarmadaDefaultRepository, constants.KarmadaAggregatedAPIServer)
+	kubeControllerManagerImageRepository      = fmt.Sprintf("%s/%s", constants.KubeDefaultRepository, constants.KubeControllerManager)
+	karmadaControllerManagerImageRepository   = fmt.Sprintf("%s/%s", constants.KarmadaDefaultRepository, constants.KarmadaControllerManager)
+	karmadaSchedulerImageRepository           = fmt.Sprintf("%s/%s", constants.KarmadaDefaultRepository, constants.KarmadaScheduler)
+	karmadaWebhookImageRepository             = fmt.Sprintf("%s/%s", constants.KarmadaDefaultRepository, constants.KarmadaWebhook)
+	karmadaDeschedulerImageRepository         = fmt.Sprintf("%s/%s", constants.KarmadaDefaultRepository, constants.KarmadaDescheduler)
 )
 
 func addDefaultingFuncs(scheme *runtime.Scheme) error {
@@ -49,11 +50,14 @@ func setDefaultsKarmadaComponents(obj *Karmada) {
 
 	setDefaultsEtcd(obj.Spec.Components)
 	setDefaultsKarmadaAPIServer(obj.Spec.Components)
-	setDefaultsKarmadaAggregratedAPIServer(obj.Spec.Components)
+	setDefaultsKarmadaAggregatedAPIServer(obj.Spec.Components)
 	setDefaultsKubeControllerManager(obj.Spec.Components)
 	setDefaultsKarmadaControllerManager(obj.Spec.Components)
 	setDefaultsKarmadaScheduler(obj.Spec.Components)
 	setDefaultsKarmadaWebhook(obj.Spec.Components)
+
+	// set addon defaults
+	setDefaultsKarmadaDescheduler(obj.Spec.Components)
 }
 
 func setDefaultsHostCluster(obj *Karmada) {
@@ -122,20 +126,20 @@ func setDefaultsKarmadaAPIServer(obj *KarmadaComponents) {
 	}
 }
 
-func setDefaultsKarmadaAggregratedAPIServer(obj *KarmadaComponents) {
-	if obj.KarmadaAggregratedAPIServer == nil {
-		obj.KarmadaAggregratedAPIServer = &KarmadaAggregratedAPIServer{}
+func setDefaultsKarmadaAggregatedAPIServer(obj *KarmadaComponents) {
+	if obj.KarmadaAggregatedAPIServer == nil {
+		obj.KarmadaAggregatedAPIServer = &KarmadaAggregatedAPIServer{}
 	}
 
-	aggregrated := obj.KarmadaAggregratedAPIServer
-	if len(aggregrated.Image.ImageRepository) == 0 {
-		aggregrated.Image.ImageRepository = karmadaAggregratedAPIServerImageRepository
+	aggregated := obj.KarmadaAggregatedAPIServer
+	if len(aggregated.Image.ImageRepository) == 0 {
+		aggregated.Image.ImageRepository = karmadaAggregatedAPIServerImageRepository
 	}
-	if len(aggregrated.Image.ImageTag) == 0 {
-		aggregrated.Image.ImageTag = constants.KarmadaDefaultVersion
+	if len(aggregated.Image.ImageTag) == 0 {
+		aggregated.Image.ImageTag = constants.KarmadaDefaultVersion
 	}
-	if aggregrated.Replicas == nil {
-		aggregrated.Replicas = pointer.Int32(1)
+	if aggregated.Replicas == nil {
+		aggregated.Replicas = pointer.Int32(1)
 	}
 }
 
@@ -204,5 +208,22 @@ func setDefaultsKarmadaWebhook(obj *KarmadaComponents) {
 	}
 	if webhook.Replicas == nil {
 		webhook.Replicas = pointer.Int32(1)
+	}
+}
+
+func setDefaultsKarmadaDescheduler(obj *KarmadaComponents) {
+	if obj.KarmadaDescheduler == nil {
+		return
+	}
+
+	descheduler := obj.KarmadaDescheduler
+	if len(descheduler.Image.ImageRepository) == 0 {
+		descheduler.Image.ImageRepository = karmadaDeschedulerImageRepository
+	}
+	if len(descheduler.Image.ImageTag) == 0 {
+		descheduler.Image.ImageTag = constants.KarmadaDefaultVersion
+	}
+	if descheduler.Replicas == nil {
+		descheduler.Replicas = pointer.Int32(1)
 	}
 }

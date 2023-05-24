@@ -7,6 +7,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apivalidation "k8s.io/apimachinery/pkg/api/validation"
 	metav1validation "k8s.io/apimachinery/pkg/apis/meta/v1/validation"
+	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/utils/pointer"
 
@@ -21,6 +22,7 @@ const LabelValueMaxLength int = 63
 func ValidatePropagationSpec(spec policyv1alpha1.PropagationSpec) field.ErrorList {
 	var allErrs field.ErrorList
 	allErrs = append(allErrs, ValidatePlacement(spec.Placement, field.NewPath("spec").Child("placement"))...)
+	allErrs = append(allErrs, ValidateFailover(spec.Failover, field.NewPath("spec").Child("failover"))...)
 	return allErrs
 }
 
@@ -58,6 +60,9 @@ func ValidateClusterAffinities(affinities []policyv1alpha1.ClusterAffinityTerm, 
 
 	affinityNames := make(map[string]bool)
 	for index, term := range affinities {
+		for _, err := range validation.IsQualifiedName(term.AffinityName) {
+			allErrs = append(allErrs, field.Invalid(fldPath.Index(index), term.AffinityName, err))
+		}
 		if _, exist := affinityNames[term.AffinityName]; exist {
 			allErrs = append(allErrs, field.Invalid(fldPath, affinities, "each affinity term in a policy must have a unique name"))
 		} else {
@@ -137,6 +142,45 @@ func ValidateSpreadConstraint(spreadConstraints []policyv1alpha1.SpreadConstrain
 		if _, ok := spreadByFieldsWithErrorMark[policyv1alpha1.SpreadByFieldCluster]; !ok {
 			allErrs = append(allErrs, field.Invalid(fldPath, spreadConstraints, "the cluster spread constraint must be enabled in one of the constraints in case of SpreadByField is enabled"))
 		}
+	}
+
+	return allErrs
+}
+
+// ValidateFailover validates that the failoverBehavior is correctly defined.
+func ValidateFailover(failoverBehavior *policyv1alpha1.FailoverBehavior, fldPath *field.Path) field.ErrorList {
+	var allErrs field.ErrorList
+
+	if failoverBehavior == nil {
+		return nil
+	}
+
+	allErrs = append(allErrs, ValidateApplicationFailover(failoverBehavior.Application, fldPath.Child("application"))...)
+	return allErrs
+}
+
+// ValidateApplicationFailover validates that the application failover is correctly defined.
+func ValidateApplicationFailover(applicationFailoverBehavior *policyv1alpha1.ApplicationFailoverBehavior, fldPath *field.Path) field.ErrorList {
+	var allErrs field.ErrorList
+
+	if applicationFailoverBehavior == nil {
+		return nil
+	}
+
+	if *applicationFailoverBehavior.DecisionConditions.TolerationSeconds < 0 {
+		allErrs = append(allErrs, field.Invalid(fldPath.Child("decisionConditions").Child("tolerationSeconds"), *applicationFailoverBehavior.DecisionConditions.TolerationSeconds, "must be greater than or equal to 0"))
+	}
+
+	if applicationFailoverBehavior.PurgeMode != policyv1alpha1.Graciously && applicationFailoverBehavior.GracePeriodSeconds != nil {
+		allErrs = append(allErrs, field.Invalid(fldPath.Child("gracePeriodSeconds"), *applicationFailoverBehavior.GracePeriodSeconds, "only takes effect when purgeMode is graciously"))
+	}
+
+	if applicationFailoverBehavior.PurgeMode == policyv1alpha1.Graciously && applicationFailoverBehavior.GracePeriodSeconds == nil {
+		allErrs = append(allErrs, field.Invalid(fldPath.Child("gracePeriodSeconds"), applicationFailoverBehavior.GracePeriodSeconds, "should not be empty when purgeMode is graciously"))
+	}
+
+	if applicationFailoverBehavior.GracePeriodSeconds != nil && *applicationFailoverBehavior.GracePeriodSeconds <= 0 {
+		allErrs = append(allErrs, field.Invalid(fldPath.Child("gracePeriodSeconds"), *applicationFailoverBehavior.GracePeriodSeconds, "must be greater than 0"))
 	}
 
 	return allErrs

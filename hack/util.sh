@@ -22,7 +22,7 @@ KARMADA_OPENSEARCH_DASHBOARDS_LABEL="karmada-opensearch-dashboards"
 
 KARMADA_GO_PACKAGE="github.com/karmada-io/karmada"
 
-MIN_Go_VERSION=go1.19.0
+MIN_Go_VERSION=go1.20.0
 
 KARMADA_TARGET_SOURCE=(
   karmada-aggregated-apiserver=cmd/aggregated-apiserver
@@ -320,7 +320,7 @@ function util::wait_context_exist() {
     local timeout=${3}
     local error_msg="[ERROR] Timeout waiting for context exist ${context_name}"
     for ((time=0; time<${timeout}; time++)); do
-        if [[ `grep -c "${context_name}" ${file_path}` -ne '0' ]]; then
+        if [[ `kubectl config get-contexts ${context_name} --kubeconfig=${file_path}` =~ ${context_name} ]]; then
             return 0
         fi
         sleep 1

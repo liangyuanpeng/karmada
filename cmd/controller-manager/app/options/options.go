@@ -110,6 +110,10 @@ type Options struct {
 	// ConcurrentNamespaceSyncs is the number of Namespace objects that are
 	// allowed to sync concurrently.
 	ConcurrentNamespaceSyncs int
+	// ConcurrentPropagationPolicySyncs is the number of PropagationPolicy that are allowed to sync concurrently.
+	ConcurrentPropagationPolicySyncs int
+	// ConcurrentClusterPropagationPolicySyncs is the number of ClusterPropagationPolicy that are allowed to sync concurrently.
+	ConcurrentClusterPropagationPolicySyncs int
 	// ConcurrentResourceTemplateSyncs is the number of resource templates that are allowed to sync concurrently.
 	ConcurrentResourceTemplateSyncs int
 	// If set to true enables NoExecute Taints and will evict all not-tolerating
@@ -185,8 +189,9 @@ func (o *Options) AddFlags(flags *pflag.FlagSet, allControllers, disabledByDefau
 		"<group> for skip resources with a specific API group(e.g. networking.k8s.io),\n"+
 		"<group>/<version> for skip resources with a specific API version(e.g. networking.k8s.io/v1beta1),\n"+
 		"<group>/<version>/<kind>,<kind> for skip one or more specific resource(e.g. networking.k8s.io/v1beta1/Ingress,IngressClass) where the kinds are case-insensitive.")
-	flags.StringSliceVar(&o.SkippedPropagatingNamespaces, "skipped-propagating-namespaces", []string{},
-		"Comma-separated namespaces that should be skipped from propagating in addition to the default skipped namespaces(karmada-system, karmada-cluster, namespaces prefixed by kube- and karmada-es-).")
+	flags.StringSliceVar(&o.SkippedPropagatingNamespaces, "skipped-propagating-namespaces", []string{"kube-.*"},
+		"Comma-separated namespaces that should be skipped from propagating.\n"+
+			"Note: 'karmada-system', 'karmada-cluster' and 'karmada-es-.*' are Karmada reserved namespaces that will always be skipped.")
 	flags.StringVar(&o.ClusterAPIContext, "cluster-api-context", "", "Name of the cluster context in cluster-api management cluster kubeconfig file.")
 	flags.StringVar(&o.ClusterAPIKubeconfig, "cluster-api-kubeconfig", "", "Path to the cluster-api management cluster kubeconfig file.")
 	flags.Float32Var(&o.ClusterAPIQPS, "cluster-api-qps", 40.0, "QPS to use while talking with cluster kube-apiserver. Doesn't cover events and node heartbeat apis which rate limiting is controlled by a different set of flags.")
@@ -201,6 +206,8 @@ func (o *Options) AddFlags(flags *pflag.FlagSet, allControllers, disabledByDefau
 	flags.IntVar(&o.ConcurrentResourceBindingSyncs, "concurrent-resourcebinding-syncs", 5, "The number of ResourceBindings that are allowed to sync concurrently.")
 	flags.IntVar(&o.ConcurrentWorkSyncs, "concurrent-work-syncs", 5, "The number of Works that are allowed to sync concurrently.")
 	flags.IntVar(&o.ConcurrentNamespaceSyncs, "concurrent-namespace-syncs", 1, "The number of Namespaces that are allowed to sync concurrently.")
+	flags.IntVar(&o.ConcurrentPropagationPolicySyncs, "concurrent-propagation-policy-syncs", 1, "The number of PropagationPolicy that are allowed to sync concurrently.")
+	flags.IntVar(&o.ConcurrentClusterPropagationPolicySyncs, "concurrent-cluster-propagation-policy-syncs", 1, "The number of ClusterPropagationPolicy that are allowed to sync concurrently.")
 	flags.IntVar(&o.ConcurrentResourceTemplateSyncs, "concurrent-resource-template-syncs", 5, "The number of resource templates that are allowed to sync concurrently.")
 	flags.BoolVar(&o.EnableTaintManager, "enable-taint-manager", true, "If set to true enables NoExecute Taints and will evict all not-tolerating objects propagating on Clusters tainted with this kind of Taints.")
 	flags.DurationVar(&o.GracefulEvictionTimeout.Duration, "graceful-eviction-timeout", 10*time.Minute, "Specifies the timeout period waiting for the graceful-eviction-controller performs the final removal since the workload(resource) has been moved to the graceful eviction tasks.")

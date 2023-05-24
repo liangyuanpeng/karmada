@@ -37,7 +37,6 @@ spec:
             - --allow-privileged=true
             - --authorization-mode=Node,RBAC
             - --client-ca-file=/etc/karmada/pki/ca.crt
-            - --enable-admission-plugins=NodeRestriction
             - --enable-bootstrap-token-auth=true
             - --etcd-cafile=/etc/karmada/pki/etcd-ca.crt
             - --etcd-certfile=/etc/karmada/pki/etcd-client.crt
@@ -64,7 +63,7 @@ spec:
             - --tls-cert-file=/etc/karmada/pki/apiserver.crt
             - --tls-private-key-file=/etc/karmada/pki/apiserver.key
           name: karmada-apiserver
-          image: registry.k8s.io/kube-apiserver:v1.25.2
+          image: registry.k8s.io/kube-apiserver:v1.25.4
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 8

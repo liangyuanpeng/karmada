@@ -35,7 +35,7 @@ func NewMutatingHandler(notReadyTolerationSeconds, unreachableTolerationSeconds 
 }
 
 // Handle yields a response to an AdmissionRequest.
-func (a *MutatingAdmission) Handle(ctx context.Context, req admission.Request) admission.Response {
+func (a *MutatingAdmission) Handle(_ context.Context, req admission.Request) admission.Response {
 	policy := &policyv1alpha1.PropagationPolicy{}
 
 	err := a.decoder.Decode(req, policy)
@@ -70,6 +70,12 @@ func (a *MutatingAdmission) Handle(ctx context.Context, req admission.Request) a
 
 	// When ReplicaSchedulingType is Divided, set the default value of ReplicaDivisionPreference to Weighted.
 	helper.SetReplicaDivisionPreferenceWeighted(&policy.Spec.Placement)
+
+	if policy.Spec.Failover != nil {
+		if policy.Spec.Failover.Application != nil {
+			helper.SetDefaultGracePeriodSeconds(policy.Spec.Failover.Application)
+		}
+	}
 
 	marshaledBytes, err := json.Marshal(policy)
 	if err != nil {

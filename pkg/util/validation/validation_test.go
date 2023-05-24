@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/validation/field"
+	"k8s.io/utils/pointer"
 
 	policyv1alpha1 "github.com/karmada-io/karmada/pkg/apis/policy/v1alpha1"
 	"github.com/karmada-io/karmada/pkg/util"
@@ -550,6 +552,81 @@ func TestValidatePropagationSpec(t *testing.T) {
 				if tt.expectedErr != "" {
 					t.Errorf("unexpected no error, expected to contain:\n  %s", tt.expectedErr)
 				}
+			}
+		})
+	}
+}
+
+func TestValidateApplicationFailover(t *testing.T) {
+	tests := []struct {
+		name                        string
+		applicationFailoverBehavior *policyv1alpha1.ApplicationFailoverBehavior
+		expectedErr                 string
+	}{
+		{
+			name:                        "application failover is nil",
+			applicationFailoverBehavior: nil,
+			expectedErr:                 "",
+		},
+		{
+			name: "the tolerationSeconds is less than zero",
+			applicationFailoverBehavior: &policyv1alpha1.ApplicationFailoverBehavior{
+				DecisionConditions: policyv1alpha1.DecisionConditions{
+					TolerationSeconds: pointer.Int32(-100),
+				},
+			},
+			expectedErr: "spec.failover.application.decisionConditions.tolerationSeconds: Invalid value: -100: must be greater than or equal to 0",
+		},
+		{
+			name: "the gracePeriodSeconds is declared when purgeMode is not graciously",
+			applicationFailoverBehavior: &policyv1alpha1.ApplicationFailoverBehavior{
+				DecisionConditions: policyv1alpha1.DecisionConditions{
+					TolerationSeconds: pointer.Int32(100),
+				},
+				PurgeMode:          policyv1alpha1.Immediately,
+				GracePeriodSeconds: pointer.Int32(100),
+			},
+			expectedErr: "spec.failover.application.gracePeriodSeconds: Invalid value: 100: only takes effect when purgeMode is graciously",
+		},
+		{
+			name: "the gracePeriodSeconds is less than 0 when purgeMode is graciously",
+			applicationFailoverBehavior: &policyv1alpha1.ApplicationFailoverBehavior{
+				DecisionConditions: policyv1alpha1.DecisionConditions{
+					TolerationSeconds: pointer.Int32(100),
+				},
+				PurgeMode:          policyv1alpha1.Graciously,
+				GracePeriodSeconds: pointer.Int32(-100),
+			},
+			expectedErr: "spec.failover.application.gracePeriodSeconds: Invalid value: -100: must be greater than 0",
+		},
+		{
+			name: "the gracePeriodSeconds is empty when purgeMode is graciously",
+			applicationFailoverBehavior: &policyv1alpha1.ApplicationFailoverBehavior{
+				DecisionConditions: policyv1alpha1.DecisionConditions{
+					TolerationSeconds: pointer.Int32(100),
+				},
+				PurgeMode: policyv1alpha1.Graciously,
+			},
+			expectedErr: "spec.failover.application.gracePeriodSeconds: Invalid value: \"null\": should not be empty when purgeMode is graciously",
+		},
+		{
+			name: "application behavior is correctly declared",
+			applicationFailoverBehavior: &policyv1alpha1.ApplicationFailoverBehavior{
+				DecisionConditions: policyv1alpha1.DecisionConditions{
+					TolerationSeconds: pointer.Int32(100),
+				},
+			},
+			expectedErr: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			errs := ValidateApplicationFailover(tt.applicationFailoverBehavior, field.NewPath("spec").Child("failover").Child("application"))
+			err := errs.ToAggregate()
+			if err != nil && err.Error() != tt.expectedErr {
+				t.Errorf("expected error:\n  %s, but got:\n  %s", tt.expectedErr, err.Error())
+			} else if err == nil && tt.expectedErr != "" {
+				t.Errorf("expected error:\n  %s, but got no error\n", tt.expectedErr)
 			}
 		})
 	}

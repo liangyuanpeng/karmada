@@ -38,9 +38,10 @@ const (
 // AltNamesMutatorConfig is a config to AltNamesMutator. It includes necessary
 // configs to AltNamesMutator.
 type AltNamesMutatorConfig struct {
-	Name       string
-	Namespace  string
-	Components *operatorv1alpha1.KarmadaComponents
+	Name                string
+	Namespace           string
+	ControlplaneAddress string
+	Components          *operatorv1alpha1.KarmadaComponents
 }
 
 type altNamesMutatorFunc func(*AltNamesMutatorConfig, *CertConfig) error
@@ -117,6 +118,20 @@ func KarmadaCertApiserver() *CertConfig {
 		Config: certutil.Config{
 			CommonName: "karmada-apiserver",
 			Usages:     []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		},
+		AltNamesMutatorFunc: makeAltNamesMutator(apiServerAltNamesMutator),
+	}
+}
+
+// KarmadaCertClient returns karmada client cert config.
+func KarmadaCertClient() *CertConfig {
+	return &CertConfig{
+		Name:   "karmada-client",
+		CAName: constants.CaCertAndKeyName,
+		Config: certutil.Config{
+			CommonName:   "system:admin",
+			Organization: []string{"system:masters"},
+			Usages:       []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
 		},
 		AltNamesMutatorFunc: makeAltNamesMutator(apiServerAltNamesMutator),
 	}
@@ -445,11 +460,16 @@ func apiServerAltNamesMutator(cfg *AltNamesMutatorConfig) (*certutil.AltNames, e
 			fmt.Sprintf("*.%s.svc.cluster.local", cfg.Namespace),
 			fmt.Sprintf("*.%s.svc", cfg.Namespace),
 		},
-		IPs: []net.IP{net.IPv4(127, 0, 0, 1)},
+		IPs: []net.IP{
+			net.IPv4(127, 0, 0, 1),
+		},
 	}
 
 	if len(cfg.Components.KarmadaAPIServer.CertSANs) > 0 {
 		appendSANsToAltNames(altNames, cfg.Components.KarmadaAPIServer.CertSANs)
+	}
+	if len(cfg.ControlplaneAddress) > 0 {
+		appendSANsToAltNames(altNames, []string{cfg.ControlplaneAddress})
 	}
 
 	return altNames, nil

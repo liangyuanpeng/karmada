@@ -12,6 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/informers"
 	kubeclientset "k8s.io/client-go/kubernetes"
 	cliflag "k8s.io/component-base/cli/flag"
 	"k8s.io/component-base/term"
@@ -29,6 +30,7 @@ import (
 	workv1alpha1 "github.com/karmada-io/karmada/pkg/apis/work/v1alpha1"
 	workv1alpha2 "github.com/karmada-io/karmada/pkg/apis/work/v1alpha2"
 	"github.com/karmada-io/karmada/pkg/clusterdiscovery/clusterapi"
+	"github.com/karmada-io/karmada/pkg/controllers/applicationfailover"
 	"github.com/karmada-io/karmada/pkg/controllers/binding"
 	"github.com/karmada-io/karmada/pkg/controllers/cluster"
 	controllerscontext "github.com/karmada-io/karmada/pkg/controllers/context"
@@ -195,6 +197,7 @@ func init() {
 	controllers["federatedResourceQuotaSync"] = startFederatedResourceQuotaSyncController
 	controllers["federatedResourceQuotaStatus"] = startFederatedResourceQuotaStatusController
 	controllers["gracefulEviction"] = startGracefulEvictionController
+	controllers["applicationFailover"] = startApplicationFailoverController
 }
 
 func startClusterController(ctx controllerscontext.Context) (enabled bool, err error) {
@@ -499,31 +502,54 @@ func startFederatedResourceQuotaStatusController(ctx controllerscontext.Context)
 }
 
 func startGracefulEvictionController(ctx controllerscontext.Context) (enabled bool, err error) {
-	if features.FeatureGate.Enabled(features.GracefulEviction) {
-		rbGracefulEvictionController := &gracefuleviction.RBGracefulEvictionController{
-			Client:                  ctx.Mgr.GetClient(),
-			EventRecorder:           ctx.Mgr.GetEventRecorderFor(gracefuleviction.RBGracefulEvictionControllerName),
-			RateLimiterOptions:      ctx.Opts.RateLimiterOptions,
-			GracefulEvictionTimeout: ctx.Opts.GracefulEvictionTimeout.Duration,
-		}
-		if err := rbGracefulEvictionController.SetupWithManager(ctx.Mgr); err != nil {
-			return false, err
-		}
-
-		crbGracefulEvictionController := &gracefuleviction.CRBGracefulEvictionController{
-			Client:                  ctx.Mgr.GetClient(),
-			EventRecorder:           ctx.Mgr.GetEventRecorderFor(gracefuleviction.CRBGracefulEvictionControllerName),
-			RateLimiterOptions:      ctx.Opts.RateLimiterOptions,
-			GracefulEvictionTimeout: ctx.Opts.GracefulEvictionTimeout.Duration,
-		}
-		if err := crbGracefulEvictionController.SetupWithManager(ctx.Mgr); err != nil {
-			return false, err
-		}
-
-		return true, nil
+	if !features.FeatureGate.Enabled(features.GracefulEviction) {
+		return false, nil
+	}
+	rbGracefulEvictionController := &gracefuleviction.RBGracefulEvictionController{
+		Client:                  ctx.Mgr.GetClient(),
+		EventRecorder:           ctx.Mgr.GetEventRecorderFor(gracefuleviction.RBGracefulEvictionControllerName),
+		RateLimiterOptions:      ctx.Opts.RateLimiterOptions,
+		GracefulEvictionTimeout: ctx.Opts.GracefulEvictionTimeout.Duration,
+	}
+	if err := rbGracefulEvictionController.SetupWithManager(ctx.Mgr); err != nil {
+		return false, err
 	}
 
-	return false, nil
+	crbGracefulEvictionController := &gracefuleviction.CRBGracefulEvictionController{
+		Client:                  ctx.Mgr.GetClient(),
+		EventRecorder:           ctx.Mgr.GetEventRecorderFor(gracefuleviction.CRBGracefulEvictionControllerName),
+		RateLimiterOptions:      ctx.Opts.RateLimiterOptions,
+		GracefulEvictionTimeout: ctx.Opts.GracefulEvictionTimeout.Duration,
+	}
+	if err := crbGracefulEvictionController.SetupWithManager(ctx.Mgr); err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func startApplicationFailoverController(ctx controllerscontext.Context) (enabled bool, err error) {
+	if !features.FeatureGate.Enabled(features.Failover) {
+		return false, nil
+	}
+	rbApplicationFailoverController := applicationfailover.RBApplicationFailoverController{
+		Client:              ctx.Mgr.GetClient(),
+		EventRecorder:       ctx.Mgr.GetEventRecorderFor(applicationfailover.RBApplicationFailoverControllerName),
+		ResourceInterpreter: ctx.ResourceInterpreter,
+	}
+	if err = rbApplicationFailoverController.SetupWithManager(ctx.Mgr); err != nil {
+		return false, err
+	}
+
+	crbApplicationFailoverController := applicationfailover.CRBApplicationFailoverController{
+		Client:              ctx.Mgr.GetClient(),
+		EventRecorder:       ctx.Mgr.GetEventRecorderFor(applicationfailover.CRBApplicationFailoverControllerName),
+		ResourceInterpreter: ctx.ResourceInterpreter,
+	}
+	if err = crbApplicationFailoverController.SetupWithManager(ctx.Mgr); err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // setupControllers initialize controllers and setup one by one.
@@ -531,6 +557,7 @@ func setupControllers(mgr controllerruntime.Manager, opts *options.Options, stop
 	restConfig := mgr.GetConfig()
 	dynamicClientSet := dynamic.NewForConfigOrDie(restConfig)
 	discoverClientSet := discovery.NewDiscoveryClientForConfigOrDie(restConfig)
+	kubeClientSet := kubeclientset.NewForConfigOrDie(restConfig)
 
 	overrideManager := overridemanager.New(mgr.GetClient(), mgr.GetEventRecorderFor(overridemanager.OverrideManagerName))
 	skippedResourceConfig := util.NewSkippedResourceConfig()
@@ -541,7 +568,14 @@ func setupControllers(mgr controllerruntime.Manager, opts *options.Options, stop
 
 	controlPlaneInformerManager := genericmanager.NewSingleClusterInformerManager(dynamicClientSet, 0, stopChan)
 
-	resourceInterpreter := resourceinterpreter.NewResourceInterpreter(controlPlaneInformerManager)
+	// We need a service lister to build a resource interpreter with `ClusterIPServiceResolver`
+	// witch allows connection to the customized interpreter webhook without a cluster DNS service.
+	sharedFactory := informers.NewSharedInformerFactory(kubeClientSet, 0)
+	serviceLister := sharedFactory.Core().V1().Services().Lister()
+	sharedFactory.Start(stopChan)
+	sharedFactory.WaitForCacheSync(stopChan)
+
+	resourceInterpreter := resourceinterpreter.NewResourceInterpreter(controlPlaneInformerManager, serviceLister)
 	if err := mgr.Add(resourceInterpreter); err != nil {
 		klog.Fatalf("Failed to setup custom resource interpreter: %v", err)
 	}
@@ -549,17 +583,19 @@ func setupControllers(mgr controllerruntime.Manager, opts *options.Options, stop
 	objectWatcher := objectwatcher.NewObjectWatcher(mgr.GetClient(), mgr.GetRESTMapper(), util.NewClusterDynamicClientSet, resourceInterpreter)
 
 	resourceDetector := &detector.ResourceDetector{
-		DiscoveryClientSet:              discoverClientSet,
-		Client:                          mgr.GetClient(),
-		InformerManager:                 controlPlaneInformerManager,
-		RESTMapper:                      mgr.GetRESTMapper(),
-		DynamicClient:                   dynamicClientSet,
-		SkippedResourceConfig:           skippedResourceConfig,
-		SkippedPropagatingNamespaces:    opts.SkippedNamespacesRegexps(),
-		ResourceInterpreter:             resourceInterpreter,
-		EventRecorder:                   mgr.GetEventRecorderFor("resource-detector"),
-		ConcurrentResourceTemplateSyncs: opts.ConcurrentResourceTemplateSyncs,
-		RateLimiterOptions:              opts.RateLimiterOpts,
+		DiscoveryClientSet:                      discoverClientSet,
+		Client:                                  mgr.GetClient(),
+		InformerManager:                         controlPlaneInformerManager,
+		RESTMapper:                              mgr.GetRESTMapper(),
+		DynamicClient:                           dynamicClientSet,
+		SkippedResourceConfig:                   skippedResourceConfig,
+		SkippedPropagatingNamespaces:            opts.SkippedNamespacesRegexps(),
+		ResourceInterpreter:                     resourceInterpreter,
+		EventRecorder:                           mgr.GetEventRecorderFor("resource-detector"),
+		ConcurrentPropagationPolicySyncs:        opts.ConcurrentPropagationPolicySyncs,
+		ConcurrentClusterPropagationPolicySyncs: opts.ConcurrentClusterPropagationPolicySyncs,
+		ConcurrentResourceTemplateSyncs:         opts.ConcurrentResourceTemplateSyncs,
+		RateLimiterOptions:                      opts.RateLimiterOpts,
 	}
 
 	if err := mgr.Add(resourceDetector); err != nil {

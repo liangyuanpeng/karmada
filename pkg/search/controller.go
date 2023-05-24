@@ -331,7 +331,22 @@ func (c *Controller) updateResourceRegistry(oldObj, newObj interface{}) {
 
 // deleteResourceRegistry parse the resourceRegistry object and add deleted Cluster to the queue
 func (c *Controller) deleteResourceRegistry(obj interface{}) {
-	rr := obj.(*searchv1alpha1.ResourceRegistry)
+	rr, isRR := obj.(*searchv1alpha1.ResourceRegistry)
+	// We can get DeletedFinalStateUnknown instead of *searchv1alpha1.ResourceRegistry here and
+	// we need to handle that correctly.
+	if !isRR {
+		deletedState, ok := obj.(cache.DeletedFinalStateUnknown)
+		if !ok {
+			klog.ErrorS(nil, "Received unpexpected object", "object", obj)
+			return
+		}
+		rr, ok = deletedState.Obj.(*searchv1alpha1.ResourceRegistry)
+		if !ok {
+			klog.ErrorS(nil, "DeletedFinalStateUnknown contained non-ResourceRegistry object", "object", deletedState.Obj)
+			return
+		}
+	}
+
 	for _, cluster := range c.getClusters(rr.Spec.TargetCluster) {
 		v, ok := c.clusterRegistry.Load(cluster)
 		if !ok {
@@ -397,7 +412,22 @@ func (c *Controller) updateCluster(oldObj, curObj interface{}) {
 
 // deleteCluster set cluster to not exists
 func (c *Controller) deleteCluster(obj interface{}) {
-	cluster := obj.(*clusterV1alpha1.Cluster)
+	cluster, isCluster := obj.(*clusterV1alpha1.Cluster)
+	// We can get DeletedFinalStateUnknown instead of *clusterV1alpha1.Cluster here and
+	// we need to handle that correctly.
+	if !isCluster {
+		deletedState, ok := obj.(cache.DeletedFinalStateUnknown)
+		if !ok {
+			klog.ErrorS(nil, "Received unexpected object", "object", obj)
+			return
+		}
+		cluster, ok = deletedState.Obj.(*clusterV1alpha1.Cluster)
+		if !ok {
+			klog.ErrorS(nil, "DeletedFinalStateUnknown contained non-Cluster object", "object", deletedState.Obj)
+			return
+		}
+	}
+
 	_, ok := c.clusterRegistry.Load(cluster.GetName())
 	if !ok {
 		// unregistered cluster, do nothing.
@@ -410,7 +440,7 @@ func (c *Controller) deleteCluster(obj interface{}) {
 	c.queue.Add(cluster.GetName())
 }
 
-// getClusterAndResource returns the cluster and resources from the resourceRegistry object
+// getClusters returns the cluster from the resourceRegistry object
 func (c *Controller) getClusters(affinity policyv1alpha1.ClusterAffinity) []string {
 	clusters := make([]string, 0)
 	lst, err := c.clusterLister.List(labels.Everything())
@@ -426,7 +456,7 @@ func (c *Controller) getClusters(affinity policyv1alpha1.ClusterAffinity) []stri
 	return clusters
 }
 
-// getClusterAndResource returns the cluster and resources from the resourceRegistry object
+// getResources returns the resources from the resourceRegistry object
 func (c *Controller) getResources(selectors []searchv1alpha1.ResourceSelector) []schema.GroupVersionResource {
 	resources := make([]schema.GroupVersionResource, 0)
 	for _, rs := range selectors {

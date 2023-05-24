@@ -11,14 +11,25 @@ spec:
         imageTag: 3.5.3-0
         replicas: 1
         volumeData:
-          emptyDir: {}
+          # hostPath:
+          #   type: DirectoryOrCreate
+          #   path: /var/lib/karmada/etcd/karmada-demo
+          volumeClaim:
+            metadata:
+              name: etcd-data
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 3Gi
     karmadaAPIServer:
       imageRepository: registry.k8s.io/kube-apiserver
-      imageTag: v1.25.2
+      imageTag: v1.25.4
       replicas: 1
       serviceType: NodePort
       serviceSubnet: 10.96.0.0/12
-    karmadaAggregratedAPIServer:
+    karmadaAggregatedAPIServer:
       imageRepository: docker.io/karmada/karmada-aggregated-apiserver
       imageTag: v1.4.0
       replicas: 1
@@ -36,7 +47,7 @@ spec:
       replicas: 1
     kubeControllerManager:
       imageRepository: registry.k8s.io/kube-controller-manager
-      imageTag: v1.25.2
+      imageTag: v1.25.4
       replicas: 1
   hostCluster:
     networking:

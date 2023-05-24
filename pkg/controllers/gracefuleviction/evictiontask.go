@@ -1,6 +1,7 @@
 package gracefuleviction
 
 import (
+	"math"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -48,8 +49,22 @@ func assessEvictionTasks(bindingSpec workv1alpha2.ResourceBindingSpec,
 }
 
 func assessSingleTask(task workv1alpha2.GracefulEvictionTask, opt assessmentOption) *workv1alpha2.GracefulEvictionTask {
+	if task.SuppressDeletion != nil {
+		if *task.SuppressDeletion {
+			return &task
+		}
+		// If *task.SuppressDeletion is equal to false,
+		// it means users have confirmed that they want to delete the redundant copy.
+		// In that case, we will delete the task immediately.
+		return nil
+	}
+
+	timeout := opt.timeout
+	if task.GracePeriodSeconds != nil {
+		timeout = time.Duration(*task.GracePeriodSeconds) * time.Second
+	}
 	// task exceeds timeout
-	if metav1.Now().After(task.CreationTimestamp.Add(opt.timeout)) {
+	if metav1.Now().After(task.CreationTimestamp.Add(timeout)) {
 		return nil
 	}
 
@@ -91,14 +106,28 @@ func nextRetry(tasks []workv1alpha2.GracefulEvictionTask, timeout time.Duration,
 		return 0
 	}
 
-	retryInterval := timeout / 10
+	retryInterval := time.Duration(math.MaxInt64)
 
+	// Skip tasks whose type is SuppressDeletion because they are manually controlled by users.
+	// We currently take the minimum value of the timeout of all GracefulEvictionTasks besides above.
+	// When the application on the new cluster becomes healthy, a new event will be queued
+	// because the controller can watch the changes of binding status.
 	for i := range tasks {
+		if tasks[i].SuppressDeletion != nil {
+			continue
+		}
+		if tasks[i].GracePeriodSeconds != nil {
+			timeout = time.Duration(*tasks[i].GracePeriodSeconds) * time.Second
+		}
 		next := tasks[i].CreationTimestamp.Add(timeout).Sub(timeNow)
 		if next < retryInterval {
 			retryInterval = next
 		}
 	}
 
+	// When there are only tasks whose type is SuppressDeletion, we do not need to retry.
+	if retryInterval == time.Duration(math.MaxInt64) {
+		retryInterval = 0
+	}
 	return retryInterval
 }
