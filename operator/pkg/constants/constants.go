@@ -16,7 +16,7 @@ const (
 	// KarmadaDefaultVersion defines the default of the karmada components image tag
 	KarmadaDefaultVersion = "v1.4.0"
 	// KubeDefaultVersion defines the default of the karmada apiserver and kubeControllerManager image tag
-	KubeDefaultVersion = "v1.25.2"
+	KubeDefaultVersion = "v1.25.4"
 	// KarmadaDefaultServiceSubnet defines the default of the subnet used by k8s services.
 	KarmadaDefaultServiceSubnet = "10.96.0.0/12"
 	// KarmadaDefaultDNSDomain defines the default of the DNSDomain
@@ -27,7 +27,9 @@ const (
 	// Etcd defines the name of the built-in etcd cluster component
 	Etcd = "etcd"
 	// KarmadaAPIServer defines the name of the karmada-apiserver component
-	KarmadaAPIServer = "kube-apiserver"
+	KarmadaAPIServer = "karmada-apiserver"
+	// KubeAPIServer defines the repository name of the kube apiserver
+	KubeAPIServer = "kube-apiserver"
 	// KarmadaAggregatedAPIServer defines the name of the karmada-aggregated-apiserver component
 	KarmadaAggregatedAPIServer = "karmada-aggregated-apiserver"
 	// KubeControllerManager defines the name of the kube-controller-manager component
@@ -38,6 +40,8 @@ const (
 	KarmadaScheduler = "karmada-scheduler"
 	// KarmadaWebhook defines the name of the karmada-webhook component
 	KarmadaWebhook = "karmada-webhook"
+	// KarmadaDescheduler defines the name of the karmada-descheduler component
+	KarmadaDescheduler = "karmada-descheduler"
 
 	// KarmadaSystemNamespace defines the leader selection namespace for karmada components
 	KarmadaSystemNamespace = "karmada-system"
@@ -52,6 +56,8 @@ const (
 	EtcdListenPeerPort = 2380
 	// KarmadaAPIserverListenClientPort defines the port karmada apiserver listen on for client traffic
 	KarmadaAPIserverListenClientPort = 5443
+	// EtcdDataVolumeName defines the name to etcd data volume
+	EtcdDataVolumeName = "etcd-data"
 
 	// CertificateValidity Certificate validity period
 	CertificateValidity = time.Hour * 24 * 365
@@ -76,18 +82,20 @@ const (
 	// UserName karmada cluster user name
 	UserName = "karmada-admin"
 
-	// KarmadaAPIserverComponent defines the name of karmada apiserver component
+	// KarmadaAPIserverComponent defines the name of karmada-apiserver component
 	KarmadaAPIserverComponent = "KarmadaAPIServer"
-	// KarmadaAggregatedAPIServerComponent defines the name of karmada aggregated apiserver component
+	// KarmadaAggregatedAPIServerComponent defines the name of karmada-aggregated-apiserver component
 	KarmadaAggregatedAPIServerComponent = "KarmadaAggregatedAPIServer"
-	// KubeControllerManagerComponent defines the name of kube controller manager component
+	// KubeControllerManagerComponent defines the name of kube-controller-manager-component
 	KubeControllerManagerComponent = "KubeControllerManager"
-	// KarmadaControllerManagerComponent defines the name of karmada controller manager component
+	// KarmadaControllerManagerComponent defines the name of karmada-controller-manager component
 	KarmadaControllerManagerComponent = "KarmadaControllerManager"
-	// KarmadaSchedulerComponent defines the name of karmada scheduler component
+	// KarmadaSchedulerComponent defines the name of karmada-scheduler component
 	KarmadaSchedulerComponent = "KarmadaScheduler"
 	// KarmadaWebhookComponent defines the name of the karmada-webhook component
 	KarmadaWebhookComponent = "KarmadaWebhook"
+	// KarmadaDeschedulerComponent defines the name of the karmada-descheduler component
+	KarmadaDeschedulerComponent = "KarmadaDescheduler"
 
 	// KarmadaOperatorLabelKeyName defines a label key used by all of resources created by karmada operator
 	KarmadaOperatorLabelKeyName = "app.kubernetes.io/managed-by"

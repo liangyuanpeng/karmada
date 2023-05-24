@@ -14,6 +14,7 @@ import (
 	"github.com/karmada-io/karmada/operator/pkg/constants"
 	"github.com/karmada-io/karmada/operator/pkg/util"
 	"github.com/karmada-io/karmada/operator/pkg/util/apiclient"
+	"github.com/karmada-io/karmada/operator/pkg/util/patcher"
 )
 
 // EnsureKarmadaEtcd creates etcd StatefulSet and service resource.
@@ -44,10 +45,10 @@ func installKarmadaEtcd(client clientset.Interface, name, namespace string, cfg 
 	}
 
 	etcdStatefuleSetBytes, err := util.ParseTemplate(KarmadaEtcdStatefulSet, struct {
-		StatefulSetName, Namespace, Image                  string
-		EtcdClientService, CertsSecretName                 string
-		EtcdPeerServiceName, InitialCluster                string
-		Replicas, EtcdListenClientPort, EtcdListenPeerPort int32
+		StatefulSetName, Namespace, Image, EtcdClientService string
+		CertsSecretName, EtcdPeerServiceName                 string
+		InitialCluster, EtcdDataVolumeName                   string
+		Replicas, EtcdListenClientPort, EtcdListenPeerPort   int32
 	}{
 		StatefulSetName:      util.KarmadaEtcdName(name),
 		Namespace:            namespace,
@@ -55,6 +56,7 @@ func installKarmadaEtcd(client clientset.Interface, name, namespace string, cfg 
 		EtcdClientService:    util.KarmadaEtcdClientName(name),
 		CertsSecretName:      util.EtcdCertSecretName(name),
 		EtcdPeerServiceName:  util.KarmadaEtcdName(name),
+		EtcdDataVolumeName:   constants.EtcdDataVolumeName,
 		InitialCluster:       strings.Join(initialClusters, ","),
 		Replicas:             *cfg.Replicas,
 		EtcdListenClientPort: constants.EtcdListenClientPort,
@@ -68,6 +70,9 @@ func installKarmadaEtcd(client clientset.Interface, name, namespace string, cfg 
 	if err := kuberuntime.DecodeInto(clientsetscheme.Codecs.UniversalDecoder(), etcdStatefuleSetBytes, etcdStatefulSet); err != nil {
 		return fmt.Errorf("error when decoding Etcd StatefulSet: %w", err)
 	}
+
+	patcher.NewPatcher().WithAnnotations(cfg.Annotations).WithLabels(cfg.Labels).
+		WithVolumeData(cfg.VolumeData).ForStatefulSet(etcdStatefulSet)
 
 	if err := apiclient.CreateOrUpdateStatefulSet(client, etcdStatefulSet); err != nil {
 		return fmt.Errorf("error when creating Etcd statefulset, err: %w", err)
