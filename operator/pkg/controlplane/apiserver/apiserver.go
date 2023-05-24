@@ -34,6 +34,7 @@ func EnsureKarmadaAggregatedAPIServer(client clientset.Interface, cfg *operatorv
 }
 
 func installKarmadaAPIServer(client clientset.Interface, cfg *operatorv1alpha1.KarmadaAPIServer, name, namespace string) error {
+	//lan support custom volumes
 	apiserverDeploymentbytes, err := util.ParseTemplate(KarmadaApiserverDeployment, struct {
 		DeploymentName, Namespace, Image, EtcdClientService string
 		ServiceSubnet, KarmadaCertsSecret, EtcdCertsSecret  string
