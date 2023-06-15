@@ -32,6 +32,7 @@ source "${REPO_ROOT}/hack/util.sh"
 REGISTRY=${REGISTRY:-"docker.io/karmada"}
 VERSION=${VERSION:="unknown"}
 DOCKER_BUILD_ARGS=${DOCKER_BUILD_ARGS:-}
+SIGN_IMAGE=${SIGN_IMAGE:-"0"}
 
 function build_images() {
   local -r target=$1
@@ -71,14 +72,13 @@ function build_local_image() {
 }
 
 function signImage(){
-
-echo "====================begin cosign for :"$1
-
-#echo "github.run_id:" $GH_RUN_ID
-
-cosign sign --yes \
-            -a run_id=$GH_RUN_ID \
-            $1
+  if [ $SIGN_IMAGE = "1" ];then
+    echo "====================begin cosign for :"$1
+    #echo "github.run_id:" $GH_RUN_ID
+    cosign sign --yes \
+                -a run_id=$GH_RUN_ID \
+                $1
+  fi
 }
 
 function build_cross_image() {
