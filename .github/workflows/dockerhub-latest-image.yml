@@ -79,5 +79,6 @@ jobs:
           VERSION: latest
           GH_RUN_ID: ${{ github.run_id }}
           COSIGN_EXPERIMENTAL: 1
+          SIGN_IMAGE: 1
         run: |
           make mp-image-${{ matrix.target }}
