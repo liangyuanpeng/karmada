@@ -47,23 +47,23 @@ type RBApplicationFailoverController struct {
 // The Controller will requeue the Request to be processed again if an error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (c *RBApplicationFailoverController) Reconcile(ctx context.Context, req controllerruntime.Request) (controllerruntime.Result, error) {
-	klog.V(4).Infof("Reconciling ResourceBinding %s.", req.NamespacedName.String())
+	klog.Infof("Reconciling ResourceBinding %s.", req.NamespacedName.String())
 
 	binding := &workv1alpha2.ResourceBinding{}
 	if err := c.Client.Get(ctx, req.NamespacedName, binding); err != nil {
 		if apierrors.IsNotFound(err) {
-			klog.V(4).Infof("lan.dev.Reconciling ResourceBinding1 %s.", req.NamespacedName.String())
+			klog.Infof("lan.dev.Reconciling ResourceBinding1 %s.", req.NamespacedName.String())
 
 			c.workloadUnhealthyMap.delete(req.NamespacedName)
 			return controllerruntime.Result{}, nil
 		}
-		klog.V(4).Infof("lan.dev.Reconciling ResourceBinding2 %s.", req.NamespacedName.String())
+		klog.Infof("lan.dev.Reconciling ResourceBinding2 %s.", req.NamespacedName.String())
 
 		return controllerruntime.Result{Requeue: true}, err
 	}
 
 	if !c.bindingFilter(binding) {
-		klog.V(4).Infof("lan.dev.Reconciling ResourceBinding3 %s.", req.NamespacedName.String())
+		klog.Infof("lan.dev.Reconciling ResourceBinding3 %s", req.NamespacedName)
 
 		c.workloadUnhealthyMap.delete(req.NamespacedName)
 		return controllerruntime.Result{}, nil
@@ -71,17 +71,17 @@ func (c *RBApplicationFailoverController) Reconcile(ctx context.Context, req con
 
 	retryDuration, err := c.syncBinding(binding)
 	if err != nil {
-		klog.V(4).Infof("lan.dev.Reconciling ResourceBinding4 %s.", req.NamespacedName.String())
+		klog.Infof("lan.dev.Reconciling ResourceBinding4 ")
 
 		return controllerruntime.Result{Requeue: true}, err
 	}
 	if retryDuration > 0 {
-		klog.V(4).Infof("lan.dev.Reconciling ResourceBinding5 %s.", req.NamespacedName.String())
+		klog.Infof("lan.dev.Reconciling ResourceBinding5 %s.", req.NamespacedName.String())
 
 		klog.V(4).Infof("Retry to check health status of the workload after %v minutes.", retryDuration.Minutes())
 		return controllerruntime.Result{RequeueAfter: retryDuration}, nil
 	}
-	klog.V(4).Infof("lan.dev.Reconciling ResourceBinding6 %s.", req.NamespacedName.String())
+	klog.Infof("lan.dev.Reconciling ResourceBinding6 %s.", req.NamespacedName.String())
 
 	return controllerruntime.Result{}, nil
 }
@@ -129,18 +129,23 @@ func (c *RBApplicationFailoverController) syncBinding(binding *workv1alpha2.Reso
 
 	unhealthyClusters, others := distinguishUnhealthyClustersWithOthers(binding.Status.AggregatedStatus, binding.Spec)
 	duration, needEvictClusters := c.detectFailure(unhealthyClusters, tolerationSeconds, key)
+	klog.Infof("lan.dev.RBApplicationFailoverController.syncBinding1 %s.", binding.Name)
 
 	err := c.evictBinding(binding, needEvictClusters)
 	if err != nil {
+		klog.Infof("lan.dev.RBApplicationFailoverController.syncBinding2 %s.", binding.Name)
 		klog.Errorf("Failed to evict binding(%s/%s), err: %v.", binding.Namespace, binding.Name, err)
 		return 0, err
 	}
 
 	if len(needEvictClusters) != 0 {
+		klog.Infof("lan.dev.RBApplicationFailoverController.syncBinding3 %s.", binding.Name)
+
 		if err = c.updateBinding(binding, allClusters, needEvictClusters); err != nil {
 			return 0, err
 		}
 	}
+	klog.Infof("lan.dev.RBApplicationFailoverController.syncBinding4 %s.", binding.Name)
 
 	// Cleanup clusters on which the application status is not unhealthy and clusters that have been evicted or removed in the workloadUnhealthyMap.
 	c.workloadUnhealthyMap.deleteIrrelevantClusters(key, allClusters, others)
