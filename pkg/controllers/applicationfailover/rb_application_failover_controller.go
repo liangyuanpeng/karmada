@@ -52,25 +52,37 @@ func (c *RBApplicationFailoverController) Reconcile(ctx context.Context, req con
 	binding := &workv1alpha2.ResourceBinding{}
 	if err := c.Client.Get(ctx, req.NamespacedName, binding); err != nil {
 		if apierrors.IsNotFound(err) {
+			klog.V(4).Infof("lan.dev.Reconciling ResourceBinding1 %s.", req.NamespacedName.String())
+
 			c.workloadUnhealthyMap.delete(req.NamespacedName)
 			return controllerruntime.Result{}, nil
 		}
+		klog.V(4).Infof("lan.dev.Reconciling ResourceBinding2 %s.", req.NamespacedName.String())
+
 		return controllerruntime.Result{Requeue: true}, err
 	}
 
 	if !c.bindingFilter(binding) {
+		klog.V(4).Infof("lan.dev.Reconciling ResourceBinding3 %s.", req.NamespacedName.String())
+
 		c.workloadUnhealthyMap.delete(req.NamespacedName)
 		return controllerruntime.Result{}, nil
 	}
 
 	retryDuration, err := c.syncBinding(binding)
 	if err != nil {
+		klog.V(4).Infof("lan.dev.Reconciling ResourceBinding4 %s.", req.NamespacedName.String())
+
 		return controllerruntime.Result{Requeue: true}, err
 	}
 	if retryDuration > 0 {
+		klog.V(4).Infof("lan.dev.Reconciling ResourceBinding5 %s.", req.NamespacedName.String())
+
 		klog.V(4).Infof("Retry to check health status of the workload after %v minutes.", retryDuration.Minutes())
 		return controllerruntime.Result{RequeueAfter: retryDuration}, nil
 	}
+	klog.V(4).Infof("lan.dev.Reconciling ResourceBinding6 %s.", req.NamespacedName.String())
+
 	return controllerruntime.Result{}, nil
 }
 
