@@ -112,6 +112,13 @@ func (s *ResourceBindingSpec) RemoveCluster(name string) {
 // building a graceful eviction task.
 // This function no-opts if the cluster does not exist.
 func (s *ResourceBindingSpec) GracefulEvictCluster(name string, options *TaskOptions) {
+
+	// skip if the target cluster already in the task list
+	if s.ClusterInGracefulEvictionTasks(name) {
+		// if s.ClusterInGracefulEvictionTasks(evictCluster.Name) {
+		return
+	}
+
 	// find the cluster index
 	var i int
 	for i = 0; i < len(s.Clusters); i++ {
@@ -128,11 +135,6 @@ func (s *ResourceBindingSpec) GracefulEvictCluster(name string, options *TaskOpt
 
 	// remove the target cluster from scheduling result
 	s.Clusters = append(s.Clusters[:i], s.Clusters[i+1:]...)
-
-	// skip if the target cluster already in the task list
-	if s.ClusterInGracefulEvictionTasks(evictCluster.Name) {
-		return
-	}
 
 	// build eviction task
 	evictingCluster := evictCluster.DeepCopy()

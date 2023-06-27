@@ -5,6 +5,7 @@ import (
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog/v2"
 
 	workv1alpha2 "github.com/karmada-io/karmada/pkg/apis/work/v1alpha2"
 )
@@ -30,6 +31,7 @@ func assessEvictionTasks(bindingSpec workv1alpha2.ResourceBindingSpec,
 		if task.CreationTimestamp.IsZero() {
 			task.CreationTimestamp = now
 			keptTasks = append(keptTasks, task)
+			klog.Info("lan.dev.assessEvictionTasks.new task:", task.CreationTimestamp)
 			continue
 		}
 
@@ -63,8 +65,10 @@ func assessSingleTask(task workv1alpha2.GracefulEvictionTask, opt assessmentOpti
 	if task.GracePeriodSeconds != nil {
 		timeout = time.Duration(*task.GracePeriodSeconds) * time.Second
 	}
+	klog.Info("lan.dev.assessSingleTask:", timeout)
 	// task exceeds timeout
 	if metav1.Now().After(task.CreationTimestamp.Add(timeout)) {
+		klog.Info("lan.dev.assessSingleTask2:", timeout)
 		return nil
 	}
 
@@ -81,6 +85,7 @@ func allScheduledResourceInHealthyState(opt assessmentOption) bool {
 
 		// find the observed status of targetCluster
 		for index, aggregatedStatus := range opt.observedStatus {
+			klog.Info("lan.dev.allScheduledResourceInHealthyState.aggregatedStatus:", aggregatedStatus)
 			if aggregatedStatus.ClusterName == targetCluster.Name {
 				statusItem = &opt.observedStatus[index]
 				break

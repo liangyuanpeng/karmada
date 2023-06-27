@@ -87,6 +87,7 @@ func (c *RBApplicationFailoverController) detectFailure(clusters []string, toler
 
 	for _, cluster := range clusters {
 		if !c.workloadUnhealthyMap.hasWorkloadBeenUnhealthy(key, cluster) {
+			klog.Info("===========lan.dev.RBApplicationFailoverController.detectFailure.hasWorkloadBeenUnhealthy:", key, cluster)
 			c.workloadUnhealthyMap.setTimeStamp(key, cluster)
 			if duration > *tolerationSeconds {
 				duration = *tolerationSeconds
@@ -128,19 +129,18 @@ func (c *RBApplicationFailoverController) syncBinding(binding *workv1alpha2.Reso
 
 	err := c.evictBinding(binding, needEvictClusters)
 	if err != nil {
-		klog.Infof("lan.dev.RBApplicationFailoverController.syncBinding2 %s.", binding.Name)
+		// klog.Infof("lan.dev.RBApplicationFailoverController.syncBinding2 %s.", binding.Name)
 		klog.Errorf("Failed to evict binding(%s/%s), err: %v.", binding.Namespace, binding.Name, err)
 		return 0, err
 	}
 
 	if len(needEvictClusters) != 0 {
-		klog.Infof("lan.dev.RBApplicationFailoverController.syncBinding3 %s.", binding.Name)
-
+		// klog.Infof("lan.dev.RBApplicationFailoverController.syncBinding3 %s.", binding.Name)
 		if err = c.updateBinding(binding, allClusters, needEvictClusters); err != nil {
 			return 0, err
 		}
 	}
-	klog.Infof("lan.dev.RBApplicationFailoverController.syncBinding4 %s.", binding.Name)
+	// klog.Infof("lan.dev.RBApplicationFailoverController.syncBinding4 %s.", binding.Name)
 
 	// Cleanup clusters on which the application status is not unhealthy and clusters that have been evicted or removed in the workloadUnhealthyMap.
 	c.workloadUnhealthyMap.deleteIrrelevantClusters(key, allClusters, others)
