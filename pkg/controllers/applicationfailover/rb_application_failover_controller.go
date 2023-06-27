@@ -53,18 +53,15 @@ func (c *RBApplicationFailoverController) Reconcile(ctx context.Context, req con
 	if err := c.Client.Get(ctx, req.NamespacedName, binding); err != nil {
 		if apierrors.IsNotFound(err) {
 			klog.Infof("lan.dev.Reconciling ResourceBinding1 %s.", req.NamespacedName.String())
-
 			c.workloadUnhealthyMap.delete(req.NamespacedName)
 			return controllerruntime.Result{}, nil
 		}
 		klog.Infof("lan.dev.Reconciling ResourceBinding2 %s.", req.NamespacedName.String())
-
 		return controllerruntime.Result{Requeue: true}, err
 	}
 
 	if !c.bindingFilter(binding) {
 		klog.Infof("lan.dev.Reconciling ResourceBinding3 %s", req.NamespacedName)
-
 		c.workloadUnhealthyMap.delete(req.NamespacedName)
 		return controllerruntime.Result{}, nil
 	}
@@ -72,12 +69,10 @@ func (c *RBApplicationFailoverController) Reconcile(ctx context.Context, req con
 	retryDuration, err := c.syncBinding(binding)
 	if err != nil {
 		klog.Infof("lan.dev.Reconciling ResourceBinding4 ")
-
 		return controllerruntime.Result{Requeue: true}, err
 	}
 	if retryDuration > 0 {
 		klog.Infof("lan.dev.Reconciling ResourceBinding5 %s.", req.NamespacedName.String())
-
 		klog.V(4).Infof("Retry to check health status of the workload after %v minutes.", retryDuration.Minutes())
 		return controllerruntime.Result{RequeueAfter: retryDuration}, nil
 	}
@@ -255,11 +250,14 @@ func (c *RBApplicationFailoverController) bindingFilter(rb *workv1alpha2.Resourc
 	}
 
 	if !c.ResourceInterpreter.HookEnabled(resourceKey.GroupVersionKind(), configv1alpha1.InterpreterOperationInterpretHealth) {
+		klog.Info("lan.de.bindingFilter.ResourceInterpreter have not hookenabled.", rb.Name, resourceKey.GroupVersionKind())
 		return false
 	}
 
 	if !rb.Spec.PropagateDeps {
+		klog.Info("lan.dev.bindingFilter.PropagateDeps is false.", rb.Name)
 		return false
 	}
+	klog.Info("lan.dev.bindingFilter.is true.", rb.Name, resourceKey.GroupVersionKind())
 	return true
 }
