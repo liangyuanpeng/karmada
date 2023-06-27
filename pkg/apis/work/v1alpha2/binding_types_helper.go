@@ -1,5 +1,7 @@
 package v1alpha2
 
+import "k8s.io/klog/v2"
+
 // TaskOptions represents options for GracefulEvictionTasks.
 type TaskOptions struct {
 	producer           string
@@ -113,6 +115,8 @@ func (s *ResourceBindingSpec) RemoveCluster(name string) {
 // This function no-opts if the cluster does not exist.
 func (s *ResourceBindingSpec) GracefulEvictCluster(name string, options *TaskOptions) {
 
+	klog.Info("=====lan.dev.GracefulEvictCluster.", name)
+
 	// skip if the target cluster already in the task list
 	if s.ClusterInGracefulEvictionTasks(name) {
 		// if s.ClusterInGracefulEvictionTasks(evictCluster.Name) {
@@ -149,5 +153,6 @@ func (s *ResourceBindingSpec) GracefulEvictCluster(name string, options *TaskOpt
 	if evictingCluster.Replicas > 0 {
 		evictionTask.Replicas = &evictingCluster.Replicas
 	}
+	klog.Info("=====lan.dev.GracefulEvictCluster.append.", name)
 	s.GracefulEvictionTasks = append(s.GracefulEvictionTasks, evictionTask)
 }

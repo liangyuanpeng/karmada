@@ -34,6 +34,7 @@ func assessEvictionTasks(bindingSpec workv1alpha2.ResourceBindingSpec,
 			klog.Info("lan.dev.assessEvictionTasks.new task:", task.CreationTimestamp)
 			continue
 		}
+		klog.Info("lan.dev.assessEvictionTasks task:", task.CreationTimestamp)
 
 		// assess task according to observed status
 		kt := assessSingleTask(task, assessmentOption{
@@ -42,8 +43,10 @@ func assessEvictionTasks(bindingSpec workv1alpha2.ResourceBindingSpec,
 			observedStatus: observedStatus,
 		})
 		if kt != nil {
+			klog.Info("lan.dev.assessEvictionTasks task1:", task.CreationTimestamp)
 			keptTasks = append(keptTasks, *kt)
 		} else {
+			klog.Info("lan.dev.assessEvictionTasks task2:", task.CreationTimestamp)
 			evictedClusters = append(evictedClusters, task.FromCluster)
 		}
 	}
