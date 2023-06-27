@@ -101,7 +101,9 @@ func (c *RBApplicationFailoverController) detectFailure(clusters []string, toler
 		timeNow := metav1.Now()
 		if timeNow.After(unHealthyTimeStamp.Add(time.Duration(*tolerationSeconds) * time.Second)) {
 			needEvictClusters = append(needEvictClusters, cluster)
+			klog.Info("=========lan.dev.RBApplicationFailoverController.detectFailure.time is up!",key,cluster)
 		} else {
+			klog.Info("=========lan.dev.RBApplicationFailoverController.detectFailure.time have not up!",key,cluster,duration,*tolerationSeconds-int32(timeNow.Sub(unHealthyTimeStamp.Time).Seconds()))
 			if duration > *tolerationSeconds-int32(timeNow.Sub(unHealthyTimeStamp.Time).Seconds()) {
 				duration = *tolerationSeconds - int32(timeNow.Sub(unHealthyTimeStamp.Time).Seconds())
 			}
