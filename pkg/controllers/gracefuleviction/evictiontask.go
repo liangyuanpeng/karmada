@@ -89,7 +89,6 @@ func allScheduledResourceInHealthyState(opt assessmentOption) bool {
 
 		// find the observed status of targetCluster
 		for index, aggregatedStatus := range opt.observedStatus {
-			klog.Info("lan.dev.allScheduledResourceInHealthyState.aggregatedStatus:", aggregatedStatus)
 			if aggregatedStatus.ClusterName == targetCluster.Name {
 				statusItem = &opt.observedStatus[index]
 				break
@@ -100,6 +99,8 @@ func allScheduledResourceInHealthyState(opt assessmentOption) bool {
 		if statusItem == nil {
 			return false
 		}
+		klog.Info("lan.dev.allScheduledResourceInHealthyState.aggregatedStatus:", statusItem.ClusterName, statusItem.Health, statusItem.Health)
+		klog.Info("lan.dev.allScheduledResourceInHealthyState.aggregatedStatus2:", statusItem.Status)
 
 		// resource not in healthy state
 		if statusItem.Health != workv1alpha2.ResourceHealthy {
