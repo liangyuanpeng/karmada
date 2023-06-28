@@ -120,6 +120,7 @@ func (s *ResourceBindingSpec) GracefulEvictCluster(name string, options *TaskOpt
 	// skip if the target cluster already in the task list
 	if s.ClusterInGracefulEvictionTasks(name) {
 		// if s.ClusterInGracefulEvictionTasks(evictCluster.Name) {
+		klog.Info("=====lan.dev.GracefulEvictCluster.exist!", name)
 		return
 	}
 

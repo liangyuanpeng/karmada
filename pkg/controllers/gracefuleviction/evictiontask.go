@@ -34,7 +34,7 @@ func assessEvictionTasks(bindingSpec workv1alpha2.ResourceBindingSpec,
 			klog.Info("lan.dev.assessEvictionTasks.new task:", task.CreationTimestamp)
 			continue
 		}
-		klog.Info("lan.dev.assessEvictionTasks task:", task.CreationTimestamp)
+		klog.Info("lan.dev.assessEvictionTasks task:", task.FromCluster, task.CreationTimestamp)
 
 		// assess task according to observed status
 		kt := assessSingleTask(task, assessmentOption{
@@ -76,9 +76,10 @@ func assessSingleTask(task workv1alpha2.GracefulEvictionTask, opt assessmentOpti
 	}
 
 	if allScheduledResourceInHealthyState(opt) {
+		klog.Info("lan.dev.assessSingleTask3:")
 		return nil
 	}
-
+	klog.Info("lan.dev.assessSingleTask4:")
 	return &task
 }
 
