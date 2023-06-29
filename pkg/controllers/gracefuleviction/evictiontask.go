@@ -14,6 +14,7 @@ type assessmentOption struct {
 	timeout        time.Duration
 	scheduleResult []workv1alpha2.TargetCluster
 	observedStatus []workv1alpha2.AggregatedStatusItem
+	replicas       int32
 }
 
 // assessEvictionTasks assesses each task according to graceful eviction rules and
@@ -41,6 +42,7 @@ func assessEvictionTasks(bindingSpec workv1alpha2.ResourceBindingSpec,
 			scheduleResult: bindingSpec.Clusters,
 			timeout:        timeout,
 			observedStatus: observedStatus,
+			replicas:       bindingSpec.Replicas,
 		})
 		if kt != nil {
 			klog.Info("lan.dev.assessEvictionTasks task1:", task.CreationTimestamp)
@@ -79,12 +81,15 @@ func assessSingleTask(task workv1alpha2.GracefulEvictionTask, opt assessmentOpti
 		klog.Info("lan.dev.assessSingleTask3:")
 		return nil
 	}
+
 	klog.Info("lan.dev.assessSingleTask4:")
 	return &task
 }
 
 func allScheduledResourceInHealthyState(opt assessmentOption) bool {
+	var scheduleReplaces int32 = 0
 	for _, targetCluster := range opt.scheduleResult {
+		scheduleReplaces += targetCluster.DeepCopy().Replicas
 		var statusItem *workv1alpha2.AggregatedStatusItem
 
 		// find the observed status of targetCluster
@@ -106,7 +111,13 @@ func allScheduledResourceInHealthyState(opt assessmentOption) bool {
 		if statusItem.Health != workv1alpha2.ResourceHealthy {
 			return false
 		}
+
 	}
+	if scheduleReplaces != opt.replicas {
+		klog.Infof("lan.dev.allScheduledResourceInHealthyState.replicas is not equal:%d,%d", opt.replicas, scheduleReplaces)
+		// return false
+	}
+	klog.Infof("lan.dev.allScheduledResourceInHealthyState.return true:%d,%d", opt.replicas, scheduleReplaces)
 
 	return true
 }
