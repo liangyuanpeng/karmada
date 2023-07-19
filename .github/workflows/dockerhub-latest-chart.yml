@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+  pull_request:
 jobs:
   publish-chart-to-dockerhub:
     name: publish to DockerHub
