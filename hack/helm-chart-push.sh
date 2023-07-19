@@ -9,5 +9,5 @@ source "${REPO_ROOT}/hack/util.sh"
 helm push _output/charts/karmada-chart-$1.tgz oci://docker.io/lypgcs
 helm push _output/charts/karmada-operator-chart-$1.tgz oci://docker.io/lypgcs
 
-signImage oci://docker.io/lypgcs/karmada:$1
-signImage oci://docker.io/lypgcs/karmada-operator:$1
+signImage docker.io/lypgcs/karmada:$1
+signImage docker.io/lypgcs/karmada-operator:$1
