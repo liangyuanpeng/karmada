@@ -18,8 +18,8 @@ jobs:
       - name: login to DockerHub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USER_NAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: liangyuanpeng
+          password: ${{ secrets.TOKEN }}
       - name: package chart
         env:
           VERSION: ${{ github.ref_name }}
