@@ -34,11 +34,11 @@ jobs:
           cosign-release: 'v1.13.1'
       - name: package chart
         env:
-          VERSION: 0.0.0
+          VERSION: latest
         run: make package-chart
       - name: push chart
         env:
-          VERSION: 0.0.0
+          VERSION: latest
           SIGN_IMAGE: 1
           COSIGN_EXPERIMENTAL: 1
         run: make push-chart
