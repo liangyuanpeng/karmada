@@ -40,4 +40,5 @@ jobs:
         env:
           VERSION: 0.0.0
           SIGN_IMAGE: 1
+          COSIGN_EXPERIMENTAL: 1
         run: make push-chart
