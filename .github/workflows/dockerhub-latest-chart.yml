@@ -35,4 +35,5 @@ jobs:
       - name: push chart
         env:
           VERSION: 0.0.0
+          SIGN_IMAGE: 1
         run: make push-chart
