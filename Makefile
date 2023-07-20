@@ -95,12 +95,11 @@ verify:
 
 .PHONY: package-chart
 package-chart:
-	hack/package-helm-chart.sh $(VERSION)
+	hack/helm-chart-package.sh $(VERSION)
 
 .PHONY: push-chart
 push-chart:
-	helm push _output/charts/karmada-chart-${VERSION}.tgz oci://docker.io/karmada
-	helm push _output/charts/karmada-operator-chart-${VERSION}.tgz oci://docker.io/karmada
+	hack/helm-chart-push.sh $(VERSION)
 
 .PHONY: test
 test:
