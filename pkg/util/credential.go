@@ -167,5 +167,6 @@ func RegisterClusterInControllerPlane(opts ClusterRegisterOption, controlPlaneKu
 			return fmt.Errorf("failed to patch secret %s/%s, error: %v", secret.Namespace, secret.Name, err)
 		}
 	}
+
 	return nil
 }

@@ -1,6 +1,7 @@
 package join
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -18,6 +19,8 @@ import (
 	cmdutil "github.com/karmada-io/karmada/pkg/karmadactl/util"
 	"github.com/karmada-io/karmada/pkg/karmadactl/util/apiclient"
 	"github.com/karmada-io/karmada/pkg/util"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var (
@@ -192,6 +195,25 @@ func (j *CommandJoinOption) RunJoinCluster(controlPlaneRestConfig, clusterConfig
 	clusterSecret, impersonatorSecret, err := util.ObtainCredentialsFromMemberCluster(clusterKubeClient, registerOption)
 	if err != nil {
 		return err
+	}
+
+	m := make(map[string]string)
+	m["host"] = "123"
+	c := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: registerOption.ClusterNamespace,
+			Name:      "karmada",
+		},
+		Data: m,
+	}
+	_, err = clusterKubeClient.CoreV1().ConfigMaps(registerOption.ClusterNamespace).Create(context.TODO(), c, metav1.CreateOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to cluster configmap %s/%s, error: %v", registerOption.ClusterNamespace, registerOption.ClusterName, err)
+	}
+
+	c, err = clusterKubeClient.CoreV1().ConfigMaps(registerOption.ClusterNamespace).Get(context.TODO(), c.Name, metav1.GetOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to get configmap %s/%s, error: %v", registerOption.ClusterNamespace, registerOption.ClusterName, err)
 	}
 
 	if j.DryRun {
