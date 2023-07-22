@@ -46,8 +46,13 @@ func (v *ValidatingAdmission) Handle(_ context.Context, req admission.Request) a
 			return admission.Denied(err.Error())
 		}
 	}
-	if req.Operation == admissionv1.Create{
+	if req.Operation == admissionv1.Create {
 		klog.V(4).Infof("Validating Create PropagationPolicy(%s/%s) for request: %s", policy.Namespace, policy.Name, req.Operation)
+		if policy.Spec.Association {
+			err = fmt.Errorf("Association can not be use!")
+			klog.Error(err)
+			return admission.Denied(err.Error())
+		}
 	}
 
 	errs := validation.ValidatePropagationSpec(policy.Spec)
