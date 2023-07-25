@@ -15,7 +15,8 @@ on:
 
 jobs:
   chart-lint-test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
+    if: ${{ github.repository == 'karmada-io/karmada' && github.ref == 'refs/heads/master' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3

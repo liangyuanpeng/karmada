@@ -5,6 +5,7 @@ import (
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog/v2"
 
 	workv1alpha2 "github.com/karmada-io/karmada/pkg/apis/work/v1alpha2"
 )
@@ -13,6 +14,7 @@ type assessmentOption struct {
 	timeout        time.Duration
 	scheduleResult []workv1alpha2.TargetCluster
 	observedStatus []workv1alpha2.AggregatedStatusItem
+	replicas       int32
 }
 
 // assessEvictionTasks assesses each task according to graceful eviction rules and
@@ -30,18 +32,23 @@ func assessEvictionTasks(bindingSpec workv1alpha2.ResourceBindingSpec,
 		if task.CreationTimestamp.IsZero() {
 			task.CreationTimestamp = now
 			keptTasks = append(keptTasks, task)
+			klog.Info("======lan.dev.assessEvictionTasks.new task:", task.CreationTimestamp)
 			continue
 		}
+		klog.Info("======lan.dev.assessEvictionTasks task:", task.FromCluster, task.CreationTimestamp)
 
 		// assess task according to observed status
 		kt := assessSingleTask(task, assessmentOption{
 			scheduleResult: bindingSpec.Clusters,
 			timeout:        timeout,
 			observedStatus: observedStatus,
+			replicas:       bindingSpec.Replicas,
 		})
 		if kt != nil {
+			klog.Info("======lan.dev.assessEvictionTasks task1:", task.CreationTimestamp)
 			keptTasks = append(keptTasks, *kt)
 		} else {
+			klog.Info("======lan.dev.assessEvictionTasks task2:", task.CreationTimestamp)
 			evictedClusters = append(evictedClusters, task.FromCluster)
 		}
 	}
@@ -63,20 +70,26 @@ func assessSingleTask(task workv1alpha2.GracefulEvictionTask, opt assessmentOpti
 	if task.GracePeriodSeconds != nil {
 		timeout = time.Duration(*task.GracePeriodSeconds) * time.Second
 	}
+	klog.Info("======lan.dev.assessSingleTask:", timeout)
 	// task exceeds timeout
 	if metav1.Now().After(task.CreationTimestamp.Add(timeout)) {
+		klog.Info("======lan.dev.assessSingleTask2:", timeout)
 		return nil
 	}
 
 	if allScheduledResourceInHealthyState(opt) {
+		klog.Info("======lan.dev.assessSingleTask3:")
 		return nil
 	}
 
+	klog.Info("======lan.dev.assessSingleTask4:")
 	return &task
 }
 
 func allScheduledResourceInHealthyState(opt assessmentOption) bool {
+	var scheduleReplaces int32 = 0
 	for _, targetCluster := range opt.scheduleResult {
+		scheduleReplaces += targetCluster.DeepCopy().Replicas
 		var statusItem *workv1alpha2.AggregatedStatusItem
 
 		// find the observed status of targetCluster
@@ -91,6 +104,8 @@ func allScheduledResourceInHealthyState(opt assessmentOption) bool {
 		if statusItem == nil {
 			return false
 		}
+		klog.Info("======lan.dev.allScheduledResourceInHealthyState.aggregatedStatus:", statusItem.ClusterName, statusItem.Health, statusItem.Health)
+		klog.Info("======lan.dev.allScheduledResourceInHealthyState.aggregatedStatus2:", statusItem.Status)
 
 		// resource not in healthy state
 		if statusItem.Health != workv1alpha2.ResourceHealthy {
