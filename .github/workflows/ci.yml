@@ -63,6 +63,7 @@ jobs:
     name: compile
     needs: codegen # rely on codegen successful completion
     runs-on: ubuntu-20.04
+    if: ${{ github.repository == 'karmada-io/karmada' && github.ref == 'refs/heads/master' }}
     steps:
       - name: checkout code
         uses: actions/checkout@v3
@@ -80,6 +81,7 @@ jobs:
     name: unit test
     needs: build
     runs-on: ubuntu-20.04
+    if: ${{ github.repository == 'karmada-io/karmada' && github.ref == 'refs/heads/master' }}
     steps:
       - name: checkout code
         uses: actions/checkout@v3
