@@ -12,6 +12,7 @@ jobs:
   init:
     name: init
     runs-on: ubuntu-20.04
+    if: ${{ github.repository == 'karmada-io/karmada' && github.ref == 'refs/heads/master' }}
     strategy:
       matrix:
         # Here support the latest three minor releases of Kubernetes, this can be considered to be roughly
