@@ -106,7 +106,8 @@ type ClusterStatusController struct {
 // The Controller will requeue the Request to be processed again if an error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will requeue the reconcile key after the duration.
 func (c *ClusterStatusController) Reconcile(ctx context.Context, req controllerruntime.Request) (controllerruntime.Result, error) {
-	klog.V(4).Infof("Syncing cluster status: %s", req.NamespacedName.Name)
+	//lan.disable.loig
+	// klog.V(4).Infof("Syncing cluster status: %s", req.NamespacedName.Name)
 
 	cluster := &clusterv1alpha1.Cluster{}
 	if err := c.Client.Get(ctx, req.NamespacedName, cluster); err != nil {

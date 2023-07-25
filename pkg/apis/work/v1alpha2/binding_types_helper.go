@@ -1,5 +1,7 @@
 package v1alpha2
 
+import "k8s.io/klog/v2"
+
 // TaskOptions represents options for GracefulEvictionTasks.
 type TaskOptions struct {
 	producer           string
@@ -112,6 +114,16 @@ func (s *ResourceBindingSpec) RemoveCluster(name string) {
 // building a graceful eviction task.
 // This function no-opts if the cluster does not exist.
 func (s *ResourceBindingSpec) GracefulEvictCluster(name string, options *TaskOptions) {
+
+	klog.Info("=====lan.dev.GracefulEvictCluster.", name)
+
+	// skip if the target cluster already in the task list
+	if s.ClusterInGracefulEvictionTasks(name) {
+		// if s.ClusterInGracefulEvictionTasks(evictCluster.Name) {
+		klog.Info("=====lan.dev.GracefulEvictCluster.exist!", name)
+		return
+	}
+
 	// find the cluster index
 	var i int
 	for i = 0; i < len(s.Clusters); i++ {
@@ -129,11 +141,6 @@ func (s *ResourceBindingSpec) GracefulEvictCluster(name string, options *TaskOpt
 	// remove the target cluster from scheduling result
 	s.Clusters = append(s.Clusters[:i], s.Clusters[i+1:]...)
 
-	// skip if the target cluster already in the task list
-	if s.ClusterInGracefulEvictionTasks(evictCluster.Name) {
-		return
-	}
-
 	// build eviction task
 	evictingCluster := evictCluster.DeepCopy()
 	evictionTask := GracefulEvictionTask{
@@ -147,5 +154,6 @@ func (s *ResourceBindingSpec) GracefulEvictCluster(name string, options *TaskOpt
 	if evictingCluster.Replicas > 0 {
 		evictionTask.Replicas = &evictingCluster.Replicas
 	}
+	klog.Info("=====lan.dev.GracefulEvictCluster.append.", name)
 	s.GracefulEvictionTasks = append(s.GracefulEvictionTasks, evictionTask)
 }

@@ -54,6 +54,7 @@ type ResourceBindingController struct {
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (c *ResourceBindingController) Reconcile(ctx context.Context, req controllerruntime.Request) (controllerruntime.Result, error) {
 	klog.V(4).Infof("Reconciling ResourceBinding %s.", req.NamespacedName.String())
+	klog.Infof("lan.dev.Reconciling ResourceBinding %s.", req.NamespacedName.String())
 
 	binding := &workv1alpha2.ResourceBinding{}
 	if err := c.Client.Get(ctx, req.NamespacedName, binding); err != nil {

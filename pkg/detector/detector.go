@@ -436,7 +436,8 @@ func (d *ResourceDetector) ApplyPolicy(object *unstructured.Unstructured, object
 	if operationResult == controllerutil.OperationResultCreated {
 		klog.Infof("Create ResourceBinding(%s/%s) successfully.", binding.GetNamespace(), binding.GetName())
 	} else if operationResult == controllerutil.OperationResultUpdated {
-		klog.Infof("Update ResourceBinding(%s/%s) successfully.", binding.GetNamespace(), binding.GetName())
+		klog.Infof("lan.dev.test %s.", "hello")
+		klog.Infof("lan.dev.Update ResourceBinding(%s/%s) successfully.", binding.GetNamespace(), binding.GetName())
 	} else {
 		klog.V(2).Infof("ResourceBinding(%s/%s) is up to date.", binding.GetNamespace(), binding.GetName())
 	}
