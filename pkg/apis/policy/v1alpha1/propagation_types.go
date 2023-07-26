@@ -429,6 +429,8 @@ type ClusterPreferences struct {
 	StaticWeightList []StaticClusterWeight `json:"staticWeightList,omitempty"`
 	// DynamicWeight specifies the factor to generates dynamic weight list.
 	// If specified, StaticWeightList will be ignored.
+	// Possible enum values:
+	// - `"AvailableReplicas"` represents the cluster weight list should be generated according to available resource (available replicas).
 	// +kubebuilder:validation:Enum=AvailableReplicas
 	// +optional
 	DynamicWeight DynamicWeightFactor `json:"dynamicWeight,omitempty"`
