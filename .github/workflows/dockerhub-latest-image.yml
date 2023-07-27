@@ -1,8 +1,9 @@
 name: latest image to DockerHub
 on:
   push:
-    # branches:
-    #   - master
+    branches:
+      - master
+      - build
 jobs:
   publish-image-to-dockerhub:
     name: publish to DockerHub
