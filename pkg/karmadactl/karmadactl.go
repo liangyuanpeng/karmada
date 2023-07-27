@@ -27,6 +27,7 @@ import (
 	"github.com/karmada-io/karmada/pkg/karmadactl/promote"
 	"github.com/karmada-io/karmada/pkg/karmadactl/register"
 	"github.com/karmada-io/karmada/pkg/karmadactl/taint"
+	"github.com/karmada-io/karmada/pkg/karmadactl/task"
 	"github.com/karmada-io/karmada/pkg/karmadactl/token"
 	"github.com/karmada-io/karmada/pkg/karmadactl/unjoin"
 	"github.com/karmada-io/karmada/pkg/karmadactl/util"
@@ -79,6 +80,7 @@ func NewKarmadaCtlCommand(cmdUse, parentCommand string) *cobra.Command {
 				deinit.NewCmdDeInit(parentCommand),
 				addons.NewCmdAddons(parentCommand),
 				join.NewCmdJoin(f, parentCommand),
+				task.NewCmdTask(f, parentCommand),
 				unjoin.NewCmdUnjoin(f, parentCommand),
 				token.NewCmdToken(f, parentCommand, ioStreams),
 				register.NewCmdRegister(parentCommand),
