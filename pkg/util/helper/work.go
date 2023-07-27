@@ -23,7 +23,7 @@ import (
 
 // CreateOrUpdateWork creates a Work object if not exist, or updates if it already exist.
 func CreateOrUpdateWork(client client.Client, workMeta metav1.ObjectMeta, resource *unstructured.Unstructured) error {
-	klog.Info("======lan.dev.CreateOrUpdateWork:", workMeta.Name, workMeta.Namespace)
+	// klog.Info("======lan.dev.CreateOrUpdateWork:", workMeta.Name, workMeta.Namespace)
 	workload := resource.DeepCopy()
 	util.MergeAnnotation(workload, workv1alpha2.ResourceTemplateUIDAnnotation, string(workload.GetUID()))
 	util.RecordManagedAnnotations(workload)
@@ -73,13 +73,13 @@ func CreateOrUpdateWork(client client.Client, workMeta metav1.ObjectMeta, resour
 
 	if operationResult == controllerutil.OperationResultCreated {
 		klog.V(2).Infof("Create work %s/%s successfully.", work.GetNamespace(), work.GetName())
-		klog.Infof("======lan.dev.Create work %s/%s successfully.", work.GetNamespace(), work.GetName())
+		// klog.Infof("======lan.dev.Create work %s/%s successfully.", work.GetNamespace(), work.GetName())
 	} else if operationResult == controllerutil.OperationResultUpdated {
 		klog.V(2).Infof("Update work %s/%s successfully.", work.GetNamespace(), work.GetName())
-		klog.Infof("======lan.dev.Update work %s/%s successfully.", work.GetNamespace(), work.GetName())
+		// klog.Infof("======lan.dev.Update work %s/%s successfully.", work.GetNamespace(), work.GetName())
 	} else {
 		klog.V(2).Infof("Work %s/%s is up to date.", work.GetNamespace(), work.GetName())
-		klog.Infof("======lan.dev.Work %s/%s is up to date.", work.GetNamespace(), work.GetName())
+		// klog.Infof("======lan.dev.Work %s/%s is up to date.", work.GetNamespace(), work.GetName())
 	}
 
 	return nil
