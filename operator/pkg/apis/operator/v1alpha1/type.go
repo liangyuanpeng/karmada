@@ -207,6 +207,15 @@ type ExternalEtcd struct {
 	// KeyData is an SSL key file used to secure etcd communication.
 	// Required if using a TLS connection.
 	KeyData []byte `json:"keyData"`
+
+	CASecret   TLSSecret
+	CertSecret TLSSecret
+	KeySecret  TLSSecret
+}
+
+type TLSSecret struct {
+	Name string `json:"name,omitempty"`
+	Key  string `json:"key,omitempty"`
 }
 
 // KarmadaAPIServer holds settings to kube-apiserver component of the kubernetes.
