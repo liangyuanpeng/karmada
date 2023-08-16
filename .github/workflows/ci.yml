@@ -136,6 +136,9 @@ jobs:
         run: |
           export CLUSTER_VERSION=kindest/node:${{ matrix.k8s }}
           hack/local-up-karmada.sh
+      - name: check logs
+        run: |
+          ls /tmp/karmada/
       - name: run e2e
         run: |
           export ARTIFACTS_PATH=${{ github.workspace }}/karmada-e2e-logs/${{ matrix.k8s }}/
