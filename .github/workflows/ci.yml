@@ -144,11 +144,11 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: karmada_e2e_log_${{ matrix.k8s }}
-          path: ${{ github.workspace }}/karmada-e2e-logs/${{ matrix.k8s }}/
+          name: karmada_e2e_log_${{ matrix.k8s }}_${{ matrix.flake }}
+          path: ${{ github.workspace }}/karmada-e2e-logs/${{ matrix.k8s }}/${{ matrix.flake }}/
       - name: upload kind logs
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: karmada_kind_log_${{ matrix.k8s }}
+          name: karmada_kind_log_${{ matrix.k8s }}_${{ matrix.flake }}
           path: /tmp/karmada/
