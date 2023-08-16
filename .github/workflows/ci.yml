@@ -142,7 +142,7 @@ jobs:
           ls /tmp/karmada/
       - name: run e2e
         run: |
-          export ARTIFACTS_PATH=${{ github.workspace }}/karmada-e2e-logs/${{ matrix.k8s }}/
+          export ARTIFACTS_PATH=${{ github.workspace }}/karmada-e2e-logs/${{ matrix.k8s }}/${{ matrix.flake }}/
           hack/run-e2e.sh
       - name: upload logs
         if: always()
