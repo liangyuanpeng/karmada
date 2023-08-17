@@ -88,6 +88,7 @@ func InitClusterInformation(karmadaClient karmada.Interface, controlPlaneClient 
 // GetClusterClient get cluster client
 func GetClusterClient(clusterName string) kubernetes.Interface {
 	for _, clusterClient := range clusterClients {
+		fmt.Println("=======================cluster:", clusterClient.ClusterName)
 		if clusterClient.ClusterName == clusterName {
 			return clusterClient.KubeClient
 		}
