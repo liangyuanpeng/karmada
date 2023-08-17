@@ -115,6 +115,9 @@ jobs:
         # the same as the End of Life of the Kubernetes release: https://kubernetes.io/releases/
         # Please remember to update the CI Schedule Workflow when we add a new version.
         k8s: [ v1.25.0, v1.26.0, v1.27.3 ]
+        test:
+        - --karmada-context=karmada-apiserver --focus=\[operator\]
+        - --karmada-context=karmada-apiserver
     steps:
       - name: checkout code
         uses: actions/checkout@v3
@@ -131,6 +134,9 @@ jobs:
           export CLUSTER_VERSION=kindest/node:${{ matrix.k8s }}
           hack/local-up-karmada.sh
       - name: run e2e
+        env:
+          - name: GINKGO_PARAM
+            value: ${{ matrix.test }}
         run: |
           export ARTIFACTS_PATH=${{ github.workspace }}/karmada-e2e-logs/${{ matrix.k8s }}/
           hack/run-e2e.sh
