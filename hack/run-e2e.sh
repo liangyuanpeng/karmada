@@ -38,8 +38,9 @@ REPO_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 export KUBECONFIG=${KARMADA_APISERVER_KUBECONFIG}
 export PULL_BASED_CLUSTERS=${PULL_BASED_CLUSTERS}
 
+kubectl config get-contexts
 set +e
-ginkgo -v --race --trace --fail-fast -p --randomize-all ./test/e2e/ -- --karmada-context=karmada-apiserver
+ginkgo -v --race --trace --fail-fast -p --randomize-all ./test/e2e/ -- --karmada-context=karmada-apiserver --focus=\[operator\]
 TESTING_RESULT=$?
 
 # Collect logs

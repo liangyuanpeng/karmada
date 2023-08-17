@@ -13,7 +13,7 @@ import (
 	"github.com/karmada-io/karmada/test/helper"
 )
 
-var _ = ginkgo.Describe("operator testing", func() {
+var _ = ginkgo.Describe("[operator] testing", func() {
 	var cluster string
 	var clusterClient kubernetes.Interface
 
