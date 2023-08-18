@@ -39,7 +39,7 @@ export KUBECONFIG=${KARMADA_APISERVER_KUBECONFIG}
 export PULL_BASED_CLUSTERS=${PULL_BASED_CLUSTERS}
 
 kubectl config get-contexts
-GINKGO_PARAM=${GINKGO_PARAM:-"--karmada-context=karmada-apiserver"}
+GINKGO_PARAM=${GINKGO_PARAM:-"--skip=\[operator\]"}
 set +e
 ginkgo -v --race --trace --fail-fast -p --randomize-all ./test/e2e/ -- --karmada-context=karmada-apiserver $GINKGO_PARAM
 #--karmada-context=karmada-apiserver --focus=\[operator\]
