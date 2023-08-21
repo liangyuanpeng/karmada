@@ -21,20 +21,18 @@ import (
 )
 
 var _ = ginkgo.Describe("[operator] testing", func() {
-	var cluster string
 	var clusterClient kubernetes.Interface
 	homeDir := os.Getenv("HOME")
 	kubeConfigPath := fmt.Sprintf("%s/.kube/%s.config", homeDir, "karmada-host")
+	fmt.Println("kubeConfigPath:", kubeConfigPath)
 	clusterConfig, err := clientcmd.BuildConfigFromFlags("", kubeConfigPath)
-	if err!=nil{
+	if err != nil {
 		panic(err)
 	}
 
 	operatorClient, _ := operator.NewForConfig(clusterConfig)
 
 	ginkgo.BeforeEach(func() {
-		cluster = "karmada-host"
-		clusterClient = framework.GetClusterClient(cluster)
 		defaultConfigFlags := genericclioptions.NewConfigFlags(true).WithDeprecatedPasswordFlag().WithDiscoveryBurst(300).WithDiscoveryQPS(50.0)
 		defaultConfigFlags.Context = &karmadaContext
 	})

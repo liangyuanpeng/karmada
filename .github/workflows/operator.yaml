@@ -3,7 +3,11 @@ on:
   # Run this workflow every time a new commit pushed to upstream/fork repository.
   # Run workflow on fork repository will help contributors find and resolve issues before sending a PR.
   push:
+    branches:
+      - master2
   pull_request:
+    branches:
+      - master2
 # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency
 concurrency:
   group: ${{ github.workflow }}-${{ github.actor }}-${{ github.head_ref || github.run_id }}
@@ -39,7 +43,7 @@ jobs:
           hack/operator-testing-environment.sh
 
           # run a single e2e
-          export KUBECONFIG=${HOME}/karmada/karmada-host.config
+          export KUBECONFIG=${HOME}/.kube/karmada-host.config
           GO111MODULE=on go install github.com/onsi/ginkgo/v2/ginkgo
           ginkgo -v --race --trace -p  --focus="[operator]"  ./test/e2e/
       - uses: chainguard-dev/actions/kind-diag@main
