@@ -45,5 +45,6 @@ docker tag docker.io/karmada/karmada-operator:$IMGTAG docker.io/karmada/karmada-
 kind load docker-image docker.io/karmada/karmada-operator:latest --name $HOST_CLUSTER_NAME
 
 kubectl create namespace karmada-system --kubeconfig=${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config
+kubectl create namespace test --kubeconfig=${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config
 kubectl apply -f operator/config/deploy  --kubeconfig=${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config
 kubectl apply -f operator/config/samples --kubeconfig=${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config
