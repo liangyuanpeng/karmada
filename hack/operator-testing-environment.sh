@@ -28,7 +28,7 @@ make image-karmada-operator
 
 # create host/member1/member2 cluster
 echo "Start create clusters..."
-hack/create-cluster.sh ${HOST_CLUSTER_NAME} ${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config > /dev/null 2>&1 &
+hack/create-cluster.sh ${HOST_CLUSTER_NAME} ${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config
 
 # wait cluster ready
 echo "Wait clusters ready..."
@@ -38,7 +38,7 @@ kubectl wait --for=condition=Ready nodes --all --timeout=800s --kubeconfig=${KUB
 util::wait_nodes_taint_disappear 800 ${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config
 
 kubectl config get-contexts
-kubectl config use-context kind-$HOST_CLUSTER_NAME
+kubectl config use-context $HOST_CLUSTER_NAME
 kubectl apply -f operator/config/crds
 export IMGTAG=`git describe --tags --dirty`
 docker tag docker.io/karmada/karmada-operator:$IMGTAG docker.io/karmada/karmada-operator:latest
