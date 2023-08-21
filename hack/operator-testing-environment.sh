@@ -39,11 +39,11 @@ kubectl wait --for=condition=Ready nodes --all --timeout=800s --kubeconfig=${KUB
 util::wait_nodes_taint_disappear 800 ${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config
 
 kind get clusters
-kubectl apply -f operator/config/crds
+kubectl apply -f operator/config/crds --kubeconfig=${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config
 export IMGTAG=`git describe --tags --dirty`
 docker tag docker.io/karmada/karmada-operator:$IMGTAG docker.io/karmada/karmada-operator:latest
-kind load docker-image docker.io/karmada/karmada-operator:latest
+kind load docker-image docker.io/karmada/karmada-operator:latest --name $HOST_CLUSTER_NAME
 
-kubectl create namespace karmada-system
-kubectl apply -f operator/config/deploy 
-kubectl apply -f operator/config/samples
+kubectl create namespace karmada-system --kubeconfig=${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config
+kubectl apply -f operator/config/deploy  --kubeconfig=${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config
+kubectl apply -f operator/config/samples --kubeconfig=${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config
