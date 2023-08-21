@@ -42,7 +42,7 @@ kubectl config get-contexts
 GINKGO_PARAM=${GINKGO_PARAM:-"--skip=\[operator\]"}
 set +e
 echo "======================GINKGO_PARAM:"$GINKGO_PARAM
-ginkgo -v --race --trace --fail-fast -p --randomize-all ./test/e2e/ -- --karmada-context=karmada-apiserver $GINKGO_PARAM
+ginkgo -v --race --trace --fail-fast -p --randomize-all ./test/e2e/ -- --karmada-context=karmada-apiserver
 #--karmada-context=karmada-apiserver --focus=\[operator\]
 TESTING_RESULT=$?
 
