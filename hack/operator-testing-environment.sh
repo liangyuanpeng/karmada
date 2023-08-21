@@ -34,11 +34,11 @@ hack/create-cluster.sh ${HOST_CLUSTER_NAME} ${KUBECONFIG_PATH}/${HOST_CLUSTER_NA
 echo "Wait clusters ready..."
 util::wait_file_exist ${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config 300
 util::wait_context_exist ${HOST_CLUSTER_NAME} ${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config 300
+cat ${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config
 kubectl wait --for=condition=Ready nodes --all --timeout=800s --kubeconfig=${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config
 util::wait_nodes_taint_disappear 800 ${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config
 
-kubectl config get-contexts
-kubectl config use-context $HOST_CLUSTER_NAME
+kind get clusters
 kubectl apply -f operator/config/crds
 export IMGTAG=`git describe --tags --dirty`
 docker tag docker.io/karmada/karmada-operator:$IMGTAG docker.io/karmada/karmada-operator:latest
