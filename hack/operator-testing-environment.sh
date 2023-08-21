@@ -24,8 +24,7 @@ cp -r _crds crds
 tar -zcvf ../../crds.tar.gz crds
 cd -
 
-# make karmadactl binary
-make karmadactl
+make image-karmada-operator
 
 # create host/member1/member2 cluster
 echo "Start create clusters..."
@@ -38,9 +37,10 @@ util::wait_context_exist ${HOST_CLUSTER_NAME} ${KUBECONFIG_PATH}/${HOST_CLUSTER_
 kubectl wait --for=condition=Ready nodes --all --timeout=800s --kubeconfig=${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config
 util::wait_nodes_taint_disappear 800 ${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config
 
-# init Karmada control plane
-echo "Start init karmada control plane..."
-${BUILD_PATH}/karmadactl init --kubeconfig=${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config \
-    --karmada-data=${HOME}/karmada \
-    --karmada-pki=${HOME}/karmada/pki \
-    --crds=./crds.tar.gz
+kubectl apply -f operator/config/crds
+export IMGTAG=`git describe --tags --dirty`
+docker tag docker.io/karmada/karmada-operator:$IMGTAG docker.io/karmada/karmada-operator:latest
+kind load docker-image docker.io/karmada/karmada-operator:latest
+
+kubectl apply -f operator/config/deploy 
+kubectl apply -f operator/config/samples
