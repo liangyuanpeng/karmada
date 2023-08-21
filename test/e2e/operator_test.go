@@ -3,6 +3,7 @@ package e2e
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/onsi/ginkgo/v2"
 	appsv1 "k8s.io/api/apps/v1"
@@ -10,6 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/rand"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 
 	operatorv1alpha1 "github.com/karmada-io/karmada/operator/pkg/apis/operator/v1alpha1"
 	operator "github.com/karmada-io/karmada/operator/pkg/generated/clientset/versioned"
@@ -21,10 +23,17 @@ import (
 var _ = ginkgo.Describe("[operator] testing", func() {
 	var cluster string
 	var clusterClient kubernetes.Interface
-	operatorClient, _ := operator.NewForConfig(nil)
+	homeDir := os.Getenv("HOME")
+	kubeConfigPath := fmt.Sprintf("%s/.kube/%s.config", homeDir, "karmada-host")
+	clusterConfig, err := clientcmd.BuildConfigFromFlags("", kubeConfigPath)
+	if err!=nil{
+		panic(err)
+	}
+
+	operatorClient, _ := operator.NewForConfig(clusterConfig)
 
 	ginkgo.BeforeEach(func() {
-		cluster = "host"
+		cluster = "karmada-host"
 		clusterClient = framework.GetClusterClient(cluster)
 		defaultConfigFlags := genericclioptions.NewConfigFlags(true).WithDeprecatedPasswordFlag().WithDiscoveryBurst(300).WithDiscoveryQPS(50.0)
 		defaultConfigFlags.Context = &karmadaContext

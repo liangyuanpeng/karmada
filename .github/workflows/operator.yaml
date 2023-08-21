@@ -39,7 +39,7 @@ jobs:
           hack/operator-testing-environment.sh
 
           # run a single e2e
-          export KUBECONFIG=${HOME}/karmada/karmada-apiserver.config
+          export KUBECONFIG=${HOME}/karmada/karmada-host.config
           GO111MODULE=on go install github.com/onsi/ginkgo/v2/ginkgo
           ginkgo -v --race --trace -p  --focus="[operator]"  ./test/e2e/
       - uses: chainguard-dev/actions/kind-diag@main
