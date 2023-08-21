@@ -43,4 +43,5 @@ docker tag docker.io/karmada/karmada-operator:$IMGTAG docker.io/karmada/karmada-
 kind load docker-image docker.io/karmada/karmada-operator:latest
 
 kubectl apply -f operator/config/deploy 
+kubectl create namespace karmada-system
 kubectl apply -f operator/config/samples
