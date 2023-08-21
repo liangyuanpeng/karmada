@@ -42,6 +42,6 @@ export IMGTAG=`git describe --tags --dirty`
 docker tag docker.io/karmada/karmada-operator:$IMGTAG docker.io/karmada/karmada-operator:latest
 kind load docker-image docker.io/karmada/karmada-operator:latest
 
-kubectl apply -f operator/config/deploy 
 kubectl create namespace karmada-system
+kubectl apply -f operator/config/deploy 
 kubectl apply -f operator/config/samples
