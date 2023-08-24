@@ -116,8 +116,8 @@ jobs:
         # Please remember to update the CI Schedule Workflow when we add a new version.
         k8s: [ v1.27.3 ]
         test:
-        - --focus=\[operator\]
-        - --skip=\[operator\]
+        - --focus=[operator]
+        - --skip=[operator]
     steps:
       - name: checkout code
         uses: actions/checkout@v3
