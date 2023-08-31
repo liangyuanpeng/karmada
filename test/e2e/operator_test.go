@@ -9,14 +9,13 @@ import (
 	"k8s.io/apimachinery/pkg/util/rand"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/karmada-io/karmada/test/e2e/framework"
 	"github.com/karmada-io/karmada/test/helper"
 )
 
 var _ = ginkgo.Describe("operator testing", func() {
-	var clusterClient kubernetes.Interface
+	// var clusterClient kubernetes.Interface
 	homeDir := os.Getenv("HOME")
 	fmt.Println("==================begin operator testing")
 	kubeConfigPath := fmt.Sprintf("%s/.kube/%s.config", homeDir, "karmada")
@@ -25,7 +24,10 @@ var _ = ginkgo.Describe("operator testing", func() {
 	// if err != nil {
 	// 	panic(err)
 	// }
-	restConfig, err = framework.LoadRESTClientConfig(kubeConfigPath, "karmada-host")
+	restConfig, err := framework.LoadRESTClientConfig(kubeConfigPath, "karmada-host")
+	if err != nil {
+		panic(err)
+	}
 	kubeClient, err = kubernetes.NewForConfig(restConfig)
 	// operatorClient, _ := operator.NewForConfig(clusterConfig)
 
@@ -54,16 +56,12 @@ var _ = ginkgo.Describe("operator testing", func() {
 			framework.RemoveNamespace(kubeClient, deploymentNamespace)
 		})
 
-		ginkgo.It("[operator]test2", func() {
-			fmt.Println("hello")
-		})
-
 		ginkgo.It("[operator]test", func() {
 
 			ginkgo.By(fmt.Sprintf("Creating deployment %s with namespace %s ", deploymentName, deploymentNamespace), func() {
 				deploymentNamespaceObj := helper.NewNamespace(deploymentNamespace)
-				framework.CreateNamespace(clusterClient, deploymentNamespaceObj)
-				framework.CreateDeployment(clusterClient, deployment)
+				framework.CreateNamespace(kubeClient, deploymentNamespaceObj)
+				framework.CreateDeployment(kubeClient, deployment)
 				// karmada := &operatorv1alpha1.Karmada{}
 				// operatorClient.OperatorV1alpha1().Karmadas("default").Create(context.TODO(), karmada, v1.CreateOptions{})
 			})
