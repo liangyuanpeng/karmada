@@ -38,8 +38,16 @@ REPO_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 export KUBECONFIG=${KARMADA_APISERVER_KUBECONFIG}
 export PULL_BASED_CLUSTERS=${PULL_BASED_CLUSTERS}
 
+echo "===================KUBECONFIG="$KUBECONFIG
+kubectl config get-contexts
+GINKGO_PARAM=${GINKGO_PARAM:-"--focus=\[operator\]"}
 set +e
-ginkgo -v --race --trace --fail-fast -p --randomize-all ./test/e2e/ -- --karmada-context=karmada-apiserver
+echo "======================GINKGO_PARAM:"$GINKGO_PARAM
+ginkgo  --focus="\[operator\]" -v --race --trace --fail-fast -p  ./test/e2e/ -- --karmada-context=karmada-apiserver
+#ginkgo -v --race --trace --fail-fast -p  ./test/e2e/ --focus="operator" -- --karmada-context=karmada-apiserver 
+#ginkgo  --focus="\[operator\]" -v --race --trace --fail-fast -p  ./test/e2e/ -- --karmada-context=karmada-apiserver 
+#ginkgo -v --race --trace --fail-fast -p --randomize-all ./test/e2e/ --ginkgo.focus=[operator] -- --karmada-context=karmada-apiserver 
+#--karmada-context=karmada-apiserver --focus=\[operator\]
 TESTING_RESULT=$?
 
 # Collect logs

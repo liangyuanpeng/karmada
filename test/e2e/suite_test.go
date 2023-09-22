@@ -116,6 +116,7 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 
 	karmadaHost = restConfig.Host
+	fmt.Println("=======================karmadaHost:", karmadaHost)
 
 	kubeClient, err = kubernetes.NewForConfig(restConfig)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
