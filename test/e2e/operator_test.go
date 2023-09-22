@@ -20,10 +20,6 @@ var _ = ginkgo.Describe("operator testing", func() {
 	fmt.Println("==================begin operator testing")
 	kubeConfigPath := fmt.Sprintf("%s/.kube/%s.config", homeDir, "karmada")
 	fmt.Println("kubeConfigPath:", kubeConfigPath)
-	// clusterConfig, err := clientcmd.BuildConfigFromFlags("", kubeConfigPath)
-	// if err != nil {
-	// 	panic(err)
-	// }
 	restConfig, err := framework.LoadRESTClientConfig(kubeConfigPath, "karmada-host")
 	if err != nil {
 		panic(err)
