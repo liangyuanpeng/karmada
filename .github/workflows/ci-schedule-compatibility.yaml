@@ -55,6 +55,8 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: setup e2e test environment
         run: |
+          git describe 
+
           hack/local-up-karmada.sh
 
           # Update images
