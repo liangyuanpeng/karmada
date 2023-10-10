@@ -9,6 +9,8 @@ env:
 
 on:
   push:
+    branches:
+      - master
   pull_request:
     paths:
       - "charts/**"
