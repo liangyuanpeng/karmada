@@ -59,6 +59,11 @@ jobs:
       - name: setup e2e test environment
         run: |
           git rev-parse HEAD
+          GO111MODULE=on go install github.com/onsi/ginkgo/v2/ginkgo
+          echo "where is ginkgo:"
+          which ginkgo 
+          echo "gopath is "$GOPATH
+          echo "gobin is "$GOBIN
 
           hack/local-up-karmada.sh
 
