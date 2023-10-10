@@ -55,7 +55,8 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: setup e2e test environment
         run: |
-          git describe 
+          COMMIT=`git describe`
+          echo $COMMIT
 
           hack/local-up-karmada.sh
 
