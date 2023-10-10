@@ -11,6 +11,7 @@ jobs:
     name: e2e test
     # prevent job running from forked repository
     runs-on: ubuntu-22.04
+    # if: ${{ github.repository == 'karmada-io/karmada' }}
     strategy:
       fail-fast: false
       matrix:
