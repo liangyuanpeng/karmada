@@ -22,6 +22,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8srand "k8s.io/apimachinery/pkg/util/rand"
+	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/wait"
 	kubeclient "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -94,6 +95,8 @@ const (
 	DiscoveryRetryInterval = 5 * time.Second
 	// DefaultCertExpirationSeconds define the expiration time of certificate
 	DefaultCertExpirationSeconds int32 = 86400 * 365
+	// IgnorePreflightErrors sets the path a list of checks whose errors will be shown as warnings. Example: 'all'. Value 'all' ignores errors from all checks.
+	IgnorePreflightErrors = "ignore-preflight-errors"
 )
 
 var karmadaAgentLabels = map[string]string{"app": KarmadaAgentName}
@@ -181,6 +184,7 @@ func NewCmdRegister(parentCommand string) *cobra.Command {
 	flags.Int32Var(&opts.CertExpirationSeconds, "cert-expiration-seconds", DefaultCertExpirationSeconds, "The expiration time of certificate.")
 	flags.BoolVar(&opts.DryRun, "dry-run", false, "Run the command in dry-run mode, without making any server requests.")
 	flags.StringVar(&opts.ProxyServerAddress, "proxy-server-address", "", "Address of the proxy server that is used to proxy to the cluster.")
+	flags.StringSliceVar(&opts.IgnorePreflightErrors, "ignore-preflight-errors", []string{}, "ignore-preflight-errors")
 
 	return cmd
 }
@@ -243,6 +247,7 @@ type CommandRegisterOption struct {
 
 	memberClusterEndpoint string
 	memberClusterClient   *kubeclient.Clientset
+	IgnorePreflightErrors []string
 }
 
 // Complete ensures that options are valid and marshals them if necessary.
@@ -379,14 +384,38 @@ func (o *CommandRegisterOption) Run(parentCommand string) error {
 	return nil
 }
 
+type PreflightErr struct {
+	Name string
+	Err  error
+}
+
 // preflight checks the deployment environment of the member cluster
 func (o *CommandRegisterOption) preflight() []error {
 	var errlist []error
+	var preflighterrlist []PreflightErr
 
 	// check if the given file already exist
-	errlist = appendError(errlist, checkFileIfExist(filepath.Join(KarmadaDir, KarmadaAgentBootstrapKubeConfigFileName)))
-	errlist = appendError(errlist, checkFileIfExist(filepath.Join(KarmadaDir, KarmadaAgentKubeConfigFileName)))
-	errlist = appendError(errlist, checkFileIfExist(CACertPath))
+	if err := checkFileIfExist(filepath.Join(KarmadaDir, KarmadaAgentBootstrapKubeConfigFileName)); err != nil {
+		preflighterrlist = append(preflighterrlist, PreflightErr{
+			Name: "ExistKarmadaBootstrapKubeConfig",
+			Err:  err,
+		})
+	}
+	if err := checkFileIfExist(filepath.Join(KarmadaDir, KarmadaAgentKubeConfigFileName)); err != nil {
+		preflighterrlist = append(preflighterrlist, PreflightErr{
+			Name: "ExistKarmadaAgentFile",
+			Err:  err,
+		})
+	}
+	if err := checkFileIfExist(CACertPath); err != nil {
+		preflighterrlist = append(preflighterrlist, PreflightErr{
+			Name: "ExistCAFile",
+			Err:  err,
+		})
+	}
+	// errlist = appendError(errlist, checkFileIfExist(filepath.Join(KarmadaDir, KarmadaAgentBootstrapKubeConfigFileName)))
+	// errlist = appendError(errlist, checkFileIfExist(filepath.Join(KarmadaDir, KarmadaAgentKubeConfigFileName)))
+	// errlist = appendError(errlist, checkFileIfExist(CACertPath))
 
 	// check if relative resources already exist in member cluster
 	_, err := o.memberClusterClient.CoreV1().Namespaces().Get(context.TODO(), o.Namespace, metav1.GetOptions{})
@@ -394,22 +423,55 @@ func (o *CommandRegisterOption) preflight() []error {
 		_, err = o.memberClusterClient.CoreV1().Secrets(o.Namespace).Get(context.TODO(), KarmadaKubeconfigName, metav1.GetOptions{})
 		if err == nil {
 			errlist = append(errlist, fmt.Errorf("%s/%s Secret already exists", o.Namespace, KarmadaKubeconfigName))
+			// preflighterrlist = append(preflighterrlist, PreflightErr{
+			// 	Name: "",
+			// 	Err:  fmt.Errorf("%s/%s Secret already exists", o.Namespace, KarmadaKubeconfigName),
+			// })
 		} else if !apierrors.IsNotFound(err) {
 			errlist = append(errlist, err)
+			// preflighterrlist = append(preflighterrlist, PreflightErr{
+			// 	Name: "",
+			// 	Err:  err,
+			// })
 		}
 
 		_, err = o.memberClusterClient.CoreV1().ServiceAccounts(o.Namespace).Get(context.TODO(), KarmadaAgentServiceAccountName, metav1.GetOptions{})
 		if err == nil {
 			errlist = append(errlist, fmt.Errorf("%s/%s ServiceAccount already exists", o.Namespace, KarmadaAgentServiceAccountName))
+			// preflighterrlist = append(preflighterrlist, PreflightErr{
+			// 	Name: "",
+			// 	Err:  err,
+			// })
 		} else if !apierrors.IsNotFound(err) {
 			errlist = append(errlist, err)
+			// preflighterrlist = append(preflighterrlist, PreflightErr{
+			// 	Name: "",
+			// 	Err:  err,
+			// })
 		}
 
 		_, err = o.memberClusterClient.AppsV1().Deployments(o.Namespace).Get(context.TODO(), KarmadaAgentName, metav1.GetOptions{})
 		if err == nil {
 			errlist = append(errlist, fmt.Errorf("%s/%s Deployment already exists", o.Namespace, KarmadaAgentName))
+			// preflighterrlist = append(preflighterrlist, PreflightErr{
+			// 	Name: "",
+			// 	Err:  err,
+			// })
 		} else if !apierrors.IsNotFound(err) {
 			errlist = append(errlist, err)
+			// preflighterrlist = append(preflighterrlist, PreflightErr{
+			// 	Name: "",
+			// 	Err:  err,
+			// })
+		}
+	}
+
+	visited := sets.Set[string]{}
+	visited.Insert(o.IgnorePreflightErrors...)
+
+	for _, e := range preflighterrlist {
+		if !visited.Has(e.Name) {
+			errlist = append(errlist, e.Err)
 		}
 	}
 
