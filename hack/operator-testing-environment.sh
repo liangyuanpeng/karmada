@@ -18,12 +18,13 @@ CLUSTER_VERSION=${CLUSTER_VERSION:-"kindest/node:v1.27.3"}
 BUILD_PATH=${BUILD_PATH:-"_output/bin/linux/amd64"}
 
 # prepare the newest crds
-echo "Prepare the newest crds"
-cd  charts/karmada/
-cp -r _crds crds
-tar -zcvf ../../crds.tar.gz crds
-cd -
+# echo "Prepare the newest crds"
+# cd  charts/karmada/
+# cp -r _crds crds
+# tar -zcvf ../../crds.tar.gz crds
+# cd -
 
+# build karmada operator
 make image-karmada-operator
 
 # create host/member1/member2 cluster
@@ -40,11 +41,11 @@ util::wait_nodes_taint_disappear 800 ${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.con
 
 kind get clusters
 kubectl apply -f operator/config/crds --kubeconfig=${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config
-export IMGTAG=`git describe --tags --dirty`
 docker tag docker.io/karmada/karmada-operator:$IMGTAG docker.io/karmada/karmada-operator:latest
 kind load docker-image docker.io/karmada/karmada-operator:latest --name $HOST_CLUSTER_NAME
 
 kubectl create namespace karmada-system --kubeconfig=${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config
 kubectl create namespace test --kubeconfig=${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config
 kubectl apply -f operator/config/deploy  --kubeconfig=${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config
+# test for samples yamls
 kubectl apply -f operator/config/samples --kubeconfig=${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config

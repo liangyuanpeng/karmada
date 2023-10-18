@@ -43,7 +43,8 @@ kubectl config get-contexts
 GINKGO_PARAM=${GINKGO_PARAM:-"--focus=\[operator\]"}
 set +e
 echo "======================GINKGO_PARAM:"$GINKGO_PARAM
-ginkgo  --focus="\[operator\]" -v --race --trace --fail-fast -p  ./test/e2e/ -- --karmada-context=karmada-apiserver
+# ginkgo  --focus="\[operator\]" -v --race --trace --fail-fast -p  ./test/e2e/ -- --karmada-context=karmada-apiserver
+ginkgo  --focus="\[operator\]" -v --race --trace --fail-fast -p  ./test/e2e/
 #ginkgo -v --race --trace --fail-fast -p  ./test/e2e/ --focus="operator" -- --karmada-context=karmada-apiserver 
 #ginkgo  --focus="\[operator\]" -v --race --trace --fail-fast -p  ./test/e2e/ -- --karmada-context=karmada-apiserver 
 #ginkgo -v --race --trace --fail-fast -p --randomize-all ./test/e2e/ --ginkgo.focus=[operator] -- --karmada-context=karmada-apiserver 

@@ -49,6 +49,7 @@ jobs:
           GINKGO_PARAM: ${{ matrix.test }}
         run: |
           export ARTIFACTS_PATH=${{ github.workspace }}/karmada-e2e-logs/${{ matrix.k8s }}/
+          export KUBECONFIG=${HOME}/.kube/host_config
           hack/run-e2e.sh
       - name: upload logs
         if: always()
