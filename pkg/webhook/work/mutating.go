@@ -30,7 +30,7 @@ func (a *MutatingAdmission) Handle(_ context.Context, req admission.Request) adm
 	if err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}
-	klog.V(2).Infof("Mutating work(%s) for request: %s", work.Name, req.Operation)
+	klog.V(4).Infof("Mutating work(%s) for request: %s", work.Name, req.Operation)
 
 	var manifests []workv1alpha1.Manifest
 
