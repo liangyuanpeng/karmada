@@ -107,10 +107,9 @@ func Run(ctx context.Context, opts *options.Options) error {
 			CertDir:  opts.CertDir,
 			CertName: opts.CertName,
 			KeyName:  opts.KeyName,
-			// TLSMinVersion: opts.TLSMinVersion,
 			TLSOpts: []func(config *tls.Config){
 				func(config *tls.Config) {
-					config.MinVersion = opts.TLSMinVersion
+					config.MinVersion = uint16(opts.TLSMinVersion)
 				},
 			},
 		}),
@@ -157,25 +156,4 @@ func Run(ctx context.Context, opts *options.Options) error {
 
 	// never reach here
 	return nil
-}
-
-func TLS(TLSMinVersion string) func(tls *tls.Config) {
-	return func(s *tls.Config) {
-		switch TLSMinVersion {
-		case "v1.0":
-			s.MinVersion = tls.VersionTLS10
-			break
-		case "v1.1":
-			s.MinVersion = tls.VersionTLS11
-			break
-		case "v1.2":
-			s.MinVersion = tls.VersionTLS12
-			break
-		case "v1.3":
-			s.MinVersion = tls.VersionTLS13
-			break
-		default:
-			s.MinVersion = tls.VersionTLS13
-		}
-	}
 }
