@@ -589,6 +589,7 @@ func getNodeAvailable(allocatable corev1.ResourceList, podResources *util.Resour
 }
 
 func getAllocatableModelings(cluster *clusterv1alpha1.Cluster, nodes []*corev1.Node, pods []*corev1.Pod) []clusterv1alpha1.AllocatableModeling {
+	klog.Info("==============getAllocatableModelings", "resourceModels", len(cluster.Spec.ResourceModels))
 	if len(cluster.Spec.ResourceModels) == 0 {
 		return nil
 	}
