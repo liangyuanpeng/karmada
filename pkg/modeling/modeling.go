@@ -103,6 +103,7 @@ func NewClusterResourceNode(resourceList corev1.ResourceList) ClusterResourceNod
 }
 
 func (rs *ResourceSummary) getIndex(crn ClusterResourceNode) int {
+	klog.Info("=====================ResourceSummary.getIndex====================")
 	index := math.MaxInt
 	for i, m := range defaultModelSorting {
 		tmpIndex := searchLastLessElement(modelSortings[i], crn.resourceList[m])

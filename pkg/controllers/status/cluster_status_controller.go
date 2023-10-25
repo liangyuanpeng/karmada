@@ -153,6 +153,30 @@ func (c *ClusterStatusController) SetupWithManager(mgr controllerruntime.Manager
 		}).Complete(c)
 }
 
+func (c *ClusterStatusController) triggerGetAllocatableModelings(clusterClient *util.ClusterClient, cluster *clusterv1alpha1.Cluster) error {
+	klog.Info("==========================triggerGetAllocatableModelings")
+	// get or create informer for pods and nodes in member cluster
+	clusterInformerManager, err := c.buildInformerForCluster(clusterClient)
+	if err != nil {
+		klog.Errorf("Failed to get or create informer for Cluster %s. Error: %v.", cluster.GetName(), err)
+		// in large-scale clusters, the timeout may occur.
+		// if clusterInformerManager fails to be built, should be returned, otherwise, it may cause a nil pointer
+		return err
+	}
+	nodes, err := listNodes(clusterInformerManager)
+	if err != nil {
+		klog.Errorf("Failed to list nodes for Cluster %s. Error: %v.", cluster.GetName(), err)
+	}
+
+	pods, err := listPods(clusterInformerManager)
+	if err != nil {
+		klog.Errorf("Failed to list pods for Cluster %s. Error: %v.", cluster.GetName(), err)
+	}
+
+	getAllocatableModelings(cluster, nodes, pods)
+	return nil
+}
+
 func (c *ClusterStatusController) syncClusterStatus(cluster *clusterv1alpha1.Cluster) (controllerruntime.Result, error) {
 	start := time.Now()
 	defer func() {
@@ -168,6 +192,7 @@ func (c *ClusterStatusController) syncClusterStatus(cluster *clusterv1alpha1.Clu
 		klog.Errorf("Failed to create a ClusterClient for the given member cluster: %v, err is : %v", cluster.Name, err)
 		return c.setStatusCollectionFailedCondition(cluster, currentClusterStatus, fmt.Sprintf("failed to create a ClusterClient: %v", err))
 	}
+	c.triggerGetAllocatableModelings(clusterClient, cluster)
 
 	online, healthy := getClusterHealthStatus(clusterClient)
 	observedReadyCondition := generateReadyCondition(online, healthy)
