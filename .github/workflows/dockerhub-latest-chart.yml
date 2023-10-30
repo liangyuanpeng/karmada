@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - master
-      - sign_image_helmchart_test
+      - sign_image_helmchart_dev
 jobs:
   publish-chart-to-dockerhub:
     name: publish to DockerHub
