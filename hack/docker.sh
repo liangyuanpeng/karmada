@@ -89,7 +89,7 @@ function build_cross_image() {
           --tag "${image_name}" \
           --file "${REPO_ROOT}/cluster/images/buildx.Dockerfile" \
           "${REPO_ROOT}/_output/bin"
-  signImage ${image_name}
+  util::signImage ${image_name}
   set +x
 }
 
