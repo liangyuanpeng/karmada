@@ -3,6 +3,7 @@ on:
   release:
     types:
       - published
+  
 jobs:
   publish-image-to-dockerhub:
     name: publish to DockerHub
