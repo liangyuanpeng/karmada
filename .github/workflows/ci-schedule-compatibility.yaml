@@ -54,7 +54,15 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: print 
         run: |
-          echo "ok"
+          random_num=$RANDOM % 10
+          echo "random_num:"$random_num
+          if [ $random_num -gt 5 ]; then
+            echo "Failed"
+            exit 1
+          else
+            echo "Success" 
+            exit 0
+          fi
       # - name: setup e2e test environment
       #   run: |
       #     hack/local-up-karmada.sh
