@@ -3,14 +3,16 @@ on:
   schedule:
     # Run this workflow "At 20:00 UTC on Sunday and Saturday"
     - cron: '0 20 * * 0,6'
+  push:
 
 jobs:
   e2e:
     name: e2e test
     # prevent job running from forked repository
-    if: ${{ github.repository == 'karmada-io/karmada' }}
+    # if: ${{ github.repository == 'karmada-io/karmada' }}
     runs-on: ubuntu-22.04
     strategy:
+      fail-fast: false
       matrix:
         kubeapiserver-version: [ v1.21.10, v1.22.7, v1.23.4, v1.24.2, v1.25.0, v1.26.0, v1.27.3, v1.28.0 ]
         karmada-version: [ release-1.5, release-1.6, release-1.7 ]
@@ -77,3 +79,12 @@ jobs:
         with:
           name: karmada_e2e_log_${{ matrix.k8s }}
           path: ${{ github.workspace }}/karmada-e2e-logs/${{ matrix.kubeapiserver-version }}-${{ matrix.karmada-version }}/
+
+  comment:
+    name: comment
+    runs-on: ubuntu-22.04
+    needs: [e2e]
+    steps:
+      - name: comment to pr
+        run: |
+          echo ok
