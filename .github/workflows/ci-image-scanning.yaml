@@ -1,6 +1,7 @@
 name: image-scanning
 on:
   push: 
+  
 jobs:
   use-trivy-to-scan-image:
     name: image-scanning
