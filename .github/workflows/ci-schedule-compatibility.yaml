@@ -95,6 +95,7 @@ jobs:
     name: comment
     runs-on: ubuntu-22.04
     needs: [e2e]
+    if: ${{ always() }}
     steps:
       - name: comment to pr
         run: |
