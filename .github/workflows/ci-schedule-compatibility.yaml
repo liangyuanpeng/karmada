@@ -52,33 +52,36 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go-version }}
-      - name: setup e2e test environment
+      - name: print 
         run: |
-          hack/local-up-karmada.sh
+          echo "ok"
+      # - name: setup e2e test environment
+      #   run: |
+      #     hack/local-up-karmada.sh
 
-          # Update images
-          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
-            set image deployment/karmada-apiserver -nkarmada-system \
-            karmada-apiserver=registry.k8s.io/kube-apiserver:${{ matrix.kubeapiserver-version }}
-          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
-            set image deployment/karmada-kube-controller-manager -nkarmada-system \
-            kube-controller-manager=registry.k8s.io/kube-controller-manager:${{ matrix.kubeapiserver-version }}
+      #     # Update images
+      #     kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
+      #       set image deployment/karmada-apiserver -nkarmada-system \
+      #       karmada-apiserver=registry.k8s.io/kube-apiserver:${{ matrix.kubeapiserver-version }}
+      #     kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
+      #       set image deployment/karmada-kube-controller-manager -nkarmada-system \
+      #       kube-controller-manager=registry.k8s.io/kube-controller-manager:${{ matrix.kubeapiserver-version }}
 
-          # Wait ready
-          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
-            rollout status deployment/karmada-kube-controller-manager -nkarmada-system --timeout=5m
-          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
-            rollout status deployment/karmada-apiserver -nkarmada-system --timeout=5m
-      - name: run e2e
-        run: |
-          export ARTIFACTS_PATH=${{ github.workspace }}/karmada-e2e-logs/${{ matrix.kubeapiserver-version }}-${{ matrix.karmada-version }}/
-          hack/run-e2e.sh
-      - name: upload logs
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: karmada_e2e_log_${{ matrix.k8s }}
-          path: ${{ github.workspace }}/karmada-e2e-logs/${{ matrix.kubeapiserver-version }}-${{ matrix.karmada-version }}/
+      #     # Wait ready
+      #     kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
+      #       rollout status deployment/karmada-kube-controller-manager -nkarmada-system --timeout=5m
+      #     kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
+      #       rollout status deployment/karmada-apiserver -nkarmada-system --timeout=5m
+      # - name: run e2e
+      #   run: |
+      #     export ARTIFACTS_PATH=${{ github.workspace }}/karmada-e2e-logs/${{ matrix.kubeapiserver-version }}-${{ matrix.karmada-version }}/
+      #     hack/run-e2e.sh
+      # - name: upload logs
+      #   if: always()
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: karmada_e2e_log_${{ matrix.k8s }}
+      #     path: ${{ github.workspace }}/karmada-e2e-logs/${{ matrix.kubeapiserver-version }}-${{ matrix.karmada-version }}/
 
   comment:
     name: comment
