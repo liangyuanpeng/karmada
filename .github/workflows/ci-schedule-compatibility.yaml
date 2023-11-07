@@ -99,4 +99,6 @@ jobs:
     steps:
       - name: comment to pr
         run: |
-          echo ok
+          echo "| Job | Status |" 
+          echo "|:--|:--|"
+          gh run list --workflow ${{ github.workflow }} --json name,status | jq -r '"| \(.name) | \(.status) |"
