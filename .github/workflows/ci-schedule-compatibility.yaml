@@ -54,7 +54,7 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: print 
         run: |
-          random_num=$RANDOM % 10
+          random_num=$((RANDOM % 10))
           echo "random_num:"$random_num
           if [ $random_num -gt 5 ]; then
             echo "Failed"
