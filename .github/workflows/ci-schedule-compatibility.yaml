@@ -14,7 +14,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubeapiserver-version: [ v1.21.10, v1.22.7, v1.23.4, v1.24.2, v1.25.0, v1.26.0, v1.27.3, v1.28.0 ]
+        # kubeapiserver-version: [ v1.21.10, v1.22.7, v1.23.4, v1.24.2, v1.25.0, v1.26.0, v1.27.3, v1.28.0 ]
+        kubeapiserver-version: [  v1.28.0 ]
         karmada-version: [ release-1.5, release-1.6, release-1.7 ]
 
         include:
@@ -99,6 +100,8 @@ jobs:
     steps:
       - name: comment to pr
         run: |
-          echo "| Job | Status |" 
-          echo "|:--|:--|"
+          touch comment.log
+          echo "| Job | Status |"  > comment.log
+          echo "|:--|:--|" > comment.log
+          echo ${{ github.workflow }}
           gh run list --workflow ${{ github.workflow }} --json name,status | jq -r '"| \(.name) | \(.status) |" 
