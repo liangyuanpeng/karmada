@@ -99,7 +99,7 @@ func removeGenerateSelectorOfJob(workload *unstructured.Unstructured) error {
 	}
 	if exist {
 		delete(matchLabels, "controller-uid")
-		delete(matchLabels, "batch.kubernetes.io/controller-uid")
+		delete(matchLabels, batchv1.ControllerUidLabel)
 
 		err = unstructured.SetNestedStringMap(workload.Object, matchLabels, "spec", "selector", "matchLabels")
 		if err != nil {
@@ -114,8 +114,8 @@ func removeGenerateSelectorOfJob(workload *unstructured.Unstructured) error {
 	if exist {
 		delete(templateLabels, "controller-uid")
 		delete(templateLabels, "job-name")
-		delete(templateLabels, "batch.kubernetes.io/controller-uid")
-		delete(templateLabels, "batch.kubernetes.io/job-name")
+		delete(templateLabels, batchv1.ControllerUidLabel)
+		delete(templateLabels, batchv1.JobNameLabel)
 
 		err = unstructured.SetNestedStringMap(workload.Object, templateLabels, "spec", "template", "metadata", "labels")
 		if err != nil {
