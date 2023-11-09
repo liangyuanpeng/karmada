@@ -110,4 +110,5 @@ jobs:
           jq -r '.jobs[] | select(.name != "comment") | [.name, .status, .html_url, .conclusion] | @csv' info.json | sed 's/,/|/g' | sed 's/"//g' >> comment.log
           echo "=========================="
           cat comment.log
+          gh issue comment -R liangyuanpeng/karmada 6 -F comment.log
           
