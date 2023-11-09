@@ -104,8 +104,8 @@ jobs:
       - name: comment to pr
         run: |
           touch comment.log
-          echo "| Job | Status |"  >> comment.log
-          echo "|:--|:--|" >> comment.log
+          echo "| Job | Status | html_url | conclusion |"  >> comment.log
+          echo "|:--|:--|:--|:--|" >> comment.log
           gh api /repos/liangyuanpeng/karmada/actions/runs/$RUN_ID/jobs | jq . > info.json
           jq -r '.jobs[] | select(.name != "comment") | [.name, .status, .html_url, .conclusion] | @csv' info.json | sed 's/","/|/g' | sed 's/"//g' >> comment.log
           echo "=========================="
