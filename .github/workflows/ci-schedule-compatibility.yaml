@@ -4,16 +4,13 @@ on:
   #   # Run this workflow "At 20:00 UTC on Sunday and Saturday"
   #   - cron: '0 20 * * 0,6'
   # push:
-  workflow_dispatch:
+  workflow_call:
     inputs:
-      # ref:
-      #   description: 'source ref of karmada'
-      #   required: true
-      #   default: "master"
       repo:
         description: 'repo of karmada'
         required: false
         default: "karmada-io/karmada"
+        type: string
 
 
 jobs:
