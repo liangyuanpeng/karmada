@@ -125,10 +125,10 @@ jobs:
           echo ""  >> comment.log
           echo "CI with repo:"${{ inputs.repo }} >>  comment.log
           echo ""  >> comment.log
-          echo "| Job | Status | html_url | conclusion |"  >> comment.log
+          echo "| Job | Status | conclusion | html_url |"  >> comment.log
           echo "|:--|:--|:--|:--|" >> comment.log
           gh api /repos/liangyuanpeng/karmada/actions/runs/$RUN_ID/jobs | jq . > info.json
-          jq -r '.jobs[] | select(.name != "call_karmada / comment") | [.name, .status, .html_url, .conclusion] | @csv' info.json | sed 's/","/|/g' | sed 's/"//g' >> comment.log
+          jq -r '.jobs[] | select(.name != "call_karmada / comment") | [.name, .status, .conclusion, .html_url] | @csv' info.json | sed 's/","/|/g' | sed 's/"//g' >> comment.log
           echo "=========================="
           cat comment.log
           gh issue comment -R liangyuanpeng/karmada 6 -F comment.log
