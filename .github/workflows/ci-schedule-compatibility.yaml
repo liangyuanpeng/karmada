@@ -120,7 +120,8 @@ jobs:
       - name: comment to pr
         run: |
           touch comment.log
-          echo "Hi, here is a bot message for karmada APIServer compatibility " >> comment.log
+          echo "Hi, here is a bot message for karmada APIServer compatibility, Run with PR(trigger)/schedule " >> comment.log
+          echo "NOTE: this job status is random now." >> comment.log
           echo ""  >> comment.log
           echo "CI with repo:"${{ inputs.repo }} >>  comment.log
           echo ""  >> comment.log
