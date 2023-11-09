@@ -99,6 +99,9 @@ func removeGenerateSelectorOfJob(workload *unstructured.Unstructured) error {
 	}
 	if exist {
 		delete(matchLabels, "controller-uid")
+		// The label 'batch.kubernetes.io/controller-uid' was introduced at Kubernetes v1.27, which intend to replace
+		// the previous label "controller-uid"(without batch.kubernetes.io prefix).
+		// See https://github.com/kubernetes/kubernetes/pull/114930 for more details.
 		delete(matchLabels, batchv1.ControllerUidLabel)
 
 		err = unstructured.SetNestedStringMap(workload.Object, matchLabels, "spec", "selector", "matchLabels")
