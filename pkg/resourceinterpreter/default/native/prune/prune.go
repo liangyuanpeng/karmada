@@ -114,6 +114,9 @@ func removeGenerateSelectorOfJob(workload *unstructured.Unstructured) error {
 	if exist {
 		delete(templateLabels, "controller-uid")
 		delete(templateLabels, "job-name")
+		// The label 'batch.kubernetes.io/controller-uid' and 'batch.kubernetes.io/job-name' were introduced at
+		// Kubernetes v1.27, which intend to replace the previous labels 'controller-uid' and 'job-name' respectively.
+		// See https://github.com/kubernetes/kubernetes/pull/114930 for more details.
 		delete(templateLabels, batchv1.ControllerUidLabel)
 		delete(templateLabels, batchv1.JobNameLabel)
 
