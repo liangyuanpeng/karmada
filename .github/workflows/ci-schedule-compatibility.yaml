@@ -19,6 +19,7 @@ jobs:
     # prevent job running from forked repository
     # if: ${{ github.repository == 'karmada-io/karmada' }}
     runs-on: ubuntu-22.04
+    # if: contains(matrix.karmada-version,'')
     strategy:
       fail-fast: false
       matrix:
@@ -58,6 +59,9 @@ jobs:
           fetch-depth: 0
           ref: ${{ matrix.karmada-version }}
           repository: ${{ inputs.repo }}
+      - name: echo 
+        run: |
+          echo ${{ matrix.karmada-version }}
       - name: install Go
         uses: actions/setup-go@v3
         with:
