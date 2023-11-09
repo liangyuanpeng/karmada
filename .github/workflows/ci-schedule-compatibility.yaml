@@ -66,26 +66,26 @@ jobs:
           fetch-depth: 0
           ref: ${{ matrix.karmada-version }}
           repository: ${{ inputs.repo }}
-      - name: echo 
-        run: |
-          echo ${{ matrix.karmada-version }}
-          echo "========================="
-          echo ${{ matrix.go-version }}
+      # - name: echo 
+      #   run: |
+      #     echo ${{ matrix.karmada-version }}
+      #     echo "========================="
+      #     echo ${{ matrix.go-version }}
       - name: install Go
         uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go-version }}
-      - name: print 
-        run: |
-          random_num=$((RANDOM % 10))
-          echo "random_num:"$random_num
-          if [ $random_num -gt 5 ]; then
-            echo "Failed"
-            exit 1
-          else
-            echo "Success" 
-            exit 0
-          fi
+      # - name: print 
+      #   run: |
+      #     random_num=$((RANDOM % 10))
+      #     echo "random_num:"$random_num
+      #     if [ $random_num -gt 5 ]; then
+      #       echo "Failed"
+      #       exit 1
+      #     else
+      #       echo "Success" 
+      #       exit 0
+      #     fi
       - name: setup e2e test environment
         run: |
           hack/local-up-karmada.sh
