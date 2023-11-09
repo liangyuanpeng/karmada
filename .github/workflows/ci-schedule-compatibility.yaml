@@ -1,9 +1,20 @@
 name: APIServer compatibility
 on:
-  schedule:
-    # Run this workflow "At 20:00 UTC on Sunday and Saturday"
-    - cron: '0 20 * * 0,6'
-  push:
+  # schedule:
+  #   # Run this workflow "At 20:00 UTC on Sunday and Saturday"
+  #   - cron: '0 20 * * 0,6'
+  # push:
+  workflow_dispatch:
+    inputs:
+      # ref:
+      #   description: 'source ref of karmada'
+      #   required: true
+      #   default: "master"
+      repo:
+        description: 'repo of karmada'
+        required: false
+        default: "karmada-io/karmada"
+
 
 jobs:
   e2e:
@@ -42,13 +53,14 @@ jobs:
       #     large-packages: false
       #     docker-images: false
       #     swap-storage: false
-      # - name: checkout code
-      #   uses: actions/checkout@v3
-      #   with:
-      #     # Number of commits to fetch. 0 indicates all history for all branches and tags.
-      #     # We need to guess version via git tags.
-      #     fetch-depth: 0
-      #     ref: ${{ matrix.karmada-version }}
+      - name: checkout code
+        uses: actions/checkout@v3
+        with:
+          # Number of commits to fetch. 0 indicates all history for all branches and tags.
+          # We need to guess version via git tags.
+          fetch-depth: 0
+          ref: ${{ matrix.karmada-version }}
+          repository: ${{ inputs.repo }}
       - name: install Go
         uses: actions/setup-go@v3
         with:
@@ -104,6 +116,7 @@ jobs:
       - name: comment to pr
         run: |
           touch comment.log
+          echo "Hi, here is the bot message for karmada APIServer compatibility"
           echo "| Job | Status | html_url | conclusion |"  >> comment.log
           echo "|:--|:--|:--|:--|" >> comment.log
           gh api /repos/liangyuanpeng/karmada/actions/runs/$RUN_ID/jobs | jq . > info.json
