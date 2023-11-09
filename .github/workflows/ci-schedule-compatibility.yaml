@@ -106,8 +106,6 @@ jobs:
           touch comment.log
           echo "| Job | Status |"  > comment.log
           echo "|:--|:--|" > comment.log
-          echo ${{ github.workflow }}
-          echo "${{ toJSON(github.event.workflow_run.jobs) }}"
-          gh api /repos/${{ github.repository }}/actions/runs/$RUN_ID 
-          #gh run list --workflow ${{ github.workflow }} --json name,status | jq -r '"| \(.name) | \(.status) |" 
-          #gh run list --workflow "APIServer compatibility" --json name,conclusion,status -R liangyuanpeng/karmada | jq -r '"| \(.name) | .status |"'
+          gh api /repos/liangyuanpeng/karmada/actions/runs/$RUN_ID/jobs | jq . > info.json
+          jq -r '.jobs[] | select(.name != "comment") | [.name, .status, .html_url, .conclusion] | @csv' info.json | sed 's/,/|/g'
+          
