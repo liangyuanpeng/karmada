@@ -62,6 +62,8 @@ jobs:
       - name: echo 
         run: |
           echo ${{ matrix.karmada-version }}
+          echo "========================="
+          echo ${{ matrix.go-version }}
       - name: install Go
         uses: actions/setup-go@v3
         with:
@@ -117,7 +119,7 @@ jobs:
       - name: comment to pr
         run: |
           touch comment.log
-          echo "Hi, here is a bot message for karmada APIServer compatibility \n" >> comment.log
+          echo "Hi, here is a bot message for karmada APIServer compatibility " >> comment.log
           echo ""  >> comment.log
           echo "CI with repo:"${{ inputs.repo }} >>  comment.log
           echo ""  >> comment.log
