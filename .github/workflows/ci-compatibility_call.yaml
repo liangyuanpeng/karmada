@@ -12,5 +12,4 @@ jobs:
     uses: ./.github/workflows/ci-schedule-compatibility.yaml
     # needs: get_outputs
     with:
-      # tag: ${{needs.get_outputs.outputs.tag}}
       repo: "liangyuanpeng/karmada"
