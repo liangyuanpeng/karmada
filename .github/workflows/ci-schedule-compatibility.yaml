@@ -90,6 +90,9 @@ jobs:
         run: |
           hack/local-up-karmada.sh
 
+
+          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host get po -A
+
           # Update images
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
             set image deployment/karmada-apiserver -nkarmada-system \
@@ -97,6 +100,10 @@ jobs:
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
             set image deployment/karmada-kube-controller-manager -nkarmada-system \
             kube-controller-manager=registry.k8s.io/kube-controller-manager:${{ matrix.kubeapiserver-version }}
+
+          sleep 2m
+          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host get po -A
+          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host describe deployment/karmada-kube-controller-manager -nkarmada-system
 
           # Wait ready
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
