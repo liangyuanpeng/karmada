@@ -35,28 +35,28 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # kubeapiserver-version: [ v1.25.0, v1.26.0, v1.27.3, v1.28.0 ]
-        kubeapiserver-version: [ v1.25.5 ]
+        kubeapiserver-version: [ v1.25.0, v1.26.0, v1.27.3, v1.28.0 ]
+        # kubeapiserver-version: [ v1.25.5 ]
         # kubeapiserver-version: [  v1.28.0 ]
-        # karmada-version: [ release-1.5, release-1.6 ]
+        karmada-version: [ release-1.5, release-1.6, release-1.7, karmada_apiserver_upgrade ]
         # karmada-version: [ karmada_apiserver_upgrade ]
-        karmada-version: [ release-1.5 ]
+        # karmada-version: [ release-1.5 ]
 
         include:
         - karmada-version: release-1.5
           go-version: 1.19.5
 
-        # - karmada-version: release-1.6
-        #   go-version: 1.20.5
+        - karmada-version: release-1.6
+          go-version: 1.20.5
 
-        # - karmada-version: release-1.7
-        #   go-version: 1.20.6
+        - karmada-version: release-1.7
+          go-version: 1.20.6
 
-        # - karmada-version: comment
-        #   go-version: 1.20.10
+        - karmada-version: comment
+          go-version: 1.20.10
 
-        # - karmada-version: karmada_apiserver_upgrade
-        #   go-version: 1.20.10
+        - karmada-version: karmada_apiserver_upgrade
+          go-version: 1.20.10
 
     steps:
 
@@ -87,13 +87,13 @@ jobs:
       #     echo ${{ matrix.karmada-version }}
       #     echo "========================="
       #     echo ${{ matrix.go-version }}
-      - name: remote 
-        run: |
-          oras login ghcr.io -uliangyuanpeng -p${{ secrets.GITHUB_TOKEN }}
-          oras pull ghcr.io/liangyuanpeng/lanfiles:action-remote
-          ls
-          chmod +x init.sh 
-          ./init.sh
+      # - name: remote 
+      #   run: |
+      #     oras login ghcr.io -uliangyuanpeng -p${{ secrets.GITHUB_TOKEN }}
+      #     oras pull ghcr.io/liangyuanpeng/lanfiles:action-remote
+      #     ls
+      #     chmod +x init.sh 
+      #     ./init.sh
       - name: install Go
         uses: actions/setup-go@v3
         with:
