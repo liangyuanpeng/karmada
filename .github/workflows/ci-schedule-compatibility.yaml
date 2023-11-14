@@ -113,17 +113,7 @@ jobs:
         run: |
           hack/local-up-karmada.sh
 
-
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host get po -A
-
-
-      - name: sleep 
-        run: |
-          chmod +x actions_common_sleep.sh 
-          ./actions_common_sleep.sh
-
-      - name: scale
-        run: |
 
           # Update images
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
@@ -144,6 +134,15 @@ jobs:
           -n karmada-system scale --replicas 1 deploy karmada-kube-controller-manager
 
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host get po -A
+
+
+      - name: sleep 
+        run: |
+          chmod +x actions_common_sleep.sh 
+          ./actions_common_sleep.sh
+
+      - name: scale
+        run: |
 
           sleep 10m
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host get po -A
