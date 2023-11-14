@@ -123,18 +123,15 @@ jobs:
             set image deployment/karmada-kube-controller-manager -nkarmada-system \
             kube-controller-manager=registry.k8s.io/kube-controller-manager:${{ matrix.kubeapiserver-version }}
 
-          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
-          -n karmada-system scale --replicas 0 deploy karmada-apiserver
-          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
-          -n karmada-system scale --replicas 1 deploy karmada-apiserver
+          # kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
+          # -n karmada-system scale --replicas 0 deploy karmada-apiserver
+          # kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
+          # -n karmada-system scale --replicas 1 deploy karmada-apiserver
 
-          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
-          -n karmada-system scale --replicas 0 deploy karmada-kube-controller-manager
-          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
-          -n karmada-system scale --replicas 1 deploy karmada-kube-controller-manager
-
-          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host get po -A
-
+          # kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
+          # -n karmada-system scale --replicas 0 deploy karmada-kube-controller-manager
+          # kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
+          # -n karmada-system scale --replicas 1 deploy karmada-kube-controller-manager
 
       - name: sleep 
         run: |
