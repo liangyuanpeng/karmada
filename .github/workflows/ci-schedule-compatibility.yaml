@@ -47,6 +47,12 @@ jobs:
         #   go-version: 1.20.10
 
     steps:
+      - name: Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ghaction
       # Free up disk space on Ubuntu
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
@@ -94,13 +100,7 @@ jobs:
 
 
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host get po -A
-      
-      - name: Tailscale
-        uses: tailscale/github-action@v2
-        with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:ghaction
+
 
       - name: sleep 
         run: |
