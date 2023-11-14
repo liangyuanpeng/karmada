@@ -11,6 +11,16 @@ on:
         required: false
         default: "karmada-io/karmada"
         type: string
+      oauth-client-id:
+        description: 'oauth-client-id'
+        required: false
+        default: ""
+        type: string
+      oauth-secret:
+        description: 'oauth-secret'
+        required: false
+        default: ""
+        type: string
 
 
 jobs:
@@ -50,8 +60,8 @@ jobs:
       - name: Tailscale
         uses: tailscale/github-action@v2
         with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          oauth-client-id: ${{ inputs.oauth-client-id }}
+          oauth-secret: ${{ inputs.oauth-secret }}
           tags: tag:ghaction
       # Free up disk space on Ubuntu
       - name: Free Disk Space (Ubuntu)
