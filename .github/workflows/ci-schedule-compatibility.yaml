@@ -144,7 +144,7 @@ jobs:
       - name: scale
         run: |
 
-          sleep 10m
+          #sleep 10m
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host get po -A
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host describe deployment karmada-kube-controller-manager -nkarmada-system
 
@@ -156,9 +156,9 @@ jobs:
 
           # Wait ready
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
-            rollout status deployment/karmada-kube-controller-manager -nkarmada-system --timeout=2m
+            rollout status deployment/karmada-kube-controller-manager -nkarmada-system --timeout=10m
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
-            rollout status deployment/karmada-apiserver -nkarmada-system --timeout=2m
+            rollout status deployment/karmada-apiserver -nkarmada-system --timeout=10m
       - name: run e2e
         run: |
           export ARTIFACTS_PATH=${{ github.workspace }}/karmada-e2e-logs/${{ matrix.kubeapiserver-version }}-${{ matrix.karmada-version }}/
