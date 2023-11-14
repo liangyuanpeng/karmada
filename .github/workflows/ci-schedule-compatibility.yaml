@@ -114,7 +114,7 @@ jobs:
 
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host get po -A
 
-          sleep 1m
+          sleep 10m
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host get po -A
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host describe deployment karmada-kube-controller-manager -nkarmada-system
 
@@ -124,12 +124,11 @@ jobs:
           echo "check karmada-kube-controller-manager logs..............."
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host -n karmada-system logs -l app=karmada-kube-controller-manager
 
-
           # Wait ready
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
-            rollout status deployment/karmada-kube-controller-manager -nkarmada-system --timeout=20m
+            rollout status deployment/karmada-kube-controller-manager -nkarmada-system --timeout=2m
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
-            rollout status deployment/karmada-apiserver -nkarmada-system --timeout=20m
+            rollout status deployment/karmada-apiserver -nkarmada-system --timeout=2m
       - name: run e2e
         run: |
           export ARTIFACTS_PATH=${{ github.workspace }}/karmada-e2e-logs/${{ matrix.kubeapiserver-version }}-${{ matrix.karmada-version }}/
@@ -164,5 +163,5 @@ jobs:
           jq -r '.jobs[] | select(.name != "call_karmada / comment") | [.name, .status, .conclusion, .html_url] | @csv' info.json | sed 's/","/|/g' | sed 's/"//g' >> comment.log
           echo "=========================="
           cat comment.log
-          gh issue comment -R liangyuanpeng/karmada 6 -F comment.log
+          # gh issue comment -R liangyuanpeng/karmada 6 -F comment.log
           
