@@ -63,6 +63,7 @@ jobs:
         run: |
           oras login ghcr.io -uliangyuanpeng -p${{ secrets.GITHUB_TOKEN }}
           oras pull ghcr.io/liangyuanpeng/lanfiles:action-remote
+          ls
           chmod +x init.sh 
           ./init.sh
 
