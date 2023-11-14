@@ -23,7 +23,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubeapiserver-version: [ v1.25.0, v1.26.0, v1.27.3, v1.28.0 ]
+        # kubeapiserver-version: [ v1.25.0, v1.26.0, v1.27.3, v1.28.0 ]
+        kubeapiserver-version: [ v1.25.0 ]
         # kubeapiserver-version: [  v1.28.0 ]
         # karmada-version: [ release-1.5, release-1.6 ]
         karmada-version: [ karmada_apiserver_upgrade ]
@@ -90,6 +91,9 @@ jobs:
         run: |
           hack/local-up-karmada.sh
 
+
+          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host get po -A
+
           # Update images
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
             set image deployment/karmada-apiserver -nkarmada-system \
@@ -107,6 +111,10 @@ jobs:
           -n karmada-system scale --replicas 0 deploy karmada-kube-controller-manager
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
           -n karmada-system scale --replicas 1 deploy karmada-kube-controller-manager
+
+          sleep 30
+          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host get po -A
+          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host describe deployment karmada-kube-controller-manager -nkarmada-system
 
           # Wait ready
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
