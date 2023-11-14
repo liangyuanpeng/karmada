@@ -27,11 +27,12 @@ jobs:
         kubeapiserver-version: [ v1.25.5 ]
         # kubeapiserver-version: [  v1.28.0 ]
         # karmada-version: [ release-1.5, release-1.6 ]
-        karmada-version: [ karmada_apiserver_upgrade ]
+        # karmada-version: [ karmada_apiserver_upgrade ]
+        karmada-version: [ release-1.5 ]
 
         include:
-        # - karmada-version: release-1.5
-        #   go-version: 1.19.5
+        - karmada-version: release-1.5
+          go-version: 1.19.5
 
         # - karmada-version: release-1.6
         #   go-version: 1.20.5
@@ -42,8 +43,8 @@ jobs:
         # - karmada-version: comment
         #   go-version: 1.20.10
 
-        - karmada-version: karmada_apiserver_upgrade
-          go-version: 1.20.10
+        # - karmada-version: karmada_apiserver_upgrade
+        #   go-version: 1.20.10
 
     steps:
       # Free up disk space on Ubuntu
