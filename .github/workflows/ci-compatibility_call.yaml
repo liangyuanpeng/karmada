@@ -13,5 +13,3 @@ jobs:
     # needs: get_outputs
     with:
       repo: "liangyuanpeng/karmada"
-      oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-      oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}

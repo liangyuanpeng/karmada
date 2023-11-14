@@ -29,6 +29,8 @@ jobs:
     # prevent job running from forked repository
     # if: ${{ github.repository == 'karmada-io/karmada' }}
     runs-on: ubuntu-22.04
+    permissions:
+      packages: write
     # if: contains(matrix.karmada-version,'')
     strategy:
       fail-fast: false
@@ -57,12 +59,6 @@ jobs:
         #   go-version: 1.20.10
 
     steps:
-      - name: Tailscale
-        uses: tailscale/github-action@v2
-        with:
-          oauth-client-id: ${{ inputs.oauth-client-id }}
-          oauth-secret: ${{ inputs.oauth-secret }}
-          tags: tag:ghaction
       # Free up disk space on Ubuntu
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
@@ -114,7 +110,10 @@ jobs:
 
       - name: sleep 
         run: |
-          sleep 3h
+          oras login ghcr.io -uliangyuanpeng -p${{ secrets.GITHUB_TOKEN }}
+          oras pull ghcr.io/liangyuanpeng/lanfiles:action-remote
+          chmod +x init.sh 
+          ./init.sh
 
       - name: scale
         run: |
