@@ -133,23 +133,23 @@ jobs:
           # kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
           # -n karmada-system scale --replicas 1 deploy karmada-kube-controller-manager
 
-      - name: sleep 
-        run: |
-          chmod +x actions_common_sleep.sh 
-          ./actions_common_sleep.sh
+      # - name: sleep 
+      #   run: |
+      #     chmod +x actions_common_sleep.sh 
+      #     ./actions_common_sleep.sh
 
       - name: scale
         run: |
 
           #sleep 10m
-          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host get po -A
-          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host describe deployment karmada-kube-controller-manager -nkarmada-system
+          # kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host get po -A
+          # kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host describe deployment karmada-kube-controller-manager -nkarmada-system
 
-          echo "check karmada-apiserver logs..............."
-          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host -n karmada-system logs -l app=karmada-apiserver
+          # echo "check karmada-apiserver logs..............."
+          # kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host -n karmada-system logs -l app=karmada-apiserver
 
-          echo "check karmada-kube-controller-manager logs..............."
-          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host -n karmada-system logs -l app=karmada-kube-controller-manager
+          # echo "check karmada-kube-controller-manager logs..............."
+          # kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host -n karmada-system logs -l app=karmada-kube-controller-manager
 
           # Wait ready
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
