@@ -98,11 +98,21 @@ jobs:
             set image deployment/karmada-kube-controller-manager -nkarmada-system \
             kube-controller-manager=registry.k8s.io/kube-controller-manager:${{ matrix.kubeapiserver-version }}
 
+          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
+          -n karmada-system scale --replicas 0 deploy karmada-apiserver
+          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
+          -n karmada-system scale --replicas 1 deploy karmada-apiserver
+
+          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
+          -n karmada-system scale --replicas 0 deploy karmada-kube-controller-manager
+          kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
+          -n karmada-system scale --replicas 1 deploy karmada-kube-controller-manager
+
           # Wait ready
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
-            rollout status deployment/karmada-kube-controller-manager -nkarmada-system --timeout=5m
+            rollout status deployment/karmada-kube-controller-manager -nkarmada-system --timeout=2m
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
-            rollout status deployment/karmada-apiserver -nkarmada-system --timeout=5m
+            rollout status deployment/karmada-apiserver -nkarmada-system --timeout=2m
       - name: run e2e
         run: |
           export ARTIFACTS_PATH=${{ github.workspace }}/karmada-e2e-logs/${{ matrix.kubeapiserver-version }}-${{ matrix.karmada-version }}/
@@ -126,7 +136,7 @@ jobs:
       - name: comment to pr
         run: |
           touch comment.log
-          echo "Hi, here is a bot message for karmada APIServer compatibility, Run with PR  ( comment trigger/schedule for release ) " >> comment.log
+          echo "Hi, Here is a bot message for karmada APIServer compatibility, Run with PR karmada_apiserver_upgrade ( comment trigger/schedule for release ) " >> comment.log
           #echo "NOTE: This job status is random now." >> comment.log
           echo ""  >> comment.log
           echo "CI with repo: " ${{ inputs.repo }} >>  comment.log
