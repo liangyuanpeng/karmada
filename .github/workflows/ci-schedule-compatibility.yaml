@@ -93,6 +93,16 @@ jobs:
 
 
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host get po -A
+      
+      - name: Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ghaction
+
+      - name: scale
+        run: |
 
           # Update images
           kubectl --kubeconfig=${HOME}/.kube/karmada.config --context=karmada-host \
