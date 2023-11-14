@@ -102,9 +102,9 @@ jobs:
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ghaction
 
-      - name: sleep 
-        run: |
-          sleep 3h
+      # - name: sleep 
+      #   run: |
+      #     sleep 3h
 
       - name: scale
         run: |
