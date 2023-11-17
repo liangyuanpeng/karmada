@@ -1,6 +1,7 @@
 package prune
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -102,7 +103,7 @@ func removeGenerateSelectorOfJob(workload *unstructured.Unstructured) error {
 		// The label 'batch.kubernetes.io/controller-uid' was introduced at Kubernetes v1.27, which intend to replace
 		// the previous label "controller-uid"(without batch.kubernetes.io prefix).
 		// See https://github.com/kubernetes/kubernetes/pull/114930 for more details.
-		delete(matchLabels, batchv1.ControllerUidLabel)
+		// delete(matchLabels, batchv1.ControllerUidLabel)
 
 		err = unstructured.SetNestedStringMap(workload.Object, matchLabels, "spec", "selector", "matchLabels")
 		if err != nil {
@@ -120,14 +121,22 @@ func removeGenerateSelectorOfJob(workload *unstructured.Unstructured) error {
 		// The label 'batch.kubernetes.io/controller-uid' and 'batch.kubernetes.io/job-name' were introduced at
 		// Kubernetes v1.27, which intend to replace the previous labels 'controller-uid' and 'job-name' respectively.
 		// See https://github.com/kubernetes/kubernetes/pull/114930 for more details.
-		delete(templateLabels, batchv1.ControllerUidLabel)
-		delete(templateLabels, batchv1.JobNameLabel)
+		// delete(templateLabels, batchv1.ControllerUidLabel)
+		// delete(templateLabels, batchv1.JobNameLabel)
 
 		err = unstructured.SetNestedStringMap(workload.Object, templateLabels, "spec", "template", "metadata", "labels")
 		if err != nil {
 			return err
 		}
 	}
+
+	bytes, err := json.Marshal(workload.Object)
+	if err != nil {
+		return err
+	}
+	fmt.Println("workload.Object=========================================")
+	fmt.Println(string(bytes))
+
 	return nil
 }
 
