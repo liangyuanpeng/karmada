@@ -32,7 +32,7 @@ Provides a new API for stateful applications across clusters, enabling karmada t
 ### Goals
 
 - Defining an API(TBD,karmada/StatefulSet?) enables users to implement specific logic for stateful operator applications across clusters.
--  Propose the implementation ideas for involved components, including the new controller of `cross_cluster_statefulset_controller` in karma -controller-manager.
+-  Propose the implementation ideas for involved components, including the new controller of `cross_cluster_statefulset_controller` in karmada-controller-manager.
 
 ### Non-Goals
 
@@ -80,14 +80,61 @@ Consider including folks who also work outside the SIG or subproject.
 
 ## Design Details
 
-<!--
-This section should contain enough information that the specifics of your
-change are understandable. This may include API specs (though not always
-required) or even code snippets. If there's any ambiguity about HOW your
-proposal will be implemented, this is the place to discuss them.
--->
 
-A new API
+### New API
+
+
+```golang
+type MultiClusterStatefulSet struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	// Spec is the desired state of the MultiClusterIngress.
+	// +optional
+	Spec MultiClusterStatefulSetSpec `json:"spec,omitempty"`
+}
+
+// MultiClusterStatefulSetSpec is the desired state of the MultiClusterStatefulSet.
+type MultiClusterStatefulSetSpec struct {
+	ResourceSelector policyv1alpha1.ResourceSelector `json:"resourceSelector,omitempty"`
+}
+```
+
+### Two part here for user CRD
+
+### propagate schedule result to all of member cluster for CRD
+
+propagate schedule result with CRD annotation,just like:
+
+```yaml
+    annotations:
+        schedule.karmada.io/replicas: [{
+                                        "clusterName":"member1",
+                                        "replicas": 2
+                                        },
+                                        {
+                                            "clusterName":"member2",
+                                            "replicas": 3
+                                        }]
+```
+
+Should have a better name for this annotation, currently just a placeholder.
+
+### Strategy for rollingupdate
+
+#### First step: decide which ones member cluster is processor 
+
+Propagate processor with CRD annotation:
+
+
+```yaml
+    annotations:
+        schedule.karmada.io/processor: true/false
+```
+
+Should have a better name for this annotation, currently just a placeholder.
+
+
 
 ### Test Plan
 
