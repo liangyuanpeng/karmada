@@ -34,13 +34,9 @@ type MultiClusterStatefulSet struct {
 	// Spec is the desired state of the MultiClusterIngress.
 	// +optional
 	Spec MultiClusterStatefulSetSpec `json:"spec,omitempty"`
-
-	// Status is the current state of the MultiClusterIngress.
-	// +optional
-	Status networkingv1.IngressStatus `json:"status,omitempty"`
 }
 
 // MultiClusterStatefulSetSpec is the desired state of the MultiClusterService.
 type MultiClusterStatefulSetSpec struct {
-	policyv1alpha1.ResourceSelector `json:"resourceSelectors,omitempty"`
+	ResourceSelector policyv1alpha1.ResourceSelector `json:"resourceSelector,omitempty"`
 }
