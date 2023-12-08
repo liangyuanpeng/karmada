@@ -63,6 +63,10 @@ func main() {
 		networkingv1alpha1.SchemeGroupVersion.WithResource(networkingv1alpha1.ResourcePluralMultiClusterService),
 		networkingv1alpha1.SchemeGroupVersion.WithResource(networkingv1alpha1.ResourceSingularMultiClusterService), meta.RESTScopeRoot)
 
+	mapper.AddSpecific(networkingv1alpha1.SchemeGroupVersion.WithKind(policyv1alpha1.ResourceKindMultiClusterStatefulset),
+		networkingv1alpha1.SchemeGroupVersion.WithResource(policyv1alpha1.ResourcePluralMultiClusterStatefulset),
+		networkingv1alpha1.SchemeGroupVersion.WithResource(policyv1alpha1.ResourceSingularMultiClusterStatefulset), meta.RESTScopeRoot)
+
 	mapper.AddSpecific(policyv1alpha1.SchemeGroupVersion.WithKind(policyv1alpha1.ResourceKindPropagationPolicy),
 		policyv1alpha1.SchemeGroupVersion.WithResource(policyv1alpha1.ResourcePluralPropagationPolicy),
 		policyv1alpha1.SchemeGroupVersion.WithResource(policyv1alpha1.ResourceSingularPropagationPolicy), meta.RESTScopeRoot)

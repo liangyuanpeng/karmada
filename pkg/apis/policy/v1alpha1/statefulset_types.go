@@ -17,8 +17,14 @@ limitations under the License.
 package v1alpha1
 
 import (
-	policyv1alpha1 "github.com/karmada-io/karmada/pkg/apis/policy/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+const (
+	// ResourceKindMultiClusterService is kind name of MultiClusterService.
+	ResourceKindMultiClusterStatefulset     = "MultiClusterStatefulset"
+	ResourceSingularMultiClusterStatefulset = "multiclusterstatefulset"
+	ResourcePluralMultiClusterStatefulset   = "multiClusterStatefulsets"
 )
 
 // +genclient
@@ -37,5 +43,5 @@ type MultiClusterStatefulSet struct {
 
 // MultiClusterStatefulSetSpec is the desired state of the MultiClusterService.
 type MultiClusterStatefulSetSpec struct {
-	ResourceSelector policyv1alpha1.ResourceSelector `json:"resourceSelector,omitempty"`
+	ResourceSelector ResourceSelector `json:"resourceSelector,omitempty"`
 }
