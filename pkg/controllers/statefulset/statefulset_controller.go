@@ -20,8 +20,6 @@ import (
 	"context"
 
 	workv1alpha2 "github.com/karmada-io/karmada/pkg/apis/work/v1alpha2"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/klog/v2"
 	controllerruntime "sigs.k8s.io/controller-runtime"
@@ -48,8 +46,7 @@ type Controller struct {
 // The Controller will requeue the Request to be processed again if an error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (c *Controller) Reconcile(ctx context.Context, req controllerruntime.Request) (controllerruntime.Result, error) {
-	klog.V(4).Infof("Namespaces sync controller reconciling %s", req.NamespacedName.String())
-
+	klog.Infof("Namespaces sync controller reconciling %s", req.NamespacedName.String())
 	return controllerruntime.Result{}, nil
 }
 
@@ -58,17 +55,18 @@ func (c *Controller) SetupWithManager(mgr controllerruntime.Manager) error {
 	clusterNamespaceFn := handler.MapFunc(
 		func(ctx context.Context, a client.Object) []reconcile.Request {
 			var requests []reconcile.Request
-			namespaceList := &corev1.NamespaceList{}
-			if err := c.Client.List(context.TODO(), namespaceList); err != nil {
-				klog.Errorf("Failed to list namespace, error: %v", err)
-				return nil
-			}
+			klog.Info("================================return requests")
+			// namespaceList := &corev1.NamespaceList{}
+			// if err := c.Client.List(context.TODO(), namespaceList); err != nil {
+			// 	klog.Errorf("Failed to list namespace, error: %v", err)
+			// 	return nil
+			// }
 
-			for _, namespace := range namespaceList.Items {
-				requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{
-					Name: namespace.Name,
-				}})
-			}
+			// for _, namespace := range namespaceList.Items {
+			// 	requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{
+			// 		Name: namespace.Name,
+			// 	}})
+			// }
 			return requests
 		})
 
@@ -88,8 +86,8 @@ func (c *Controller) SetupWithManager(mgr controllerruntime.Manager) error {
 	})
 
 	return controllerruntime.NewControllerManagedBy(mgr).
-		For(&workv1alpha2.ResourceKindResourceBinding{}).
-		Watches(&workv1alpha2.ResourceKindResourceBinding{},
+		For(&workv1alpha2.ResourceBinding{}).
+		Watches(&workv1alpha2.ResourceBinding{},
 			handler.EnqueueRequestsFromMapFunc(clusterNamespaceFn),
 			clusterPredicate).
 		Complete(c)
