@@ -22,9 +22,10 @@ import (
 
 const (
 	// ResourceKindMultiClusterService is kind name of MultiClusterService.
-	ResourceKindMultiClusterStatefulset     = "MultiClusterStatefulset"
-	ResourceSingularMultiClusterStatefulset = "multiclusterstatefulset"
-	ResourcePluralMultiClusterStatefulset   = "multiClusterStatefulsets"
+	ResourceKindMultiClusterStatefulset            = "MultiClusterStatefulset"
+	ResourceSingularMultiClusterStatefulset        = "multiclusterstatefulset"
+	ResourcePluralMultiClusterStatefulset          = "multiClusterStatefulsets"
+	ResourceNamespaceScopedMultiClusterStatefulset = true
 )
 
 // +genclient
@@ -44,4 +45,13 @@ type MultiClusterStatefulSet struct {
 // MultiClusterStatefulSetSpec is the desired state of the MultiClusterService.
 type MultiClusterStatefulSetSpec struct {
 	ResourceSelector ResourceSelector `json:"resourceSelector,omitempty"`
+}
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// MultiClusterStatefulSetList contains a list of MultiClusterStatefulSet.
+type MultiClusterStatefulSetList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []FederatedResourceQuota `json:"items"`
 }

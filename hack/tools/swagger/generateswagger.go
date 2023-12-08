@@ -137,6 +137,9 @@ func main() {
 			{GVR: policyv1alpha1.SchemeGroupVersion.WithResource(policyv1alpha1.ResourcePluralOverridePolicy), NamespaceScoped: policyv1alpha1.ResourceNamespaceScopedOverridePolicy},
 			{GVR: policyv1alpha1.SchemeGroupVersion.WithResource(policyv1alpha1.ResourcePluralClusterOverridePolicy), NamespaceScoped: policyv1alpha1.ResourceNamespaceScopedClusterOverridePolicy},
 			{GVR: policyv1alpha1.SchemeGroupVersion.WithResource(policyv1alpha1.ResourcePluralFederatedResourceQuota), NamespaceScoped: policyv1alpha1.ResourceNamespaceScopedFederatedResourceQuota},
+
+			{GVR: policyv1alpha1.SchemeGroupVersion.WithResource(policyv1alpha1.ResourcePluralMultiClusterStatefulset), NamespaceScoped: policyv1alpha1.ResourceNamespaceScopedMultiClusterStatefulset},
+
 			{GVR: workv1alpha1.SchemeGroupVersion.WithResource(workv1alpha1.ResourcePluralWork), NamespaceScoped: workv1alpha1.ResourceNamespaceScopedWork},
 			{GVR: workv1alpha2.SchemeGroupVersion.WithResource(workv1alpha2.ResourcePluralResourceBinding), NamespaceScoped: workv1alpha2.ResourceNamespaceScopedResourceBinding},
 			{GVR: workv1alpha2.SchemeGroupVersion.WithResource(workv1alpha2.ResourcePluralClusterResourceBinding), NamespaceScoped: workv1alpha2.ResourceNamespaceScopedClusterResourceBinding},

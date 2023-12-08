@@ -53,6 +53,7 @@ type PropagationPolicy struct {
 	// Spec represents the desired behavior of PropagationPolicy.
 	// +required
 	Spec PropagationSpec `json:"spec"`
+	Test string          `json:"test"`
 }
 
 // PropagationSpec represents the desired behavior of PropagationPolicy.
