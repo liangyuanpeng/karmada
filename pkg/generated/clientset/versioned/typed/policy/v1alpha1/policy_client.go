@@ -31,6 +31,7 @@ type PolicyV1alpha1Interface interface {
 	ClusterOverridePoliciesGetter
 	ClusterPropagationPoliciesGetter
 	FederatedResourceQuotasGetter
+	MultiClusterStatefulSetsGetter
 	OverridePoliciesGetter
 	PropagationPoliciesGetter
 }
@@ -50,6 +51,10 @@ func (c *PolicyV1alpha1Client) ClusterPropagationPolicies() ClusterPropagationPo
 
 func (c *PolicyV1alpha1Client) FederatedResourceQuotas(namespace string) FederatedResourceQuotaInterface {
 	return newFederatedResourceQuotas(c, namespace)
+}
+
+func (c *PolicyV1alpha1Client) MultiClusterStatefulSets(namespace string) MultiClusterStatefulSetInterface {
+	return newMultiClusterStatefulSets(c, namespace)
 }
 
 func (c *PolicyV1alpha1Client) OverridePolicies(namespace string) OverridePolicyInterface {

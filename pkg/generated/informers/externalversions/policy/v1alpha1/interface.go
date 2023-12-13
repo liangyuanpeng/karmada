@@ -30,6 +30,8 @@ type Interface interface {
 	ClusterPropagationPolicies() ClusterPropagationPolicyInformer
 	// FederatedResourceQuotas returns a FederatedResourceQuotaInformer.
 	FederatedResourceQuotas() FederatedResourceQuotaInformer
+	// MultiClusterStatefulSets returns a MultiClusterStatefulSetInformer.
+	MultiClusterStatefulSets() MultiClusterStatefulSetInformer
 	// OverridePolicies returns a OverridePolicyInformer.
 	OverridePolicies() OverridePolicyInformer
 	// PropagationPolicies returns a PropagationPolicyInformer.
@@ -60,6 +62,11 @@ func (v *version) ClusterPropagationPolicies() ClusterPropagationPolicyInformer 
 // FederatedResourceQuotas returns a FederatedResourceQuotaInformer.
 func (v *version) FederatedResourceQuotas() FederatedResourceQuotaInformer {
 	return &federatedResourceQuotaInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// MultiClusterStatefulSets returns a MultiClusterStatefulSetInformer.
+func (v *version) MultiClusterStatefulSets() MultiClusterStatefulSetInformer {
+	return &multiClusterStatefulSetInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // OverridePolicies returns a OverridePolicyInformer.
