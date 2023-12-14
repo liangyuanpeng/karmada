@@ -72,10 +72,18 @@ func ensureWork(
 		}
 	}
 
+	replicasMap := make(map[string]int64)
+	for i := range targetClusters {
+		targetCluster := targetClusters[i]
+		replicasMap[targetCluster.Name] = int64(targetCluster.Replicas)
+	}
+
+	klog.Info("lan.replicasMap:", replicasMap)
+
 	for i := range targetClusters {
 		targetCluster := targetClusters[i]
 		clonedWorkload := workload.DeepCopy()
-		klog.Infof("worker: %s,targetCluster:%s", clonedWorkload.GetName(), targetCluster.Name)
+		klog.Infof("lan. worker: %s,targetCluster:%s", clonedWorkload.GetName(), targetCluster.Name)
 
 		workNamespace := names.GenerateExecutionSpaceName(targetCluster.Name)
 
