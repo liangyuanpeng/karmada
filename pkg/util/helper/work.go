@@ -18,6 +18,7 @@ package helper
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -42,11 +43,22 @@ import (
 // CreateOrUpdateWork creates a Work object if not exist, or updates if it already exist.
 func CreateOrUpdateWork(client client.Client, workMeta metav1.ObjectMeta, resource *unstructured.Unstructured) error {
 	workload := resource.DeepCopy()
+	annotationJson, _ := json.Marshal(workMeta.GetAnnotations())
+	// klog.Info("lan.CreateOrUpdateWork.annotation: ", string(annotationJson))
 	if conflictResolution, ok := workMeta.GetAnnotations()[workv1alpha2.ResourceConflictResolutionAnnotation]; ok {
 		util.ReplaceAnnotation(workload, workv1alpha2.ResourceConflictResolutionAnnotation, conflictResolution)
 	}
+	annotationJson, _ = json.Marshal(workMeta.GetAnnotations())
+	// klog.Info("lan.CreateOrUpdateWork.annotation2: ", string(annotationJson))
 	util.MergeAnnotation(workload, workv1alpha2.ResourceTemplateUIDAnnotation, string(workload.GetUID()))
+	annotationJson, _ = json.Marshal(workMeta.GetAnnotations())
+	// klog.Info("lan.CreateOrUpdateWork.annotation3: ", string(annotationJson))
 	util.RecordManagedAnnotations(workload)
+	annotationJson, _ = json.Marshal(workMeta.GetAnnotations())
+	if len(annotationJson) > 0 {
+
+	}
+	// klog.Info("lan.CreateOrUpdateWork.annotation4: ", string(annotationJson))
 	workloadJSON, err := workload.MarshalJSON()
 	if err != nil {
 		klog.Errorf("Failed to marshal workload(%s/%s), Error: %v", workload.GetNamespace(), workload.GetName(), err)

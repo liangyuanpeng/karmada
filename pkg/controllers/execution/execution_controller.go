@@ -213,6 +213,8 @@ func (c *Controller) syncToClusters(clusterName string, work *workv1alpha1.Work)
 		}
 		util.MergeLabel(workload, workv1alpha2.WorkPermanentIDLabel, util.GetLabelValue(work.Labels, workv1alpha2.WorkPermanentIDLabel))
 
+		// annotationJson, _ := json.Marshal(workload.GetAnnotations())
+		// klog.Info("lan.execution.workload:"+workload.GetName()+" ", string(annotationJson))
 		if err = c.tryCreateOrUpdateWorkload(clusterName, workload); err != nil {
 			klog.Errorf("Failed to create or update resource(%v/%v) in the given member cluster %s, err is %v", workload.GetNamespace(), workload.GetName(), clusterName, err)
 			c.eventf(workload, corev1.EventTypeWarning, events.EventReasonSyncWorkloadFailed, "Failed to create or update resource(%s) in member cluster(%s): %v", klog.KObj(workload), clusterName, err)

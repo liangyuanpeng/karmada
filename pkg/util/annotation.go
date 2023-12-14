@@ -22,6 +22,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/sets"
+	"k8s.io/klog/v2"
 
 	workv1alpha2 "github.com/karmada-io/karmada/pkg/apis/work/v1alpha2"
 )
@@ -73,6 +74,7 @@ func RetainAnnotations(desired *unstructured.Unstructured, observed *unstructure
 		}
 		objectAnnotation[key] = value
 	}
+	klog.Info("lan.desired.annocation:", objectAnnotation)
 	if len(objectAnnotation) > 0 {
 		desired.SetAnnotations(objectAnnotation)
 	}
@@ -111,6 +113,7 @@ func RecordManagedAnnotations(object *unstructured.Unstructured) {
 	}
 	sort.Strings(managedKeys)
 	annotations[workv1alpha2.ManagedAnnotation] = strings.Join(managedKeys, ",")
+	klog.Info("lan.annotations:", annotations)
 	object.SetAnnotations(annotations)
 }
 

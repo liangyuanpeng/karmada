@@ -17,6 +17,8 @@ limitations under the License.
 package binding
 
 import (
+	"strconv"
+
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -72,10 +74,10 @@ func ensureWork(
 		}
 	}
 
-	replicasMap := make(map[string]int64)
+	replicasMap := make(map[string]string)
 	for i := range targetClusters {
 		targetCluster := targetClusters[i]
-		replicasMap[targetCluster.Name] = int64(targetCluster.Replicas)
+		replicasMap[targetCluster.Name] = strconv.Itoa(int(targetCluster.Replicas))
 	}
 
 	klog.Info("lan.replicasMap:", replicasMap)
@@ -122,10 +124,14 @@ func ensureWork(
 
 		annotations := mergeAnnotations(clonedWorkload, workNamespace, binding, scope)
 		annotations = mergeConflictResolution(clonedWorkload, conflictResolutionInBinding, annotations)
+
 		annotations, err = RecordAppliedOverrides(cops, ops, annotations)
 		if err != nil {
 			klog.Errorf("Failed to record appliedOverrides, Error: %v", err)
 			return err
+		}
+		for k, v := range replicasMap {
+			annotations["sts.karmada.io/replicas-"+k] = v
 		}
 
 		workMeta := metav1.ObjectMeta{
