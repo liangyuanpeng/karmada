@@ -75,6 +75,7 @@ func ensureWork(
 	for i := range targetClusters {
 		targetCluster := targetClusters[i]
 		clonedWorkload := workload.DeepCopy()
+		klog.Infof("worker: %s,targetCluster:%s", clonedWorkload.GetName(), targetCluster.Name)
 
 		workNamespace := names.GenerateExecutionSpaceName(targetCluster.Name)
 
