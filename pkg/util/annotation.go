@@ -17,6 +17,7 @@ limitations under the License.
 package util
 
 import (
+	"encoding/json"
 	"sort"
 	"strings"
 
@@ -67,6 +68,7 @@ func RetainAnnotations(desired *unstructured.Unstructured, observed *unstructure
 	deletedAnnotationKeys := getDeletedAnnotationKeys(desired, observed)
 	for key, value := range observed.GetAnnotations() {
 		if deletedAnnotationKeys.Has(key) {
+			klog.Info("lan.RetainAnnotations.delete.annotation:", key)
 			continue
 		}
 		if _, exist := objectAnnotation[key]; exist {
@@ -74,7 +76,8 @@ func RetainAnnotations(desired *unstructured.Unstructured, observed *unstructure
 		}
 		objectAnnotation[key] = value
 	}
-	klog.Info("lan.desired.annocation:", objectAnnotation)
+	annotationJson, _ := json.Marshal(objectAnnotation)
+	klog.Info("lan.desired.annocation:", string(annotationJson))
 	if len(objectAnnotation) > 0 {
 		desired.SetAnnotations(objectAnnotation)
 	}
@@ -103,7 +106,12 @@ func RecordManagedAnnotations(object *unstructured.Unstructured) {
 	if annotations == nil {
 		annotations = make(map[string]string, 1)
 	}
+
 	// record annotations.
+	
+	annotationJson, _ := json.Marshal(annotations)
+	klog.Info("lan.annotations1:", string(annotationJson))
+
 	managedKeys := []string{workv1alpha2.ManagedAnnotation, workv1alpha2.ManagedLabels}
 	for key := range annotations {
 		if key == workv1alpha2.ManagedAnnotation || key == workv1alpha2.ManagedLabels {
@@ -113,7 +121,8 @@ func RecordManagedAnnotations(object *unstructured.Unstructured) {
 	}
 	sort.Strings(managedKeys)
 	annotations[workv1alpha2.ManagedAnnotation] = strings.Join(managedKeys, ",")
-	klog.Info("lan.annotations:", annotations)
+	annotationJson, _ = json.Marshal(annotations)
+	klog.Info("lan.annotations2:", string(annotationJson))
 	object.SetAnnotations(annotations)
 }
 

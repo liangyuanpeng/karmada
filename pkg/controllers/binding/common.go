@@ -17,6 +17,7 @@ limitations under the License.
 package binding
 
 import (
+	"encoding/json"
 	"strconv"
 
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -142,6 +143,8 @@ func ensureWork(
 			Annotations: annotations,
 		}
 
+		annotationJson, _ := json.Marshal(annotations)
+		klog.Info("lan.CreateOrUpdateWork:", string(annotationJson))
 		if err = helper.CreateOrUpdateWork(c, workMeta, clonedWorkload); err != nil {
 			return err
 		}

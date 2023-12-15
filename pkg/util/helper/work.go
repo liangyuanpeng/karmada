@@ -42,6 +42,7 @@ import (
 
 // CreateOrUpdateWork creates a Work object if not exist, or updates if it already exist.
 func CreateOrUpdateWork(client client.Client, workMeta metav1.ObjectMeta, resource *unstructured.Unstructured) error {
+	klog.Info("lan.CreateOrUpdateWork:", workMeta.Name)
 	workload := resource.DeepCopy()
 	annotationJson, _ := json.Marshal(workMeta.GetAnnotations())
 	// klog.Info("lan.CreateOrUpdateWork.annotation: ", string(annotationJson))
@@ -92,6 +93,8 @@ func CreateOrUpdateWork(client client.Client, workMeta metav1.ObjectMeta, resour
 			delete(runtimeObject.Labels, workv1alpha2.WorkUIDLabel)
 			runtimeObject.Spec = work.Spec
 			runtimeObject.Labels = work.Labels
+			// annotationJson, _ = json.Marshal(work.Annotations)
+			// klog.Info("lan.CreateOrUpdateWork.annotation5: ", string(annotationJson))
 			runtimeObject.Annotations = work.Annotations
 			if util.GetLabelValue(runtimeObject.Labels, workv1alpha2.WorkPermanentIDLabel) == "" {
 				runtimeObject.Labels = util.DedupeAndMergeLabels(runtimeObject.Labels, map[string]string{workv1alpha2.WorkPermanentIDLabel: uuid.New().String()})
