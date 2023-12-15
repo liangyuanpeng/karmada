@@ -42,10 +42,10 @@ import (
 
 // CreateOrUpdateWork creates a Work object if not exist, or updates if it already exist.
 func CreateOrUpdateWork(client client.Client, workMeta metav1.ObjectMeta, resource *unstructured.Unstructured) error {
-	klog.Info("lan.CreateOrUpdateWork:", workMeta.Name)
+	klog.Infof("lan.CreateOrUpdateWork:%s, version:%s", workMeta.Name, workMeta.ResourceVersion)
 	workload := resource.DeepCopy()
 	annotationJson, _ := json.Marshal(workMeta.GetAnnotations())
-	// klog.Info("lan.CreateOrUpdateWork.annotation: ", string(annotationJson))
+	klog.Info("lan.CreateOrUpdateWork.annotation: ", string(annotationJson))
 	if conflictResolution, ok := workMeta.GetAnnotations()[workv1alpha2.ResourceConflictResolutionAnnotation]; ok {
 		util.ReplaceAnnotation(workload, workv1alpha2.ResourceConflictResolutionAnnotation, conflictResolution)
 	}

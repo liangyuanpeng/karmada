@@ -108,7 +108,7 @@ func RecordManagedAnnotations(object *unstructured.Unstructured) {
 	}
 
 	// record annotations.
-	
+
 	annotationJson, _ := json.Marshal(annotations)
 	klog.Info("lan.annotations1:", string(annotationJson))
 
@@ -119,6 +119,8 @@ func RecordManagedAnnotations(object *unstructured.Unstructured) {
 		}
 		managedKeys = append(managedKeys, key)
 	}
+	managedKeys = append(managedKeys, "sts.karmada.io/replicas")
+	managedKeys = append(managedKeys, "work.karmada.io/replicas")
 	sort.Strings(managedKeys)
 	annotations[workv1alpha2.ManagedAnnotation] = strings.Join(managedKeys, ",")
 	annotationJson, _ = json.Marshal(annotations)

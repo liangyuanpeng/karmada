@@ -134,6 +134,9 @@ func ensureWork(
 		for k, v := range replicasMap {
 			annotations["sts.karmada.io/replicas-"+k] = v
 		}
+		replicasMapJson, _ := json.Marshal(replicasMap)
+		annotations["sts.karmada.io/replicas"] = string(replicasMapJson)
+		annotations["work.karmada.io/replicas"] = string(replicasMapJson)
 
 		workMeta := metav1.ObjectMeta{
 			Name:        names.GenerateWorkName(clonedWorkload.GetKind(), clonedWorkload.GetName(), clonedWorkload.GetNamespace()),
