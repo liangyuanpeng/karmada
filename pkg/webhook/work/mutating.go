@@ -46,6 +46,8 @@ func (a *MutatingAdmission) Handle(_ context.Context, req admission.Request) adm
 	if err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}
+	annotationJson, _ := json.Marshal(work.GetAnnotations())
+	klog.Info("lan.webhook.work:",string(annotationJson))
 	klog.V(2).Infof("Mutating work(%s) for request: %s", work.Name, req.Operation)
 
 	var manifests []workv1alpha1.Manifest
@@ -77,6 +79,8 @@ func (a *MutatingAdmission) Handle(_ context.Context, req admission.Request) adm
 	if err != nil {
 		return admission.Errored(http.StatusInternalServerError, err)
 	}
+	annotationJson, _ = json.Marshal(work.GetAnnotations())
+	klog.Info("lan.webhook.work2:",string(annotationJson))
 
 	return admission.PatchResponseFromRaw(req.Object.Raw, marshaledBytes)
 }
