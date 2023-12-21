@@ -15,6 +15,7 @@ on:
 
 jobs:
   chart-lint-test:
+    if: ${{ github.repository == 'karmada-io/karmada' }}
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout

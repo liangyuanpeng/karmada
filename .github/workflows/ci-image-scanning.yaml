@@ -48,17 +48,6 @@ jobs:
           - karmada-operator
           - karmada-metrics-adapter
     steps:
-      - name: print 
-        id: checklabels
-        run: |
-          echo ${{ github.event.pull_request.labels }}
-          if echo "${{ github.event.pull_request.labels }}" | grep -q "area/security"; then
-            echo "Label exists"
-            echo "Run CI tasks here"
-            echo "security=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "Label does not exist"
-          fi
       - name: checkout code
         id: checkout
         uses: actions/checkout@v3
