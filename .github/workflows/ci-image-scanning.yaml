@@ -9,7 +9,7 @@ on:
 jobs:
 
   checklabels:
-    name: image-scanning
+    name: check-pr-labels
     runs-on: ubuntu-22.04
     if: ${{ github.event_name == 'pull_request' }}
     outputs:
@@ -27,14 +27,6 @@ jobs:
             echo "security=true" >> "$GITHUB_OUTPUT"
           else
             echo "Label does not exist2"
-          fi
-
-          if echo "${{ github.event.pull_request.labels }}" | grep -q "area/security"; then
-            echo "Label exists"
-            echo "Run CI tasks here"
-            echo "security=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "Label does not exist"
           fi
 
   use-trivy-to-scan-image:
