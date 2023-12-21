@@ -11,13 +11,14 @@ jobs:
   checklabels:
     name: image-scanning
     runs-on: ubuntu-22.04
+    if: ${{ github.event_name == 'pull_request' }}
     outputs:
       areaSecurity: ${{ steps.checklabels.outputs.security }}
     steps:
       - name: checklabels 
         id: checklabels
         env: 
-          GHEVENT: ${{ toJSON(github.event.pull_request) }}
+          GHEVENT: ${{ toJSON(github.event) }}
         run: |
           echo  $GHEVENT | jq .
           if echo "${{ github.event.pull_request.labels }}" | grep -q "area/security"; then
