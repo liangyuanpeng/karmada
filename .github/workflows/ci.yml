@@ -10,6 +10,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   golangci:
+    if: ${{ github.repository == 'karmada-io/karmada' }}
     name: lint
     runs-on: ubuntu-22.04
     steps:
@@ -29,6 +30,7 @@ jobs:
         run: hack/verify-import-aliases.sh
   codegen:
     name: codegen
+    if: ${{ github.repository == 'karmada-io/karmada' }}
     runs-on: ubuntu-22.04
     env:
       GOPATH: ${{ github.workspace }}

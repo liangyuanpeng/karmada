@@ -11,6 +11,7 @@ concurrency:
 jobs:
   init:
     name: init
+    if: ${{ github.repository == 'karmada-io/karmada' }}
     runs-on: ubuntu-22.04
     strategy:
       matrix:
