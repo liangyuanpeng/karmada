@@ -28,9 +28,18 @@ jobs:
           - karmada-metrics-adapter
     steps:
       - name: print 
+        id: checklabels
         run: |
           echo ${{ github.event.pull_request.labels }}
+          if echo "${{ github.event.pull_request.labels }}" | grep -q "area/security"; then
+            echo "Label exists"
+            echo "Run CI tasks here"
+            echo "area/security=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Label does not exist"
+          fi
       - name: checkout code
+        if: steps.checklabels.outputs.area/security == 'true'
         uses: actions/checkout@v3
         with:
           # Number of commits to fetch. 0 indicates all history for all branches and tags.
