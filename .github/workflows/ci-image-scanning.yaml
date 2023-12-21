@@ -17,9 +17,9 @@ jobs:
       - name: checklabels 
         id: checklabels
         env: 
-          GHEVENT: ${{ toJSON(github.event) }}
+          GHEVENT: ${{ toJSON(github.event.pull_request) }}
         run: |
-          echo  ${{ toJSON(github.event.pull_request ) }} | jq .
+          echo  $GHEVENT | jq .
           if echo "${{ github.event.pull_request.labels }}" | grep -q "area/security"; then
             echo "Label exists"
             echo "Run CI tasks here"
