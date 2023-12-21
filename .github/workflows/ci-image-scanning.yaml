@@ -17,7 +17,7 @@ jobs:
       - name: checklabels 
         id: checklabels
         env: 
-          GHEVENT: ${{ toJSON(github.event.pull_request) }}
+          GHEVENT: ${{ toJSON(github.event) }}
         run: |
           echo  $GHEVENT
           if echo "${{ github.event.pull_request.labels }}" | grep -q "area/security"; then
