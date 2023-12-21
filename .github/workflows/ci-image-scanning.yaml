@@ -7,7 +7,28 @@ on:
     branches:
       - master
 jobs:
+
+  checklabels:
+    name: image-scanning
+    runs-on: ubuntu-22.04
+    outputs:
+      areaSecurity: ${{ steps.checklabels.outputs.security }}
+    steps:
+      - name: checklabels 
+        id: checklabels
+        run: |
+          echo ${{ github.event.pull_request.labels }}
+          if echo "${{ github.event.pull_request.labels }}" | grep -q "area/security"; then
+            echo "Label exists"
+            echo "Run CI tasks here"
+            echo "security=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Label does not exist"
+          fi
+
   use-trivy-to-scan-image:
+    needs: checklabels
+    if: needs.checklabels.outputs.security == 'true'
     name: image-scanning
     # if: ${{ github.repository == 'karmada-io/karmada' }}
     runs-on: ubuntu-22.04
@@ -39,7 +60,7 @@ jobs:
             echo "Label does not exist"
           fi
       - name: checkout code
-        if: steps.checklabels.outputs.security == 'true'
+        id: checkout
         uses: actions/checkout@v3
         with:
           # Number of commits to fetch. 0 indicates all history for all branches and tags.
