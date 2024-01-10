@@ -330,6 +330,7 @@ function util::wait_file_exist() {
     local timeout=${2}
     local clustername=${2}
     local error_msg="[ERROR] Timeout waiting for file exist ${file_path}"
+    echo "waiting for kubeconfig "${clustername}
     for ((time=0; time<${timeout}; time++)); do
         if [[ -e ${file_path} ]]; then
             return 0
