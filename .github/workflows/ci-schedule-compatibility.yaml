@@ -53,6 +53,8 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: setup e2e test environment
         run: |
+          wget https://raw.githubusercontent.com/liangyuanpeng/karmada/ci/hack/util.sh
+          mv util.sh hack/util.sh
           hack/local-up-karmada.sh
       - name: change kube-apiserver and kube-controller-manager version
         run: |
