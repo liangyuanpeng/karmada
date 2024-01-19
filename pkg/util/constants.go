@@ -16,7 +16,11 @@ limitations under the License.
 
 package util
 
-import "time"
+import (
+	"time"
+
+	discoveryv1 "k8s.io/api/discovery/v1"
+)
 
 // Define labels used by karmada system.
 const (
@@ -58,6 +62,9 @@ const (
 	// resourcetemplate.karmada.io/retain-replicas: true   // with value `true` indicates retain
 	// resourcetemplate.karmada.io/retain-replicas: false  // with value `false` and others, indicates not retain
 	RetainReplicasLabel = "resourcetemplate.karmada.io/retain-replicas"
+
+	// ResourceTemplateClaimedByLabel is added to the ResourceTemplate, indicating which resource is in charge of propagating the ResourceTemplate.
+	ResourceTemplateClaimedByLabel = "resourcetemplate.karmada.io/claimed-by"
 )
 
 const (
@@ -106,7 +113,7 @@ const (
 	// before ResourceBinding itself is deleted.
 	BindingControllerFinalizer = "karmada.io/binding-controller"
 
-	// MCSEndpointSliceCollectControllerFinalizer is added to mcs to ensure related Works in provision clusters are deleted
+	// MCSEndpointSliceCollectControllerFinalizer is added to mcs to ensure related Works in provider clusters are deleted
 	MCSEndpointSliceCollectControllerFinalizer = "karmada.io/mcs-endpointslice-collect-controller"
 
 	// MCSEndpointSliceDispatchControllerFinalizer is added to mcs to ensure related Works in consumption clusters are deleted
@@ -172,6 +179,9 @@ const (
 	ServiceExportKind = "ServiceExport"
 	// ServiceImportKind indicates the target resource is a serviceimport crd
 	ServiceImportKind = "ServiceImport"
+
+	// MultiClusterServiceKind indicates the target resource is a MultiClusterService
+	MultiClusterServiceKind = "MultiClusterService"
 )
 
 // Define resource filed
@@ -204,4 +214,9 @@ const (
 const (
 	// CacheSyncTimeout refers to the time limit set on waiting for cache to sync
 	CacheSyncTimeout = 2 * time.Minute
+)
+
+var (
+	// EndpointSliceGVK is the GroupVersionKind of K8s native EndpointSlice.
+	EndpointSliceGVK = discoveryv1.SchemeGroupVersion.WithKind("EndpointSlice")
 )

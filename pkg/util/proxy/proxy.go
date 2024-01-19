@@ -42,11 +42,12 @@ import (
 	clusterapis "github.com/karmada-io/karmada/pkg/apis/cluster"
 )
 
+// SecretGetterFunc is a function to get secret.
 type SecretGetterFunc func(context.Context, string, string) (*corev1.Secret, error)
 
 // ConnectCluster returns a handler for proxy cluster.
 func ConnectCluster(ctx context.Context, cluster *clusterapis.Cluster, proxyPath string, secretGetter SecretGetterFunc, responder registryrest.Responder) (http.Handler, error) {
-	tlsConfig, err := GetTlsConfigForCluster(ctx, cluster, secretGetter)
+	tlsConfig, err := GetTLSConfigForCluster(ctx, cluster, secretGetter)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +123,8 @@ func NewThrottledUpgradeAwareProxyHandler(location *url.URL, transport http.Roun
 	return proxy.NewUpgradeAwareHandler(location, transport, wrapTransport, upgradeRequired, proxy.NewErrorResponder(responder))
 }
 
-func GetTlsConfigForCluster(ctx context.Context, cluster *clusterapis.Cluster, secretGetter SecretGetterFunc) (*tls.Config, error) {
+// GetTLSConfigForCluster returns a tls config for the cluster.
+func GetTLSConfigForCluster(ctx context.Context, cluster *clusterapis.Cluster, secretGetter SecretGetterFunc) (*tls.Config, error) {
 	// The secret is optional for a pull-mode cluster, if no secret just returns a config with root CA unset.
 	if cluster.Spec.SecretRef == nil {
 		return &tls.Config{
@@ -137,13 +139,10 @@ func GetTlsConfigForCluster(ctx context.Context, cluster *clusterapis.Cluster, s
 	if err != nil {
 		return nil, err
 	}
-	caBundle, err := getClusterCABundle(cluster.Name, caSecret)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get CA bundle for cluster %s: %v", cluster.Name, err)
-	}
+	caBundle := getClusterCABundle(caSecret)
 
 	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM([]byte(caBundle))
+	caCertPool.AppendCertsFromPEM(caBundle)
 	return &tls.Config{
 		RootCAs:    caCertPool,
 		MinVersion: tls.VersionTLS13,
@@ -200,6 +199,7 @@ func createProxyTransport(cluster *clusterapis.Cluster, tlsConfig *tls.Config) (
 	return trans, nil
 }
 
+// ParseProxyHeaders parses the proxy headers.
 func ParseProxyHeaders(proxyHeaders map[string]string) http.Header {
 	if len(proxyHeaders) == 0 {
 		return nil
@@ -213,6 +213,7 @@ func ParseProxyHeaders(proxyHeaders map[string]string) http.Header {
 	return header
 }
 
+// ImpersonateToken returns the impersonate token of the cluster.
 func ImpersonateToken(clusterName string, secret *corev1.Secret) (string, error) {
 	token, found := secret.Data[clusterapis.SecretTokenKey]
 	if !found {
@@ -221,12 +222,12 @@ func ImpersonateToken(clusterName string, secret *corev1.Secret) (string, error)
 	return string(token), nil
 }
 
-func getClusterCABundle(clusterName string, secret *corev1.Secret) (string, error) {
+func getClusterCABundle(secret *corev1.Secret) []byte {
 	caBundle, found := secret.Data[clusterapis.SecretCADataKey]
 	if !found {
-		return "", fmt.Errorf("the CA bundle of cluster %s is empty", clusterName)
+		return []byte{}
 	}
-	return string(caBundle), nil
+	return caBundle
 }
 
 // SkipGroup tells whether the input group can be skipped during impersonate.

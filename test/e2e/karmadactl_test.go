@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/onsi/ginkgo/v2"
@@ -95,7 +96,6 @@ var _ = ginkgo.Describe("Karmadactl promote testing", func() {
 		})
 
 		ginkgo.It("Test promoting a deployment from cluster member", func() {
-
 			// Step 1,  create namespace and deployment on cluster member1
 			ginkgo.By(fmt.Sprintf("Creating deployment %s with namespace %s not existed in karmada control plane", deploymentName, deploymentNamespace), func() {
 				deploymentNamespaceObj := helper.NewNamespace(deploymentNamespace)
@@ -139,8 +139,7 @@ var _ = ginkgo.Describe("Karmadactl promote testing", func() {
 		})
 	})
 
-	ginkgo.Context("Test promoting cluster resources: clusterrole and clusterrolebing", func() {
-
+	ginkgo.Context("Test promoting cluster resources: clusterrole and clusterrolebinding", func() {
 		var clusterRoleName, clusterRoleBindingName string
 		var clusterRole *rbacv1.ClusterRole
 		var clusterRoleBinding *rbacv1.ClusterRoleBinding
@@ -183,7 +182,6 @@ var _ = ginkgo.Describe("Karmadactl promote testing", func() {
 		})
 
 		ginkgo.It("Test promoting clusterrole and clusterrolebindings", func() {
-
 			// Step1, create clusterrole and clusterrolebinding on member1
 			ginkgo.By(fmt.Sprintf("Creating clusterrole and clusterrolebinding in member: %s", member1), func() {
 				framework.CreateClusterRole(member1Client, clusterRole)
@@ -231,7 +229,6 @@ var _ = ginkgo.Describe("Karmadactl promote testing", func() {
 		})
 
 		ginkgo.It("Test promoting a service from cluster member", func() {
-
 			ginkgo.By(fmt.Sprintf("Creating service %s with namespace %s not existed in karmada control plane", serviceName, serviceNamespace), func() {
 				serviceNamespaceObj := helper.NewNamespace(serviceNamespace)
 				framework.CreateNamespace(member1Client, serviceNamespaceObj)
@@ -420,7 +417,7 @@ var _ = framework.SerialDescribe("Karmadactl cordon/uncordon testing", ginkgo.La
 			err := createCluster(clusterName, kubeConfigPath, controlPlane, clusterContext)
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		})
-		ginkgo.By(fmt.Sprintf("Joinning cluster: %s", clusterName), func() {
+		ginkgo.By(fmt.Sprintf("Joining cluster: %s", clusterName), func() {
 			cmd := framework.NewKarmadactlCommand(kubeconfig, karmadaContext, karmadactlPath, "", karmadactlTimeout,
 				"join", "--cluster-kubeconfig", kubeConfigPath, "--cluster-context", clusterContext, "--cluster-namespace", "karmada-cluster", clusterName)
 			_, err := cmd.ExecOrDie()
@@ -454,7 +451,6 @@ var _ = framework.SerialDescribe("Karmadactl cordon/uncordon testing", ginkgo.La
 			}
 			err := cordon.RunCordonOrUncordon(cordon.DesiredCordon, f, opts)
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
-
 		})
 
 		ginkgo.It(fmt.Sprintf("cluster %s should have unschedulable:NoSchedule taint", clusterName), func() {
@@ -536,5 +532,81 @@ var _ = ginkgo.Describe("Karmadactl exec testing", func() {
 			_, err := cmd.ExecOrDie()
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		}
+	})
+})
+
+var _ = ginkgo.Describe("Karmadactl top testing", ginkgo.Labels{NeedCreateCluster}, func() {
+	ginkgo.Context("Karmadactl top pod which does not exist", func() {
+		ginkgo.It("Karmadactl top pod which does not exist", func() {
+			podName := podNamePrefix + rand.String(RandomStrLength)
+			for _, clusterName := range framework.ClusterNames() {
+				cmd := framework.NewKarmadactlCommand(kubeconfig, karmadaContext, karmadactlPath, "", karmadactlTimeout, "top", "pod", podName, "-n", testNamespace, "-C", clusterName)
+				_, err := cmd.ExecOrDie()
+				gomega.Expect(strings.Contains(err.Error(), fmt.Sprintf("pods \"%s\" not found", podName))).To(gomega.BeTrue(), "should not found")
+			}
+		})
+	})
+
+	ginkgo.Context("Karmadactl top pod", func() {
+		var policyName string
+		var pod *corev1.Pod
+		var policy *policyv1alpha1.PropagationPolicy
+		ginkgo.BeforeEach(func() {
+			// create a pod and a propagationPolicy
+			policyName = podNamePrefix + rand.String(RandomStrLength)
+			pod = helper.NewPod(testNamespace, podNamePrefix+rand.String(RandomStrLength))
+			policy = testhelper.NewPropagationPolicy(testNamespace, policyName, []policyv1alpha1.ResourceSelector{
+				{
+					APIVersion: pod.APIVersion,
+					Kind:       pod.Kind,
+					Name:       pod.Name,
+				},
+			}, policyv1alpha1.Placement{
+				ClusterAffinity: &policyv1alpha1.ClusterAffinity{
+					ClusterNames: framework.ClusterNames(),
+				},
+			})
+
+			framework.CreatePropagationPolicy(karmadaClient, policy)
+			framework.CreatePod(kubeClient, pod)
+			ginkgo.DeferCleanup(func() {
+				framework.RemovePropagationPolicy(karmadaClient, policy.Namespace, policyName)
+				framework.RemovePod(kubeClient, pod.Namespace, pod.Name)
+			})
+
+			// wait for pod and metrics ready
+			framework.WaitPodPresentOnClustersFitWith(framework.ClusterNames(), pod.Namespace, pod.Name,
+				func(pod *corev1.Pod) bool {
+					return pod.Status.Phase == corev1.PodRunning
+				})
+			for _, cluster := range framework.ClusterNames() {
+				framework.WaitPodMetricsReady(kubeClient, karmadaClient, cluster, pod.Namespace, pod.Name)
+			}
+		})
+
+		ginkgo.It("Karmadactl top existing pod", func() {
+			for _, clusterName := range framework.ClusterNames() {
+				cmd := framework.NewKarmadactlCommand(kubeconfig, karmadaContext, karmadactlPath, pod.Namespace, karmadactlTimeout, "top", "pod", pod.Name, "-n", pod.Namespace, "-C", clusterName)
+				_, err := cmd.ExecOrDie()
+				gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+			}
+		})
+
+		ginkgo.It("Karmadactl top existing pod without setting cluster flag", func() {
+			cmd := framework.NewKarmadactlCommand(kubeconfig, karmadaContext, karmadactlPath, pod.Namespace, karmadactlTimeout, "top", "pod", pod.Name, "-n", pod.Namespace)
+			_, err := cmd.ExecOrDie()
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+		})
+
+		ginkgo.It("Karmadactl top pod without specific podName", func() {
+			cmd := framework.NewKarmadactlCommand(kubeconfig, karmadaContext, karmadactlPath, pod.Namespace, karmadactlTimeout, "top", "pod", "-A")
+			_, err := cmd.ExecOrDie()
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+			for _, clusterName := range framework.ClusterNames() {
+				cmd := framework.NewKarmadactlCommand(kubeconfig, karmadaContext, karmadactlPath, pod.Namespace, karmadactlTimeout, "top", "pod", "-A", "-C", clusterName)
+				_, err := cmd.ExecOrDie()
+				gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
+			}
+		})
 	})
 })

@@ -341,7 +341,7 @@ func TestWorkStatusController_getEventHandler(t *testing.T) {
 	assert.NotEmpty(t, eventHandler)
 }
 
-func TestWorkStatusController_RunWorkQueue(t *testing.T) {
+func TestWorkStatusController_RunWorkQueue(_ *testing.T) {
 	c := WorkStatusController{
 		Client:                      fake.NewClientBuilder().WithScheme(gclient.NewSchema()).WithObjects(newCluster("cluster", clusterv1alpha1.ClusterConditionReady, metav1.ConditionFalse)).Build(),
 		InformerManager:             genericmanager.GetInstance(),
@@ -910,12 +910,12 @@ func TestWorkStatusController_buildStatusIdentifier(t *testing.T) {
 		Status: clusterv1alpha1.ClusterStatus{},
 	}
 	clusterObj, _ := helper.ToUnstructured(cluster)
-	clusterJson, _ := json.Marshal(clusterObj)
+	clusterJSON, _ := json.Marshal(clusterObj)
 
 	t.Run("normal case", func(t *testing.T) {
 		work.Spec.Workload.Manifests = []workv1alpha1.Manifest{
 			{
-				RawExtension: runtime.RawExtension{Raw: clusterJson},
+				RawExtension: runtime.RawExtension{Raw: clusterJSON},
 			},
 		}
 		idf, err := c.buildStatusIdentifier(work, clusterObj)
@@ -925,10 +925,10 @@ func TestWorkStatusController_buildStatusIdentifier(t *testing.T) {
 
 	t.Run("failed to GetManifestIndex", func(t *testing.T) {
 		wrongClusterObj, _ := helper.ToUnstructured(newCluster("cluster", clusterv1alpha1.ClusterConditionReady, metav1.ConditionTrue))
-		wrongClusterJson, _ := json.Marshal(wrongClusterObj)
+		wrongClusterJSON, _ := json.Marshal(wrongClusterObj)
 		work.Spec.Workload.Manifests = []workv1alpha1.Manifest{
 			{
-				RawExtension: runtime.RawExtension{Raw: wrongClusterJson},
+				RawExtension: runtime.RawExtension{Raw: wrongClusterJSON},
 			},
 		}
 		idf, err := c.buildStatusIdentifier(work, clusterObj)

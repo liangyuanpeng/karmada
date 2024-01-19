@@ -31,13 +31,11 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
-	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog/v2"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	clusterv1alpha1 "github.com/karmada-io/karmada/pkg/apis/cluster/v1alpha1"
@@ -54,6 +52,7 @@ import (
 // EndpointSliceCollectControllerName is the controller name that will be used when reporting events.
 const EndpointSliceCollectControllerName = "endpointslice-collect-controller"
 
+// EndpointSliceCollectController collects EndpointSlice from member clusters and reports them to control-plane.
 type EndpointSliceCollectController struct {
 	client.Client
 	RESTMapper                  meta.RESTMapper
@@ -92,20 +91,18 @@ func (c *EndpointSliceCollectController) Reconcile(ctx context.Context, req cont
 		return controllerruntime.Result{}, nil
 	}
 
+	if !work.DeletionTimestamp.IsZero() {
+		// The Provider Clusters' EndpointSlice will be deleted by mcs_controller, let's just ignore it
+		return controllerruntime.Result{}, nil
+	}
+
 	clusterName, err := names.GetClusterName(work.Namespace)
 	if err != nil {
 		klog.Errorf("Failed to get cluster name for work %s/%s", work.Namespace, work.Name)
 		return controllerruntime.Result{Requeue: true}, err
 	}
 
-	if !work.DeletionTimestamp.IsZero() {
-		if err := c.cleanWorkWithMCSDelete(work); err != nil {
-			return controllerruntime.Result{Requeue: true}, err
-		}
-		return controllerruntime.Result{}, nil
-	}
-
-	if err = c.buildResourceInformers(ctx, work, clusterName); err != nil {
+	if err = c.buildResourceInformers(clusterName); err != nil {
 		return controllerruntime.Result{Requeue: true}, err
 	}
 
@@ -120,49 +117,6 @@ func (c *EndpointSliceCollectController) Reconcile(ctx context.Context, req cont
 func (c *EndpointSliceCollectController) SetupWithManager(mgr controllerruntime.Manager) error {
 	return controllerruntime.NewControllerManagedBy(mgr).
 		For(&workv1alpha1.Work{}, builder.WithPredicates(c.PredicateFunc)).Complete(c)
-}
-
-func (c *EndpointSliceCollectController) cleanWorkWithMCSDelete(work *workv1alpha1.Work) error {
-	workList := &workv1alpha1.WorkList{}
-	if err := c.List(context.TODO(), workList, &client.ListOptions{
-		Namespace: work.Namespace,
-		LabelSelector: labels.SelectorFromSet(labels.Set{
-			util.MultiClusterServiceNameLabel:      util.GetLabelValue(work.Labels, util.MultiClusterServiceNameLabel),
-			util.MultiClusterServiceNamespaceLabel: util.GetLabelValue(work.Labels, util.MultiClusterServiceNamespaceLabel),
-		}),
-	}); err != nil {
-		klog.Errorf("Failed to list workList reported by work(MultiClusterService)(%s/%s): %v", work.Namespace, work.Name, err)
-		return err
-	}
-
-	var errs []error
-	for _, work := range workList.Items {
-		if !helper.IsWorkContains(work.Spec.Workload.Manifests, endpointSliceGVK) {
-			continue
-		}
-		// We only care about the EndpointSlice work in provision clusters
-		if util.GetAnnotationValue(work.Annotations, util.EndpointSliceProvisionClusterAnnotation) != "" {
-			continue
-		}
-
-		if err := c.Delete(context.TODO(), work.DeepCopy()); err != nil {
-			klog.Errorf("Failed to delete work(%s/%s), Error: %v", work.Namespace, work.Name, err)
-			errs = append(errs, err)
-		}
-	}
-	if err := utilerrors.NewAggregate(errs); err != nil {
-		return err
-	}
-
-	if controllerutil.RemoveFinalizer(work, util.MCSEndpointSliceCollectControllerFinalizer) {
-		if err := c.Client.Update(context.Background(), work); err != nil {
-			klog.Errorf("Failed to remove finalizer %s for work %s/%s: %v",
-				util.MCSEndpointSliceCollectControllerFinalizer, work.Namespace, work.Name, err)
-			return err
-		}
-	}
-
-	return nil
 }
 
 // RunWorkQueue initializes worker and run it, worker will process resource asynchronously.
@@ -193,7 +147,7 @@ func (c *EndpointSliceCollectController) collectEndpointSlice(key util.QueueKey)
 	return nil
 }
 
-func (c *EndpointSliceCollectController) buildResourceInformers(ctx context.Context, work *workv1alpha1.Work, clusterName string) error {
+func (c *EndpointSliceCollectController) buildResourceInformers(clusterName string) error {
 	cluster, err := util.GetCluster(c.Client, clusterName)
 	if err != nil {
 		klog.Errorf("Failed to get the given member cluster %s", clusterName)
@@ -208,13 +162,6 @@ func (c *EndpointSliceCollectController) buildResourceInformers(ctx context.Cont
 	if err := c.registerInformersAndStart(cluster); err != nil {
 		klog.Errorf("Failed to register informer for Cluster %s. Error: %v.", cluster.Name, err)
 		return err
-	}
-
-	if controllerutil.AddFinalizer(work, util.MCSEndpointSliceCollectControllerFinalizer) {
-		if err := c.Client.Update(ctx, work); err != nil {
-			klog.Errorf("Failed to add finalizer %s for work %s/%s: %v", util.MCSEndpointSliceCollectControllerFinalizer, work.Namespace, work.Name, err)
-			return err
-		}
 	}
 
 	return nil
@@ -430,7 +377,7 @@ func reportEndpointSlice(c client.Client, endpointSlice *unstructured.Unstructur
 
 	workMeta := metav1.ObjectMeta{
 		// Karmada will synchronize this work to other cluster namespaces and add the cluster name to prevent conflicts.
-		Name:      names.GenerateMCSWorkName(endpointSlice.GetKind(), endpointSlice.GetName(), endpointSlice.GetNamespace(), clusterName),
+		Name:      names.GenerateWorkName(endpointSlice.GetKind(), endpointSlice.GetName(), endpointSlice.GetNamespace()),
 		Namespace: executionSpace,
 		Labels: map[string]string{
 			util.MultiClusterServiceNamespaceLabel: endpointSlice.GetNamespace(),
@@ -454,7 +401,7 @@ func cleanupWorkWithEndpointSliceDelete(c client.Client, endpointSliceKey keys.F
 
 	workNamespaceKey := types.NamespacedName{
 		Namespace: executionSpace,
-		Name:      names.GenerateMCSWorkName(endpointSliceKey.Kind, endpointSliceKey.Name, endpointSliceKey.Namespace, endpointSliceKey.Cluster),
+		Name:      names.GenerateWorkName(endpointSliceKey.Kind, endpointSliceKey.Name, endpointSliceKey.Namespace),
 	}
 	work := &workv1alpha1.Work{}
 	if err := c.Get(context.TODO(), workNamespaceKey, work); err != nil {

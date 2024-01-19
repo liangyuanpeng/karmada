@@ -112,6 +112,13 @@ function util::cmd_must_exist {
     fi
 }
 
+function util::verify_docker {
+  if ! docker ps -q >/dev/null 2>&1; then
+      echo "Docker is not available, Please verify docker is installed and available"
+      exit 1
+  fi
+}
+
 function util::verify_go_version {
     local go_version
     IFS=" " read -ra go_version <<< "$(GOFLAGS='' go version)"
@@ -381,7 +388,7 @@ function util::wait_pod_ready() {
 }
 
 # util::wait_apiservice_ready waits for apiservice state becomes Available until timeout.
-# Parmeters:
+# Parameters:
 #  - $1: k8s context name, such as "karmada-apiserver"
 #  - $2: apiservice label, such as "app=etcd"
 #  - $3: time out, such as "200s"
@@ -402,7 +409,7 @@ function util::wait_apiservice_ready() {
 }
 
 # util::wait_cluster_ready waits for cluster state becomes ready until timeout.
-# Parmeters:
+# Parameters:
 #  - $1: context name, such as "karmada-apiserver"
 #  - $2: cluster name, such as "member1"
 function util:wait_cluster_ready() {
@@ -442,31 +449,31 @@ function util::kubectl_with_retry() {
     return ${ret}
 }
 
-# util::delete_all_clusters deletes all clusters directly
-# util::delete_all_clusters actually do three things: delete cluster、remove kubeconfig、record delete log
-# Parmeters:
-#  - $1: KUBECONFIG file of host cluster, such as "~/.kube/karmada.config"
-#  - $2: KUBECONFIG file of member cluster, such as "~/.kube/members.config"
+# util::delete_necessary_resources deletes clusters(karmada-host, member1, member2 and member3) and related resources directly
+# util::delete_necessary_resources actually do three things: delete cluster、remove kubeconfig、record delete log
+# Parameters:
+#  - $1: KUBECONFIG files of clusters, separated by ",", such as "~/.kube/karmada.config,~/.kube/members.config"
+#  - $2: clusters, separated by ",", such as "karmada-host,member1"
 #  - $3: log file path, such as "/tmp/karmada/"
-function util::delete_all_clusters() {
-  local main_config=${1}
-  local member_config=${2}
+function util::delete_necessary_resources() {
+  local config_files=${1}
+  local clusters=${2}
   local log_path=${3}
 
-  local log_file="${log_path}"/delete-all-clusters.log
-  rm -rf ${log_file}
+  local log_file="${log_path}"/delete-necessary-resources.log
+  rm -f ${log_file}
   mkdir -p ${log_path}
 
-  kind delete clusters --all >> "${log_file}" 2>&1
-  rm -f "${main_config}"
-  rm -f "${member_config}"
-
-  echo "Deleted all clusters and the log file is in ${log_file}"
+  local config_file_arr=$(echo ${config_files}| tr ',' ' ')
+  local cluster_arr=$(echo ${clusters}| tr ',' ' ')
+  kind delete clusters ${cluster_arr} >> "${log_file}" 2>&1
+  rm -f ${config_file_arr}
+  echo "Deleted all necessary clusters and the log file is in ${log_file}"
 }
 
 # util::create_cluster creates a kubernetes cluster
 # util::create_cluster creates a kind cluster and don't wait for control plane node to be ready.
-# Parmeters:
+# Parameters:
 #  - $1: cluster name, such as "host"
 #  - $2: KUBECONFIG file, such as "/var/run/host.config"
 #  - $3: node docker image to use for booting the cluster, such as "kindest/node:v1.19.1"
@@ -713,13 +720,13 @@ function util:create_gopath_tree() {
   local repo_root=$1
   local go_path=$2
 
-  local go_pkg_dir="${go_path}/src/${KARMADA_GO_PACKAGE}"
-  go_pkg_dir=$(dirname "${go_pkg_dir}")
+  local karmada_pkg_dir="${go_path}/src/${KARMADA_GO_PACKAGE}"
+  local go_pkg_dir=$(dirname "${karmada_pkg_dir}")
 
   mkdir -p "${go_pkg_dir}"
 
   if [[ ! -e "${go_pkg_dir}" || "$(readlink "${go_pkg_dir}")" != "${repo_root}" ]]; then
-    ln -snf "${repo_root}" "${go_pkg_dir}"
+    ln -snf "${repo_root}" "${karmada_pkg_dir}"
   fi
 }
 

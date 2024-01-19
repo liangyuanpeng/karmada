@@ -27,7 +27,6 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
 	"k8s.io/klog/v2"
@@ -53,10 +52,7 @@ import (
 // EndpointsliceDispatchControllerName is the controller name that will be used when reporting events.
 const EndpointsliceDispatchControllerName = "endpointslice-dispatch-controller"
 
-var (
-	endpointSliceGVK = discoveryv1.SchemeGroupVersion.WithKind("EndpointSlice")
-)
-
+// EndpointsliceDispatchController will reconcile a MultiClusterService object
 type EndpointsliceDispatchController struct {
 	client.Client
 	EventRecorder   record.EventRecorder
@@ -76,7 +72,7 @@ func (c *EndpointsliceDispatchController) Reconcile(ctx context.Context, req con
 		return controllerruntime.Result{Requeue: true}, err
 	}
 
-	if !helper.IsWorkContains(work.Spec.Workload.Manifests, endpointSliceGVK) {
+	if !helper.IsWorkContains(work.Spec.Workload.Manifests, util.EndpointSliceGVK) {
 		return controllerruntime.Result{}, nil
 	}
 
@@ -150,17 +146,17 @@ func (c *EndpointsliceDispatchController) updateEndpointSliceDispatched(mcs *net
 func (c *EndpointsliceDispatchController) SetupWithManager(mgr controllerruntime.Manager) error {
 	workPredicateFun := predicate.Funcs{
 		CreateFunc: func(createEvent event.CreateEvent) bool {
-			// We only care about the EndpointSlice work from provision clusters
+			// We only care about the EndpointSlice work from provider clusters
 			return util.GetLabelValue(createEvent.Object.GetLabels(), util.MultiClusterServiceNameLabel) != "" &&
 				util.GetAnnotationValue(createEvent.Object.GetAnnotations(), util.EndpointSliceProvisionClusterAnnotation) == ""
 		},
 		UpdateFunc: func(updateEvent event.UpdateEvent) bool {
-			// We only care about the EndpointSlice work from provision clusters
+			// We only care about the EndpointSlice work from provider clusters
 			return util.GetLabelValue(updateEvent.ObjectNew.GetLabels(), util.MultiClusterServiceNameLabel) != "" &&
 				util.GetAnnotationValue(updateEvent.ObjectNew.GetAnnotations(), util.EndpointSliceProvisionClusterAnnotation) == ""
 		},
 		DeleteFunc: func(deleteEvent event.DeleteEvent) bool {
-			// We only care about the EndpointSlice work from provision clusters
+			// We only care about the EndpointSlice work from provider clusters
 			return util.GetLabelValue(deleteEvent.Object.GetLabels(), util.MultiClusterServiceNameLabel) != "" &&
 				util.GetAnnotationValue(deleteEvent.Object.GetAnnotations(), util.EndpointSliceProvisionClusterAnnotation) == ""
 		},
@@ -192,9 +188,9 @@ func (c *EndpointsliceDispatchController) newClusterFunc() handler.MapFunc {
 
 		var requests []reconcile.Request
 		for _, mcs := range mcsList.Items {
-			clusterSet, err := helper.GetConsumptionClustres(c.Client, mcs.DeepCopy())
+			clusterSet, err := helper.GetConsumerClusters(c.Client, mcs.DeepCopy())
 			if err != nil {
-				klog.Errorf("Failed to get provision clusters, error: %v", err)
+				klog.Errorf("Failed to get provider clusters, error: %v", err)
 				continue
 			}
 
@@ -208,9 +204,9 @@ func (c *EndpointsliceDispatchController) newClusterFunc() handler.MapFunc {
 				continue
 			}
 			for _, work := range workList {
-				// This annotation is only added to the EndpointSlice work in consumption clusters' execution namespace
-				// Here, when new cluster joins to Karmada and it's in the consumption cluster set, we need to re-sync the EndpointSlice work
-				// from provision cluster to the newly joined cluster
+				// This annotation is only added to the EndpointSlice work in consumer clusters' execution namespace
+				// Here, when new cluster joins to Karmada and it's in the consumer cluster set, we need to re-sync the EndpointSlice work
+				// from provider cluster to the newly joined cluster
 				if util.GetLabelValue(work.Annotations, util.EndpointSliceProvisionClusterAnnotation) != "" {
 					continue
 				}
@@ -256,7 +252,7 @@ func (c *EndpointsliceDispatchController) newMultiClusterServiceFunc() handler.M
 
 		var requests []reconcile.Request
 		for _, work := range workList {
-			// We only care about the EndpointSlice work from provision clusters
+			// We only care about the EndpointSlice work from provider clusters
 			if util.GetLabelValue(work.Annotations, util.EndpointSliceProvisionClusterAnnotation) != "" {
 				continue
 			}
@@ -279,14 +275,14 @@ func (c *EndpointsliceDispatchController) cleanOrphanDispatchedEndpointSlice(ctx
 	}
 
 	for _, work := range workList.Items {
-		// We only care about the EndpointSlice work in consumption clusters
+		// We only care about the EndpointSlice work in consumer clusters
 		if util.GetAnnotationValue(work.Annotations, util.EndpointSliceProvisionClusterAnnotation) == "" {
 			continue
 		}
 
-		consumptionClusters, err := helper.GetConsumptionClustres(c.Client, mcs)
+		consumerClusters, err := helper.GetConsumerClusters(c.Client, mcs)
 		if err != nil {
-			klog.Errorf("Failed to get consumption clusters, error is: %v", err)
+			klog.Errorf("Failed to get consumer clusters, error is: %v", err)
 			return err
 		}
 
@@ -296,7 +292,7 @@ func (c *EndpointsliceDispatchController) cleanOrphanDispatchedEndpointSlice(ctx
 			return err
 		}
 
-		if consumptionClusters.Has(cluster) {
+		if consumerClusters.Has(cluster) {
 			continue
 		}
 
@@ -316,74 +312,35 @@ func (c *EndpointsliceDispatchController) dispatchEndpointSlice(ctx context.Cont
 		return err
 	}
 
-	consumptionClusters := sets.New[string](mcs.Spec.ServiceConsumptionClusters...)
-	if len(consumptionClusters) == 0 {
-		consumptionClusters, err = util.GetClusterSet(c.Client)
-		if err != nil {
-			klog.Errorf("Failed to get cluster set, error is: %v", err)
-			return err
-		}
+	consumerClusters, err := helper.GetConsumerClusters(c.Client, mcs)
+	if err != nil {
+		klog.Errorf("Failed to get consumer clusters, error is: %v", err)
+		return err
 	}
-	for clusterName := range consumptionClusters {
+	for clusterName := range consumerClusters {
 		if clusterName == epsSourceCluster {
 			continue
 		}
-
-		// It couldn't happen here
-		if len(work.Spec.Workload.Manifests) == 0 {
+		clusterObj, err := util.GetCluster(c.Client, clusterName)
+		if err != nil {
+			if apierrors.IsNotFound(err) {
+				c.EventRecorder.Eventf(mcs, corev1.EventTypeWarning, events.EventReasonClusterNotFound, "Consumer cluster %s is not found", clusterName)
+				continue
+			}
+			klog.Errorf("Failed to get cluster %s, error is: %v", clusterName, err)
+			return err
+		}
+		if !util.IsClusterReady(&clusterObj.Status) {
+			c.EventRecorder.Eventf(mcs, corev1.EventTypeWarning, events.EventReasonSyncServiceFailed,
+				"Consumer cluster %s is not ready, skip to propagate EndpointSlice", clusterName)
+			continue
+		}
+		if !helper.IsAPIEnabled(clusterObj.Status.APIEnablements, util.EndpointSliceGVK.GroupVersion().String(), util.EndpointSliceGVK.Kind) {
+			c.EventRecorder.Eventf(mcs, corev1.EventTypeWarning, events.EventReasonAPIIncompatible, "Consumer cluster %s does not support EndpointSlice", clusterName)
 			continue
 		}
 
-		// There should be only one manifest in the work, let's use the first one.
-		manifest := work.Spec.Workload.Manifests[0]
-		unstructuredObj := &unstructured.Unstructured{}
-		if err := unstructuredObj.UnmarshalJSON(manifest.Raw); err != nil {
-			klog.Errorf("Failed to unmarshal work manifest, error is: %v", err)
-			return err
-		}
-
-		endpointSlice := &discoveryv1.EndpointSlice{}
-		if err := helper.ConvertToTypedObject(unstructuredObj, endpointSlice); err != nil {
-			klog.Errorf("Failed to convert unstructured object to typed object, error is: %v", err)
-			return err
-		}
-
-		// Use this name to avoid naming conflicts and locate the EPS source cluster.
-		endpointSlice.Name = epsSourceCluster + "-" + endpointSlice.Name
-		clusterNamespace := names.GenerateExecutionSpaceName(clusterName)
-		endpointSlice.Labels = map[string]string{
-			discoveryv1.LabelServiceName:    mcs.Name,
-			workv1alpha1.WorkNamespaceLabel: clusterNamespace,
-			workv1alpha1.WorkNameLabel:      work.Name,
-			util.ManagedByKarmadaLabel:      util.ManagedByKarmadaLabelValue,
-			discoveryv1.LabelManagedBy:      util.EndpointSliceDispatchControllerLabelValue,
-		}
-		endpointSlice.Annotations = map[string]string{
-			// This annotation is used to identify the source cluster of EndpointSlice and whether the eps are the newest version
-			util.EndpointSliceProvisionClusterAnnotation: epsSourceCluster,
-		}
-
-		workMeta := metav1.ObjectMeta{
-			Name:       work.Name,
-			Namespace:  clusterNamespace,
-			Finalizers: []string{util.ExecutionControllerFinalizer},
-			Annotations: map[string]string{
-				util.EndpointSliceProvisionClusterAnnotation: epsSourceCluster,
-			},
-			Labels: map[string]string{
-				util.ManagedByKarmadaLabel:             util.ManagedByKarmadaLabelValue,
-				util.MultiClusterServiceNameLabel:      mcs.Name,
-				util.MultiClusterServiceNamespaceLabel: mcs.Namespace,
-			},
-		}
-		unstructuredEPS, err := helper.ToUnstructured(endpointSlice)
-		if err != nil {
-			klog.Errorf("Failed to convert typed object to unstructured object, error is: %v", err)
-			return err
-		}
-		if err := helper.CreateOrUpdateWork(c.Client, workMeta, unstructuredEPS); err != nil {
-			klog.Errorf("Failed to dispatch EndpointSlice %s/%s from %s to cluster %s:%v",
-				work.GetNamespace(), work.GetName(), epsSourceCluster, clusterName, err)
+		if err := c.ensureEndpointSliceWork(mcs, work, epsSourceCluster, clusterName); err != nil {
 			return err
 		}
 	}
@@ -393,6 +350,69 @@ func (c *EndpointsliceDispatchController) dispatchEndpointSlice(ctx context.Cont
 			klog.Errorf("Failed to add finalizer %s for work %s/%s:%v", util.MCSEndpointSliceDispatchControllerFinalizer, work.Namespace, work.Name, err)
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (c *EndpointsliceDispatchController) ensureEndpointSliceWork(mcs *networkingv1alpha1.MultiClusterService,
+	work *workv1alpha1.Work, providerCluster, consumerCluster string) error {
+	// It couldn't happen here
+	if len(work.Spec.Workload.Manifests) == 0 {
+		return nil
+	}
+
+	// There should be only one manifest in the work, let's use the first one.
+	manifest := work.Spec.Workload.Manifests[0]
+	unstructuredObj := &unstructured.Unstructured{}
+	if err := unstructuredObj.UnmarshalJSON(manifest.Raw); err != nil {
+		klog.Errorf("Failed to unmarshal work manifest, error is: %v", err)
+		return err
+	}
+
+	endpointSlice := &discoveryv1.EndpointSlice{}
+	if err := helper.ConvertToTypedObject(unstructuredObj, endpointSlice); err != nil {
+		klog.Errorf("Failed to convert unstructured object to typed object, error is: %v", err)
+		return err
+	}
+
+	// Use this name to avoid naming conflicts and locate the EPS source cluster.
+	endpointSlice.Name = providerCluster + "-" + endpointSlice.Name
+	clusterNamespace := names.GenerateExecutionSpaceName(consumerCluster)
+	endpointSlice.Labels = map[string]string{
+		discoveryv1.LabelServiceName:    mcs.Name,
+		workv1alpha1.WorkNamespaceLabel: clusterNamespace,
+		workv1alpha1.WorkNameLabel:      work.Name,
+		util.ManagedByKarmadaLabel:      util.ManagedByKarmadaLabelValue,
+		discoveryv1.LabelManagedBy:      util.EndpointSliceDispatchControllerLabelValue,
+	}
+	endpointSlice.Annotations = map[string]string{
+		// This annotation is used to identify the source cluster of EndpointSlice and whether the eps are the newest version
+		util.EndpointSliceProvisionClusterAnnotation: providerCluster,
+	}
+
+	workMeta := metav1.ObjectMeta{
+		Name:       work.Name,
+		Namespace:  clusterNamespace,
+		Finalizers: []string{util.ExecutionControllerFinalizer},
+		Annotations: map[string]string{
+			util.EndpointSliceProvisionClusterAnnotation: providerCluster,
+		},
+		Labels: map[string]string{
+			util.ManagedByKarmadaLabel:             util.ManagedByKarmadaLabelValue,
+			util.MultiClusterServiceNameLabel:      mcs.Name,
+			util.MultiClusterServiceNamespaceLabel: mcs.Namespace,
+		},
+	}
+	unstructuredEPS, err := helper.ToUnstructured(endpointSlice)
+	if err != nil {
+		klog.Errorf("Failed to convert typed object to unstructured object, error is: %v", err)
+		return err
+	}
+	if err := helper.CreateOrUpdateWork(c.Client, workMeta, unstructuredEPS); err != nil {
+		klog.Errorf("Failed to dispatch EndpointSlice %s/%s from %s to cluster %s:%v",
+			work.GetNamespace(), work.GetName(), providerCluster, consumerCluster, err)
+		return err
 	}
 
 	return nil
@@ -409,7 +429,7 @@ func (c *EndpointsliceDispatchController) cleanupEndpointSliceFromConsumerCluste
 
 	epsSourceCluster, err := names.GetClusterName(work.Namespace)
 	if err != nil {
-		klog.Errorf("Failed to get EndpointSlice provision cluster name for work %s/%s", work.Namespace, work.Name)
+		klog.Errorf("Failed to get EndpointSlice provider cluster name for work %s/%s", work.Namespace, work.Name)
 		return err
 	}
 	for _, item := range workList.Items {

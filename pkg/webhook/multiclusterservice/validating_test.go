@@ -51,13 +51,51 @@ func TestValidateMultiClusterServiceSpec(t *testing.T) {
 					},
 					Types: []networkingv1alpha1.ExposureType{
 						networkingv1alpha1.ExposureTypeLoadBalancer,
-						networkingv1alpha1.ExposureTypeCrossCluster,
 					},
-					ServiceProvisionClusters:   []string{"member1", "member2"},
-					ServiceConsumptionClusters: []string{"member1", "member2"},
+					ProviderClusters: []networkingv1alpha1.ClusterSelector{
+						{Name: "member1"},
+						{Name: "member2"},
+					},
+					ConsumerClusters: []networkingv1alpha1.ClusterSelector{
+						{Name: "member1"},
+						{Name: "member2"},
+					},
 				},
 			},
 			expectedErr: field.ErrorList{},
+		},
+		{
+			name: "multiple exposure type mcs",
+			mcs: &networkingv1alpha1.MultiClusterService{
+				Spec: networkingv1alpha1.MultiClusterServiceSpec{
+					Ports: []networkingv1alpha1.ExposurePort{
+						{
+							Name: "foo",
+							Port: 16312,
+						},
+						{
+							Name: "bar",
+							Port: 16313,
+						},
+					},
+					Types: []networkingv1alpha1.ExposureType{
+						networkingv1alpha1.ExposureTypeLoadBalancer,
+						networkingv1alpha1.ExposureTypeCrossCluster,
+					},
+					ProviderClusters: []networkingv1alpha1.ClusterSelector{
+						{Name: "member1"},
+						{Name: "member2"},
+					},
+					ConsumerClusters: []networkingv1alpha1.ClusterSelector{
+						{Name: "member1"},
+						{Name: "member2"},
+					},
+				},
+			},
+			expectedErr: field.ErrorList{field.Invalid(specFld.Child("types"), []networkingv1alpha1.ExposureType{
+				networkingv1alpha1.ExposureTypeLoadBalancer,
+				networkingv1alpha1.ExposureTypeCrossCluster,
+			}, "MultiClusterService types should not contain more than one type")},
 		},
 		{
 			name: "duplicated svc name",
@@ -77,8 +115,14 @@ func TestValidateMultiClusterServiceSpec(t *testing.T) {
 						networkingv1alpha1.ExposureTypeLoadBalancer,
 						networkingv1alpha1.ExposureTypeLoadBalancer,
 					},
-					ServiceProvisionClusters:   []string{"member1", "member2"},
-					ServiceConsumptionClusters: []string{"member1", "member2"},
+					ProviderClusters: []networkingv1alpha1.ClusterSelector{
+						{Name: "member1"},
+						{Name: "member2"},
+					},
+					ConsumerClusters: []networkingv1alpha1.ClusterSelector{
+						{Name: "member1"},
+						{Name: "member2"},
+					},
 				},
 			},
 			expectedErr: field.ErrorList{field.Duplicate(specFld.Child("ports").Index(1).Child("name"), "foo")},
@@ -96,8 +140,14 @@ func TestValidateMultiClusterServiceSpec(t *testing.T) {
 					Types: []networkingv1alpha1.ExposureType{
 						networkingv1alpha1.ExposureTypeLoadBalancer,
 					},
-					ServiceProvisionClusters:   []string{"member1", "member2"},
-					ServiceConsumptionClusters: []string{"member1", "member2"},
+					ProviderClusters: []networkingv1alpha1.ClusterSelector{
+						{Name: "member1"},
+						{Name: "member2"},
+					},
+					ConsumerClusters: []networkingv1alpha1.ClusterSelector{
+						{Name: "member1"},
+						{Name: "member2"},
+					},
 				},
 			},
 			expectedErr: field.ErrorList{field.Invalid(specFld.Child("ports").Index(0).Child("port"), int32(163121), validation.InclusiveRangeError(1, 65535))},
@@ -115,8 +165,14 @@ func TestValidateMultiClusterServiceSpec(t *testing.T) {
 					Types: []networkingv1alpha1.ExposureType{
 						"",
 					},
-					ServiceProvisionClusters:   []string{"member1", "member2"},
-					ServiceConsumptionClusters: []string{"member1", "member2"},
+					ProviderClusters: []networkingv1alpha1.ClusterSelector{
+						{Name: "member1"},
+						{Name: "member2"},
+					},
+					ConsumerClusters: []networkingv1alpha1.ClusterSelector{
+						{Name: "member1"},
+						{Name: "member2"},
+					},
 				},
 			},
 			expectedErr: field.ErrorList{field.Invalid(specFld.Child("types").Index(0), networkingv1alpha1.ExposureType(""), "ExposureType Error")},
@@ -134,11 +190,13 @@ func TestValidateMultiClusterServiceSpec(t *testing.T) {
 					Types: []networkingv1alpha1.ExposureType{
 						networkingv1alpha1.ExposureTypeCrossCluster,
 					},
-					ServiceProvisionClusters:   []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-					ServiceConsumptionClusters: []string{},
+					ProviderClusters: []networkingv1alpha1.ClusterSelector{
+						{Name: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+					},
+					ConsumerClusters: []networkingv1alpha1.ClusterSelector{},
 				},
 			},
-			expectedErr: field.ErrorList{field.Invalid(specFld.Child("range").Child("serviceProvisionClusters").Index(0), "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "must be no more than 48 characters")},
+			expectedErr: field.ErrorList{field.Invalid(specFld.Child("range").Child("providerClusters").Index(0), "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "must be no more than 48 characters")},
 		},
 	}
 	for _, tt := range tests {

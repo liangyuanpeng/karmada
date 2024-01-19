@@ -82,6 +82,17 @@ func WaitDeploymentPresentOnClusterFitWith(cluster, namespace, name string, fit 
 	}, pollTimeout, pollInterval).Should(gomega.Equal(true))
 }
 
+// WaitDeploymentFitWith wait deployment sync with fit func.
+func WaitDeploymentFitWith(client kubernetes.Interface, namespace, name string, fit func(deployment *appsv1.Deployment) bool) {
+	gomega.Eventually(func() bool {
+		dep, err := client.AppsV1().Deployments(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+		if err != nil {
+			return false
+		}
+		return fit(dep)
+	}, pollTimeout, pollInterval).Should(gomega.Equal(true))
+}
+
 // WaitDeploymentPresentOnClustersFitWith wait deployment present on cluster sync with fit func.
 func WaitDeploymentPresentOnClustersFitWith(clusters []string, namespace, name string, fit func(deployment *appsv1.Deployment) bool) {
 	ginkgo.By(fmt.Sprintf("Waiting for deployment(%s/%s) synced on member clusters", namespace, name), func() {
@@ -255,6 +266,7 @@ func WaitDeploymentGetByClientFitWith(client kubernetes.Interface, namespace, na
 	})
 }
 
+// WaitDeploymentReplicasFitWith wait deployment replicas get by client fit with expected replicas.
 func WaitDeploymentReplicasFitWith(clusters []string, namespace, name string, expectReplicas int) {
 	ginkgo.By(fmt.Sprintf("Check deployment(%s/%s) replicas fit with expecting", namespace, name), func() {
 		gomega.Eventually(func() bool {

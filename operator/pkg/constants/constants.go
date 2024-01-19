@@ -31,7 +31,7 @@ const (
 	// EtcdDefaultVersion defines the default of the karmada etcd image tag
 	EtcdDefaultVersion = "3.5.9-0"
 	// KubeDefaultVersion defines the default of the karmada apiserver and kubeControllerManager image tag
-	KubeDefaultVersion = "v1.25.4"
+	KubeDefaultVersion = "v1.26.12"
 	// KarmadaDefaultServiceSubnet defines the default of the subnet used by k8s services.
 	KarmadaDefaultServiceSubnet = "10.96.0.0/12"
 	// KarmadaDefaultDNSDomain defines the default of the DNSDomain
@@ -55,6 +55,8 @@ const (
 	KarmadaScheduler = "karmada-scheduler"
 	// KarmadaWebhook defines the name of the karmada-webhook component
 	KarmadaWebhook = "karmada-webhook"
+	// KarmadaSearch defines the name of the karmada-search component
+	KarmadaSearch = "karmada-search"
 	// KarmadaDescheduler defines the name of the karmada-descheduler component
 	KarmadaDescheduler = "karmada-descheduler"
 	// KarmadaMetricsAdapter defines the name of the karmada-metrics-adapter component
@@ -111,6 +113,8 @@ const (
 	KarmadaSchedulerComponent = "KarmadaScheduler"
 	// KarmadaWebhookComponent defines the name of the karmada-webhook component
 	KarmadaWebhookComponent = "KarmadaWebhook"
+	// KarmadaSearchComponent defines the name of the karmada-search component
+	KarmadaSearchComponent = "KarmadaSearch"
 	// KarmadaDeschedulerComponent defines the name of the karmada-descheduler component
 	KarmadaDeschedulerComponent = "KarmadaDescheduler"
 	// KarmadaMetricsAdapterComponent defines the name of the karmada-metrics-adapter component
@@ -132,5 +136,10 @@ var (
 		{Group: "metrics.k8s.io", Version: "v1beta1"},
 		{Group: "custom.metrics.k8s.io", Version: "v1beta1"},
 		{Group: "custom.metrics.k8s.io", Version: "v1beta2"},
+	}
+
+	// KarmadaSearchAPIServices defines the GroupVersions of all karmada-search APIServices
+	KarmadaSearchAPIServices = []schema.GroupVersion{
+		{Group: "search.karmada.io", Version: "v1alpha1"},
 	}
 )

@@ -39,7 +39,8 @@ var (
 	karmadaSchedulerImageRepository           = fmt.Sprintf("%s/%s", constants.KarmadaDefaultRepository, constants.KarmadaScheduler)
 	karmadaWebhookImageRepository             = fmt.Sprintf("%s/%s", constants.KarmadaDefaultRepository, constants.KarmadaWebhook)
 	karmadaDeschedulerImageRepository         = fmt.Sprintf("%s/%s", constants.KarmadaDefaultRepository, constants.KarmadaDescheduler)
-	KarmadaMetricsAdapterImageRepository      = fmt.Sprintf("%s/%s", constants.KarmadaDefaultRepository, constants.KarmadaMetricsAdapter)
+	karmadaMetricsAdapterImageRepository      = fmt.Sprintf("%s/%s", constants.KarmadaDefaultRepository, constants.KarmadaMetricsAdapter)
+	karmadaSearchImageRepository              = fmt.Sprintf("%s/%s", constants.KarmadaDefaultRepository, constants.KarmadaSearch)
 )
 
 func init() {
@@ -87,7 +88,7 @@ func setDefaultsKarmadaComponents(obj *Karmada) {
 	setDefaultsKarmadaScheduler(obj.Spec.Components)
 	setDefaultsKarmadaWebhook(obj.Spec.Components)
 	setDefaultsKarmadaMetricsAdapter(obj.Spec.Components)
-
+	setDefaultsKarmadaSearch(obj.Spec.Components)
 	// set addon defaults
 	setDefaultsKarmadaDescheduler(obj.Spec.Components)
 }
@@ -243,6 +244,23 @@ func setDefaultsKarmadaWebhook(obj *KarmadaComponents) {
 	}
 }
 
+func setDefaultsKarmadaSearch(obj *KarmadaComponents) {
+	if obj.KarmadaSearch == nil {
+		return
+	}
+
+	search := obj.KarmadaSearch
+	if len(search.Image.ImageRepository) == 0 {
+		search.Image.ImageRepository = karmadaSearchImageRepository
+	}
+	if len(search.Image.ImageTag) == 0 {
+		search.Image.ImageTag = DefaultKarmadaImageVersion
+	}
+	if search.Replicas == nil {
+		search.Replicas = pointer.Int32(1)
+	}
+}
+
 func setDefaultsKarmadaDescheduler(obj *KarmadaComponents) {
 	if obj.KarmadaDescheduler == nil {
 		return
@@ -267,7 +285,7 @@ func setDefaultsKarmadaMetricsAdapter(obj *KarmadaComponents) {
 
 	metricsAdapter := obj.KarmadaMetricsAdapter
 	if len(metricsAdapter.Image.ImageRepository) == 0 {
-		metricsAdapter.Image.ImageRepository = KarmadaMetricsAdapterImageRepository
+		metricsAdapter.Image.ImageRepository = karmadaMetricsAdapterImageRepository
 	}
 	if len(metricsAdapter.Image.ImageTag) == 0 {
 		metricsAdapter.Image.ImageTag = DefaultKarmadaImageVersion

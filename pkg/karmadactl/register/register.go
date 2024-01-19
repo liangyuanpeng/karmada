@@ -308,7 +308,7 @@ func (o *CommandRegisterOption) Validate() error {
 	}
 
 	if !o.BootstrapToken.UnsafeSkipCAVerification && len(o.BootstrapToken.CACertHashes) == 0 {
-		return fmt.Errorf("need to varify CACertHashes, or set --discovery-token-unsafe-skip-ca-verification=true")
+		return fmt.Errorf("need to verify CACertHashes, or set --discovery-token-unsafe-skip-ca-verification=true")
 	}
 
 	if !filepath.IsAbs(o.CACertPath) || !strings.HasSuffix(o.CACertPath, ".crt") {
@@ -592,7 +592,7 @@ func (o *CommandRegisterOption) createSecretAndRBACInMemberCluster(karmadaAgentC
 		StringData: map[string]string{KarmadaKubeconfigName: string(configBytes)},
 	}
 
-	// cerate karmada-kubeconfig secret to be used by karmada-agent component.
+	// create karmada-kubeconfig secret to be used by karmada-agent component.
 	if err := cmdutil.CreateOrUpdateSecret(o.memberClusterClient, kubeConfigSecret); err != nil {
 		return fmt.Errorf("create secret %s failed: %v", kubeConfigSecret.Name, err)
 	}
@@ -695,6 +695,7 @@ func (o *CommandRegisterOption) makeKarmadaAgentDeployment() *appsv1.Deployment 
 					fmt.Sprintf("--cluster-zones=%s", strings.Join(o.ClusterZones, ",")),
 					fmt.Sprintf("--controllers=%s", strings.Join(controllers, ",")),
 					fmt.Sprintf("--proxy-server-address=%s", o.ProxyServerAddress),
+					fmt.Sprintf("--leader-elect-resource-namespace=%s", o.Namespace),
 					"--cluster-status-update-frequency=10s",
 					"--bind-address=0.0.0.0",
 					"--secure-port=10357",

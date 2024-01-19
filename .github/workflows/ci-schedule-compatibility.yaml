@@ -11,9 +11,12 @@ jobs:
     if: ${{ github.repository == 'karmada-io/karmada' }}
     runs-on: ubuntu-22.04
     strategy:
+      # max-parallel limits the max number of jobs running at the same time.
+      # We set it to 5 to avoid too many jobs running at the same time, causing the CI to fail because of resource limitations.
+      max-parallel: 5
       fail-fast: false
       matrix:
-        kubeapiserver-version: [ v1.21.10, v1.22.7, v1.23.4, v1.24.2, v1.25.0, v1.26.0, v1.27.3, v1.28.0 ]
+        kubeapiserver-version: [ v1.23.4, v1.24.2, v1.25.0, v1.26.0, v1.27.3, v1.28.0, v1.29.0 ]
         karmada-version: [ release-1.6, release-1.7, release-1.8 ]
 
         include:
@@ -51,8 +54,12 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
       - name: setup e2e test environment
-        run: |
-          hack/local-up-karmada.sh
+        uses: nick-fields/retry@v2.9.0
+        with:
+          max_attempts: 3
+          timeout_minutes: 20
+          command: |
+            hack/local-up-karmada.sh
       - name: change kube-apiserver and kube-controller-manager version
         run: |
           # Update images
@@ -78,3 +85,9 @@ jobs:
         with:
           name: karmada_e2e_log_${{ matrix.k8s }}
           path: ${{ github.workspace }}/karmada-e2e-logs/${{ matrix.kubeapiserver-version }}-${{ matrix.karmada-version }}/
+      - name: upload kind logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: karmada_kind_log_${{ matrix.kubeapiserver-version }}_${{ matrix.karmada-version }}
+          path: /tmp/karmada/

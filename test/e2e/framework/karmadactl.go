@@ -29,11 +29,13 @@ import (
 	uexec "k8s.io/utils/exec"
 )
 
+// KarmadactlBuilder is a builder to run karmadactl.
 type KarmadactlBuilder struct {
 	cmd     *exec.Cmd
 	timeout <-chan time.Time
 }
 
+// TestKubeconfig contains the information of a test kubeconfig.
 type TestKubeconfig struct {
 	KubeConfig     string
 	KarmadaContext string
@@ -41,6 +43,7 @@ type TestKubeconfig struct {
 	Namespace      string
 }
 
+// NewKarmadactlCommand creates a new KarmadactlBuilder.
 func NewKarmadactlCommand(kubeConfig, karmadaContext, karmadactlPath, namespace string, timeout time.Duration, args ...string) *KarmadactlBuilder {
 	builder := new(KarmadactlBuilder)
 	tk := NewTestKubeconfig(kubeConfig, karmadaContext, karmadactlPath, namespace)
@@ -49,6 +52,7 @@ func NewKarmadactlCommand(kubeConfig, karmadaContext, karmadactlPath, namespace 
 	return builder
 }
 
+// NewTestKubeconfig creates a new TestKubeconfig.
 func NewTestKubeconfig(kubeConfig, karmadaContext, karmadactlpath, namespace string) *TestKubeconfig {
 	return &TestKubeconfig{
 		KubeConfig:     kubeConfig,
@@ -96,6 +100,7 @@ func isTimeout(err error) bool {
 	return false
 }
 
+// ExecOrDie executes the karmadactl executable and returns the stdout.
 func (k *KarmadactlBuilder) ExecOrDie() (string, error) {
 	str, err := k.exec()
 	if isTimeout(err) {
@@ -104,15 +109,16 @@ func (k *KarmadactlBuilder) ExecOrDie() (string, error) {
 	return str, err
 }
 
+// exec runs the karmadactl executable and returns the stdout.
 func (k *KarmadactlBuilder) exec() (string, error) {
 	stdOut, _, err := k.execWithFullOutput()
 	return stdOut, err
 }
 
 // execWithFullOutput runs the karmadactl executable, and returns the stdout and stderr.
-func (b KarmadactlBuilder) execWithFullOutput() (string, string, error) {
+func (k KarmadactlBuilder) execWithFullOutput() (string, string, error) {
 	var stdout, stderr bytes.Buffer
-	cmd := b.cmd
+	cmd := k.cmd
 	cmd.Stdout, cmd.Stderr = &stdout, &stderr
 
 	if err := cmd.Start(); err != nil {
@@ -134,8 +140,8 @@ func (b KarmadactlBuilder) execWithFullOutput() (string, string, error) {
 				Code: rc,
 			}
 		}
-	case <-b.timeout:
-		err := b.cmd.Process.Kill()
+	case <-k.timeout:
+		err := k.cmd.Process.Kill()
 		if err != nil {
 			return "", "", fmt.Errorf("after execution timeout, error killing %v:\nCommand stdout:\n%v\nstderr:\n%v\nerror:\n%v", cmd, cmd.Stdout, cmd.Stderr, err)
 		}

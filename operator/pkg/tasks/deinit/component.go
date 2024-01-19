@@ -41,6 +41,7 @@ func NewRemoveComponentTask() workflow.Task {
 			newRemoveComponentSubTask(constants.KarmadaControllerManagerComponent, util.KarmadaControllerManagerName),
 			newRemoveComponentSubTask(constants.KubeControllerManagerComponent, util.KubeControllerManagerName),
 			newRemoveComponentWithServiceSubTask(constants.KarmadaWebhookComponent, util.KarmadaWebhookName),
+			newRemoveComponentWithServiceSubTask(constants.KarmadaSearchComponent, util.KarmadaSearchName),
 			newRemoveComponentWithServiceSubTask(constants.KarmadaAggregatedAPIServerComponent, util.KarmadaAggregatedAPIServerName),
 			newRemoveComponentWithServiceSubTask(constants.KarmadaAPIserverComponent, util.KarmadaAPIServerName),
 			{
@@ -104,7 +105,7 @@ func runRemoveComponentSubTask(component string, workloadNameFunc util.Namefunc,
 				constants.KarmadaOperatorLabel,
 			)
 			if err != nil {
-				return fmt.Errorf("failed to cleanup serivce of component %s, err: %w", component, err)
+				return fmt.Errorf("failed to cleanup service of component %s, err: %w", component, err)
 			}
 		}
 

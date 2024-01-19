@@ -22,7 +22,7 @@ import (
 
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"k8s.io/cli-runtime/pkg/genericiooptions"
 	"k8s.io/client-go/kubernetes"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 	"k8s.io/kubectl/pkg/util/templates"
@@ -47,11 +47,12 @@ var (
 
 		The top command allows you to see the resource consumption for pods of member clusters.
 
-		This command requires karmada-metrics-adapter to be correctly configured and working on the Karmada control plane and 
+		This command requires karmada-metrics-adapter to be correctly configured and working on the Karmada control plane and
 		Metrics Server to be correctly configured and working on the member clusters.`)
 )
 
-func NewCmdTop(f util.Factory, parentCommand string, streams genericclioptions.IOStreams) *cobra.Command {
+// NewCmdTop implements the top command.
+func NewCmdTop(f util.Factory, parentCommand string, streams genericiooptions.IOStreams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "top",
 		Short: "Display resource (CPU/memory) usage of member clusters",
@@ -65,6 +66,7 @@ func NewCmdTop(f util.Factory, parentCommand string, streams genericclioptions.I
 	return cmd
 }
 
+// SupportedMetricsAPIVersionAvailable checks if the metrics API version is supported.
 func SupportedMetricsAPIVersionAvailable(discoveredAPIGroups *metav1.APIGroupList) bool {
 	for _, discoveredAPIGroup := range discoveredAPIGroups.Groups {
 		if discoveredAPIGroup.Name != metricsapi.GroupName {
@@ -81,6 +83,7 @@ func SupportedMetricsAPIVersionAvailable(discoveredAPIGroups *metav1.APIGroupLis
 	return false
 }
 
+// GenClusterList generates the cluster list.
 func GenClusterList(clientSet karmadaclientset.Interface, clusters []string) ([]string, error) {
 	if len(clusters) != 0 {
 		return clusters, nil
@@ -97,6 +100,7 @@ func GenClusterList(clientSet karmadaclientset.Interface, clusters []string) ([]
 	return clusters, nil
 }
 
+// GetMemberAndMetricsClientSet returns the clientset for member cluster and metrics server.
 func GetMemberAndMetricsClientSet(f util.Factory,
 	cluster string, useProtocolBuffers bool) (*kubernetes.Clientset, *metricsclientset.Clientset, error) {
 	memberFactory, err := f.FactoryForMemberCluster(cluster)
@@ -114,7 +118,7 @@ func GetMemberAndMetricsClientSet(f util.Factory,
 	}
 	metricsAPIAvailable := SupportedMetricsAPIVersionAvailable(apiGroups)
 	if !metricsAPIAvailable {
-		return nil, nil, fmt.Errorf("Metrics API not available")
+		return nil, nil, fmt.Errorf("metrics API not available")
 	}
 
 	config, err := memberFactory.ToRESTConfig()

@@ -128,7 +128,7 @@ func Unpack(file, targetPath string) error {
 			}
 			outFile.Close()
 		default:
-			fmt.Printf("uknown type: %v in %s\n", header.Typeflag, header.Name)
+			fmt.Printf("unknown type: %v in %s\n", header.Typeflag, header.Name)
 		}
 	}
 	return nil
@@ -162,11 +162,13 @@ func ListFiles(path string) []os.FileInfo {
 	return files
 }
 
+// FileExtInfo file info with absolute path
 type FileExtInfo struct {
 	os.FileInfo
 	AbsPath string
 }
 
+// ListFileWithSuffix traverse directory files with suffix
 func ListFileWithSuffix(path, suffix string) []FileExtInfo {
 	files := []FileExtInfo{}
 	if err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {

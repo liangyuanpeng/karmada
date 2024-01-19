@@ -62,8 +62,8 @@ import (
 )
 
 const (
-	// bindingDependedIdLabelKey is the resoruce id of the independent binding which the attached binding depends on.
-	bindingDependedIdLabelKey = "resourcebinding.karmada.io/depended-id"
+	// bindingDependedIDLabelKey is the resource id of the independent binding which the attached binding depends on.
+	bindingDependedIDLabelKey = "resourcebinding.karmada.io/depended-id"
 
 	// bindingDependedByLabelKeyPrefix is the prefix to a label key specifying an attached binding referred by which independent binding.
 	// the key is in the label of an attached binding which should be unique, because resource like secret can be referred by multiple deployments.
@@ -377,7 +377,7 @@ func (d *DependenciesDistributor) recordDependencies(binding *workv1alpha2.Resou
 		klog.Errorf("Failed to marshal dependencies of binding(%s/%s): %v", binding.Namespace, binding.Name, err)
 		return err
 	}
-	depenciesStr := string(dependenciesBytes)
+	dependenciesStr := string(dependenciesBytes)
 
 	objectAnnotation := binding.GetAnnotations()
 	if objectAnnotation == nil {
@@ -385,11 +385,11 @@ func (d *DependenciesDistributor) recordDependencies(binding *workv1alpha2.Resou
 	}
 
 	// dependencies are not updated, no need to update annotation.
-	if oldDependencies, exist := objectAnnotation[bindingDependenciesAnnotationKey]; exist && oldDependencies == depenciesStr {
+	if oldDependencies, exist := objectAnnotation[bindingDependenciesAnnotationKey]; exist && oldDependencies == dependenciesStr {
 		return nil
 	}
 
-	objectAnnotation[bindingDependenciesAnnotationKey] = depenciesStr
+	objectAnnotation[bindingDependenciesAnnotationKey] = dependenciesStr
 
 	return retry.RetryOnConflict(retry.DefaultRetry, func() (err error) {
 		binding.SetAnnotations(objectAnnotation)
@@ -534,6 +534,7 @@ func (d *DependenciesDistributor) createOrUpdateAttachedBinding(attachedBinding 
 			klog.Errorf("Failed to update resource binding(%s/%s): %v", existBinding.Namespace, existBinding.Name, err)
 			return err
 		}
+		return nil
 	}
 
 	if !apierrors.IsNotFound(err) {
@@ -657,7 +658,7 @@ func buildAttachedBinding(binding *workv1alpha2.ResourceBinding, object *unstruc
 	})
 
 	policyID := util.GetLabelValue(binding.Labels, workv1alpha2.ResourceBindingPermanentIDLabel)
-	dependedLabels = util.DedupeAndMergeLabels(dependedLabels, map[string]string{bindingDependedIdLabelKey: policyID})
+	dependedLabels = util.DedupeAndMergeLabels(dependedLabels, map[string]string{bindingDependedIDLabelKey: policyID})
 	return &workv1alpha2.ResourceBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      names.GenerateBindingName(object.GetKind(), object.GetName()),

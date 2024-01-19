@@ -159,22 +159,24 @@ components: [
   "schedulerEstimator"
 ]
 schedulerEstimator:
-  clusterName: "member"
-  ## kubeconfig of the member cluster
-  kubeconfig:
-    caCrt: |
-      -----BEGIN CERTIFICATE-----
-      XXXXXXXXXXXXXXXXXXXXXXXXXXX
-      -----END CERTIFICATE-----
-    crt: |
-      -----BEGIN CERTIFICATE-----
-      XXXXXXXXXXXXXXXXXXXXXXXXXXX
-      -----END CERTIFICATE-----
-    key: |
-      -----BEGIN RSA PRIVATE KEY-----
-      XXXXXXXXXXXXXXXXXXXXXXXXXXX
-      -----END RSA PRIVATE KEY-----
-    server: "https://apiserver.member"
+  memberClusters:
+  - clusterName: "member"
+    replicaCount: 1
+    ## kubeconfig of the member cluster
+    kubeconfig:
+      caCrt: |
+        -----BEGIN CERTIFICATE-----
+        XXXXXXXXXXXXXXXXXXXXXXXXXXX
+        -----END CERTIFICATE-----
+      crt: |
+        -----BEGIN CERTIFICATE-----
+        XXXXXXXXXXXXXXXXXXXXXXXXXXX
+        -----END CERTIFICATE-----
+      key: |
+        -----BEGIN RSA PRIVATE KEY-----
+        XXXXXXXXXXXXXXXXXXXXXXXXXXX
+        -----END RSA PRIVATE KEY-----
+      server: "https://apiserver.member"
 ```
 
 Execute command (switch to the `root` directory of the repo, and sets the `current-context` in a kubeconfig file)
@@ -304,7 +306,7 @@ helm install karmada-scheduler-estimator -n karmada-system ./charts/karmada
 | `apiServer.podAnnotations`               | Annotations of the karmada-apiserver pods                                                                                                                                                                                                     | `{}`                                                                                                                                                                                                                 |
 | `apiServer.imagePullSecrets`             | Image pull secret of the karmada-apiserver                                                                                                                                                                                                    | `[]`                                                                                                                                                                                                                 |
 | `apiServer.image.repository`             | Image of the karmada-apiserver                                                                                                                                                                                                                | `"registry.k8s.io/kube-apiserver"`                                                                                                                                                                                   |
-| `apiServer.image.tag`                    | Image tag of the karmada-apiserver                                                                                                                                                                                                            | `"v1.25.4"`                                                                                                                                                                                                          |
+| `apiServer.image.tag`                    | Image tag of the karmada-apiserver                                                                                                                                                                                                            | `"v1.26.12"`                                                                                                                                                                                                          |
 | `apiServer.image.pullPolicy`             | Image pull policy of the karmada-apiserver                                                                                                                                                                                                    | `"IfNotPresent"`                                                                                                                                                                                                     |
 | `apiServer.resources`                    | Resource quota of the karmada-apiserver                                                                                                                                                                                                       | `{}`                                                                                                                                                                                                                 |
 | `apiServer.hostNetwork`                  | Deploy karmada-apiserver with hostNetwork. If there are multiple karmadas in one cluster, you'd better set it to "false"                                                                                                                      | `"false"`                                                                                                                                                                                                            |
@@ -333,7 +335,7 @@ helm install karmada-scheduler-estimator -n karmada-system ./charts/karmada
 | `kubeControllerManager.podAnnotations`   | Annotations of the kube-controller-manager pods                                                                                                                                                                                               | `{}`                                                                                                                                                                                                                 |
 | `kubeControllerManager.imagePullSecrets` | Image pull secret of the kube-controller-manager                                                                                                                                                                                              | `[]`                                                                                                                                                                                                                 |
 | `kubeControllerManager.image.repository` | Image of the kube-controller-manager                                                                                                                                                                                                          | `"registry.k8s.io/kube-controller-manager"`                                                                                                                                                                          |
-| `kubeControllerManager.image.tag`        | Image tag of the kube-controller-manager                                                                                                                                                                                                      | `"v1.25.4"`                                                                                                                                                                                                          |
+| `kubeControllerManager.image.tag`        | Image tag of the kube-controller-manager                                                                                                                                                                                                      | `"v1.26.12"`                                                                                                                                                                                                          |
 | `kubeControllerManager.image.pullPolicy` | Image pull policy of the kube-controller-manager                                                                                                                                                                                              | `"IfNotPresent"`                                                                                                                                                                                                     |
 | `kubeControllerManager.resources`        | Resource quota of the kube-controller-manager                                                                                                                                                                                                 | `{}`                                                                                                                                                                                                                 |
 | `kubeControllerManager.nodeSelector`     | Node selector of the kube-controller-manager                                                                                                                                                                                                  | `{}`                                                                                                                                                                                                                 |
