@@ -527,6 +527,7 @@ func (d *DependenciesDistributor) createOrUpdateAttachedBinding(attachedBinding 
 				map[string]string{workv1alpha2.ResourceBindingPermanentIDLabel: uuid.New().String()})
 		}
 		existBinding.Spec.RequiredBy = mergeBindingSnapshot(existBinding.Spec.RequiredBy, attachedBinding.Spec.RequiredBy)
+		klog.Info("lan.dev.DependenciesDistributor.existBinding.Labels:%s", existBinding.Labels)
 		existBinding.Labels = util.DedupeAndMergeLabels(existBinding.Labels, attachedBinding.Labels)
 		existBinding.Spec.Resource = attachedBinding.Spec.Resource
 

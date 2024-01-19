@@ -45,7 +45,7 @@ func CreateOrUpdateWork(client client.Client, workMeta metav1.ObjectMeta, resour
 	klog.Infof("lan.CreateOrUpdateWork:%s, version:%s", workMeta.Name, workMeta.ResourceVersion)
 	workload := resource.DeepCopy()
 	annotationJson, _ := json.Marshal(workMeta.GetAnnotations())
-	klog.Info("lan.CreateOrUpdateWork.annotation: ", string(annotationJson))
+	// klog.Info("lan.CreateOrUpdateWork.annotation: ", string(annotationJson))
 	if conflictResolution, ok := workMeta.GetAnnotations()[workv1alpha2.ResourceConflictResolutionAnnotation]; ok {
 		util.ReplaceAnnotation(workload, workv1alpha2.ResourceConflictResolutionAnnotation, conflictResolution)
 	}
@@ -59,12 +59,15 @@ func CreateOrUpdateWork(client client.Client, workMeta metav1.ObjectMeta, resour
 	if len(annotationJson) > 0 {
 
 	}
-	// klog.Info("lan.CreateOrUpdateWork.annotation4: ", string(annotationJson))
+	// {"resourcebinding.karmada.io/name":"xline-xlinecluster","resourcebinding.karmada.io/namespace":"xline","sts.karmada.io/replicas":"{\"host\":\"0\",\"member1\":\"0\"}","sts.karmada.io/replicas-host":"0","sts.karmada.io/replicas-member1":"0","work.karmada.io/conflict-resolution":"abort","work.karmada.io/replicas":"{\"host\":\"0\",\"member1\":\"0\"}"}
+	// workMeta have annotation: work.karmada.io/replicas
+	klog.Info("lan.CreateOrUpdateWork.annotation4: ", string(annotationJson))
 	workloadJSON, err := workload.MarshalJSON()
 	if err != nil {
 		klog.Errorf("Failed to marshal workload(%s/%s), Error: %v", workload.GetNamespace(), workload.GetName(), err)
 		return err
 	}
+	// klog.Info("lan.CreateOrUpdateWork.workloadJSON:", string(workloadJSON))
 
 	work := &workv1alpha1.Work{
 		ObjectMeta: workMeta,
