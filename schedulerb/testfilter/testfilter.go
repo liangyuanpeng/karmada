@@ -16,6 +16,7 @@ const (
 type TestFilter struct{}
 
 var _ framework.FilterPlugin = &TestFilter{}
+var _ framework.ScorePlugin = &TestFilter{}
 
 // New instantiates the TestFilter plugin.
 func New() (framework.Plugin, error) {
@@ -34,4 +35,12 @@ func (p *TestFilter) Filter(ctx context.Context,
 	// implementation
 
 	return framework.NewResult(framework.Success)
+}
+
+func (p *TestFilter) Score(ctx context.Context, spec *workv1alpha2.ResourceBindingSpec, cluster *clusterv1alpha1.Cluster) (int64, *framework.Result) {
+	return 100, framework.NewResult(framework.Success)
+}
+func (p *TestFilter) ScoreExtensions() framework.ScoreExtensions {
+	// 返回 实现了ScoreExtensions接口的实现 或 nil
+	return nil
 }
