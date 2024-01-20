@@ -10,7 +10,7 @@ import (
 
 const (
 	// Name is the name of the plugin used in the plugin registry and configurations.
-	Name = "TestFilter"
+	Name = "Schedulera"
 )
 
 type TestFilter struct{}
