@@ -64,8 +64,6 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&ClusterPropagationPolicyList{},
 		&FederatedResourceQuota{},
 		&FederatedResourceQuotaList{},
-		&MultiClusterStatefulSet{},
-		&MultiClusterStatefulSetList{},
 		&OverridePolicy{},
 		&OverridePolicyList{},
 		&PropagationPolicy{},

@@ -40,10 +40,6 @@ func (c *FakePolicyV1alpha1) FederatedResourceQuotas(namespace string) v1alpha1.
 	return &FakeFederatedResourceQuotas{c, namespace}
 }
 
-func (c *FakePolicyV1alpha1) MultiClusterStatefulSets(namespace string) v1alpha1.MultiClusterStatefulSetInterface {
-	return &FakeMultiClusterStatefulSets{c, namespace}
-}
-
 func (c *FakePolicyV1alpha1) OverridePolicies(namespace string) v1alpha1.OverridePolicyInterface {
 	return &FakeOverridePolicies{c, namespace}
 }

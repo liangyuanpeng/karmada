@@ -34,14 +34,6 @@ type FederatedResourceQuotaListerExpansion interface{}
 // FederatedResourceQuotaNamespaceLister.
 type FederatedResourceQuotaNamespaceListerExpansion interface{}
 
-// MultiClusterStatefulSetListerExpansion allows custom methods to be added to
-// MultiClusterStatefulSetLister.
-type MultiClusterStatefulSetListerExpansion interface{}
-
-// MultiClusterStatefulSetNamespaceListerExpansion allows custom methods to be added to
-// MultiClusterStatefulSetNamespaceLister.
-type MultiClusterStatefulSetNamespaceListerExpansion interface{}
-
 // OverridePolicyListerExpansion allows custom methods to be added to
 // OverridePolicyLister.
 type OverridePolicyListerExpansion interface{}

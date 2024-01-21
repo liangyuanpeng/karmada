@@ -17,15 +17,16 @@ limitations under the License.
 package v1alpha1
 
 import (
+	policy "github.com/karmada-io/karmada/pkg/apis/policy/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
-	// ResourceKindMultiClusterService is kind name of MultiClusterService.
-	ResourceKindMultiClusterStatefulset            = "MultiClusterStatefulset"
-	ResourceSingularMultiClusterStatefulset        = "multiclusterstatefulset"
-	ResourcePluralMultiClusterStatefulset          = "multiClusterStatefulsets"
-	ResourceNamespaceScopedMultiClusterStatefulset = true
+	// ResourceKindCrossClusterService is kind name of CrossClusterService.
+	ResourceKindCrossClusterStatefulset            = "CrossClusterStatefulset"
+	ResourceSingularCrossClusterStatefulset        = "CrossClusterstatefulset"
+	ResourcePluralCrossClusterStatefulset          = "CrossClusterStatefulsets"
+	ResourceNamespaceScopedCrossClusterStatefulset = true
 )
 
 // +genclient
@@ -33,25 +34,25 @@ const (
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:shortName=ksts,categories={karmada-io}
 
-type MultiClusterStatefulSet struct {
+type CrossClusterStatefulSet struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	// Spec is the desired state of the MultiClusterIngress.
+	// Spec is the desired state of the CrossClusterIngress.
 	// +optional
-	Spec MultiClusterStatefulSetSpec `json:"spec,omitempty"`
+	Spec CrossClusterStatefulSetSpec `json:"spec,omitempty"`
 }
 
-// MultiClusterStatefulSetSpec is the desired state of the MultiClusterService.
-type MultiClusterStatefulSetSpec struct {
-	ResourceSelector ResourceSelector `json:"resourceSelector,omitempty"`
+// CrossClusterStatefulSetSpec is the desired state of the CrossClusterService.
+type CrossClusterStatefulSetSpec struct {
+	ResourceSelector policy.ResourceSelector `json:"resourceSelector,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// MultiClusterStatefulSetList contains a list of MultiClusterStatefulSet.
-type MultiClusterStatefulSetList struct {
+// CrossClusterStatefulSetList contains a list of CrossClusterStatefulSet.
+type CrossClusterStatefulSetList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []FederatedResourceQuota `json:"items"`
+	// Items           []FederatedResourceQuota `json:"items"`
 }

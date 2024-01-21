@@ -750,8 +750,11 @@ spec:
             required:
             - resourceSelectors
             type: object
+          test:
+            type: string
         required:
         - spec
+        - test
         type: object
     served: true
     storage: true

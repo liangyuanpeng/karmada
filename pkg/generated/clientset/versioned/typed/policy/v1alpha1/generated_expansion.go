@@ -24,8 +24,6 @@ type ClusterPropagationPolicyExpansion interface{}
 
 type FederatedResourceQuotaExpansion interface{}
 
-type MultiClusterStatefulSetExpansion interface{}
-
 type OverridePolicyExpansion interface{}
 
 type PropagationPolicyExpansion interface{}
