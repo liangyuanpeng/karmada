@@ -107,18 +107,16 @@ type MultiClusterStatefulSetSpec struct {
 propagate schedule result with CRD annotation,just like:
 
 ```yaml
-    annotations:
-        schedule.karmada.io/replicas: [{
-                                        "clusterName":"member1",
-                                        "replicas": 2
-                                        },
-                                        {
-                                            "clusterName":"member2",
-                                            "replicas": 3
-                                        }]
+Name:         xline
+Namespace:    xline
+API Version:  apps.my.io/v1alpha1
+Kind:         XlineCluster
+Annotations:
+    apps.karmada.io/replicas: {"host":"1","member1":"1"}
+...
 ```
 
-Should have a better name for this annotation, currently just a placeholder.
+And the user's operator can use this messgae to init they app cluster at member cluster, Before to really init cluster, they will splice the network so that resources between clusters can access each other, like: `xline-0=xline-0.host.karmada,xline-1=xline-1.member1.karmada`,It depends on how the user connects to the network of member clusters, which is not within the scope of the API's responsibilities.
 
 ### Strategy for rollingupdate
 
@@ -128,12 +126,16 @@ Propagate processor with CRD annotation:
 
 
 ```yaml
-    annotations:
-        schedule.karmada.io/processor: true/false
+Name:         xline
+Namespace:    xline
+API Version:  apps.my.io/v1alpha1
+Kind:         XlineCluster
+Annotations:
+    apps.karmada.io/processers: ["host","member1"]
+...
 ```
 
 Should have a better name for this annotation, currently just a placeholder.
-
 
 
 ### Test Plan
