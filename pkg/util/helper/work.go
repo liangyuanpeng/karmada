@@ -53,6 +53,7 @@ func CreateOrUpdateWork(client client.Client, workMeta metav1.ObjectMeta, resour
 	// klog.Info("lan.CreateOrUpdateWork.annotation2: ", string(annotationJson))
 	util.MergeAnnotation(workload, workv1alpha2.ResourceTemplateUIDAnnotation, string(workload.GetUID()))
 	r, _ := workMeta.GetAnnotations()["work.karmada.io/replicas"]
+	klog.Info("MergeAnnotation ", "r:", r)
 	util.MergeAnnotation(workload, "work.karmada.io/replicas", r)
 	annotationJson, _ = json.Marshal(workMeta.GetAnnotations())
 	// klog.Info("lan.CreateOrUpdateWork.annotation3: ", string(annotationJson))
