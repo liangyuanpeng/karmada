@@ -6,6 +6,7 @@ import (
 	clusterv1alpha1 "github.com/karmada-io/karmada/pkg/apis/cluster/v1alpha1"
 	workv1alpha2 "github.com/karmada-io/karmada/pkg/apis/work/v1alpha2"
 	"github.com/karmada-io/karmada/pkg/scheduler/framework"
+	klog "k8s.io/klog/v2"
 )
 
 const (
@@ -38,6 +39,7 @@ func (p *TestFilter) Filter(ctx context.Context,
 }
 
 func (p *TestFilter) Score(ctx context.Context, spec *workv1alpha2.ResourceBindingSpec, cluster *clusterv1alpha1.Cluster) (int64, *framework.Result) {
+	klog.Info("Score", "schedulerName:", spec.SchedulerName)
 	return 100, framework.NewResult(framework.Success)
 }
 
