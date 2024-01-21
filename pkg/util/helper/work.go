@@ -52,6 +52,8 @@ func CreateOrUpdateWork(client client.Client, workMeta metav1.ObjectMeta, resour
 	annotationJson, _ = json.Marshal(workMeta.GetAnnotations())
 	// klog.Info("lan.CreateOrUpdateWork.annotation2: ", string(annotationJson))
 	util.MergeAnnotation(workload, workv1alpha2.ResourceTemplateUIDAnnotation, string(workload.GetUID()))
+	r, _ := workMeta.GetAnnotations()["work.karmada.io/replicas"]
+	util.MergeAnnotation(workload, "work.karmada.io/replicas", r)
 	annotationJson, _ = json.Marshal(workMeta.GetAnnotations())
 	// klog.Info("lan.CreateOrUpdateWork.annotation3: ", string(annotationJson))
 	util.RecordManagedAnnotations(workload)
@@ -96,8 +98,8 @@ func CreateOrUpdateWork(client client.Client, workMeta metav1.ObjectMeta, resour
 			delete(runtimeObject.Labels, workv1alpha2.WorkUIDLabel)
 			runtimeObject.Spec = work.Spec
 			runtimeObject.Labels = work.Labels
-			// annotationJson, _ = json.Marshal(work.Annotations)
-			// klog.Info("lan.CreateOrUpdateWork.annotation5: ", string(annotationJson))
+			annotationJson, _ = json.Marshal(work.Annotations)
+			klog.Info("lan.CreateOrUpdateWork.annotation5: ", string(annotationJson))
 			runtimeObject.Annotations = work.Annotations
 			if util.GetLabelValue(runtimeObject.Labels, workv1alpha2.WorkPermanentIDLabel) == "" {
 				runtimeObject.Labels = util.DedupeAndMergeLabels(runtimeObject.Labels, map[string]string{workv1alpha2.WorkPermanentIDLabel: uuid.New().String()})
