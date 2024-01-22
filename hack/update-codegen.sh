@@ -62,6 +62,11 @@ deepcopy-gen \
   --output-file-base=zz_generated.deepcopy
 deepcopy-gen \
   --go-header-file hack/boilerplate/boilerplate.go.txt \
+  --input-dirs=github.com/karmada-io/karmada/pkg/apis/apps/v1alpha1 \
+  --output-package=github.com/karmada-io/karmada/pkg/apis/apps/v1alpha1 \
+  --output-file-base=zz_generated.deepcopy
+deepcopy-gen \
+  --go-header-file hack/boilerplate/boilerplate.go.txt \
   --input-dirs=github.com/karmada-io/karmada/pkg/apis/work/v1alpha1 \
   --output-package=github.com/karmada-io/karmada/pkg/apis/work/v1alpha1 \
   --output-file-base=zz_generated.deepcopy
