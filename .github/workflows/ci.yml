@@ -9,8 +9,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.actor }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 jobs:
-  build:
+  builda:
     name: compile
+    permissions:
+      packages: write
     runs-on: ubuntu-22.04
     steps:
       - name: checkout code
@@ -29,9 +31,28 @@ jobs:
           cd schedulera
           go mod tidy
           go build
+          make
+
+  buildb:
+    name: compile
+    permissions:
+      packages: write
+    runs-on: ubuntu-22.04
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v3
+        with:
+          # Number of commits to fetch. 0 indicates all history for all branches and tags.
+          # We need to guess version via git tags.
+          fetch-depth: 0
+      - name: install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.20.11
 
       - name: build schedulerb
         run: |
           cd schedulerb
           go mod tidy
           go build
+          
