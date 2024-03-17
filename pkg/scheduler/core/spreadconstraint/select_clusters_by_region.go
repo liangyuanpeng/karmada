@@ -19,10 +19,9 @@ package spreadconstraint
 import (
 	"fmt"
 
-	"k8s.io/utils/pointer"
-
 	clusterv1alpha1 "github.com/karmada-io/karmada/pkg/apis/cluster/v1alpha1"
 	policyv1alpha1 "github.com/karmada-io/karmada/pkg/apis/policy/v1alpha1"
+	"k8s.io/utils/pointer"
 )
 
 func selectBestClustersByRegion(spreadConstraintMap map[policyv1alpha1.SpreadFieldValue]policyv1alpha1.SpreadConstraint,

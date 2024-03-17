@@ -21,7 +21,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	autoscalingv2 "k8s.io/api/autoscaling/v2"
-	utilpointer "k8s.io/utils/pointer"
+	utilpointer "k8s.io/utils/ptr"
 )
 
 // This code is lifted from the Kubernetes codebase in order to avoid relying on the k8s.io/kubernetes package.
