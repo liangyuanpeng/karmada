@@ -21,7 +21,7 @@ import (
 
 	clusterv1alpha1 "github.com/karmada-io/karmada/pkg/apis/cluster/v1alpha1"
 	policyv1alpha1 "github.com/karmada-io/karmada/pkg/apis/policy/v1alpha1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 func selectBestClustersByRegion(spreadConstraintMap map[policyv1alpha1.SpreadFieldValue]policyv1alpha1.SpreadConstraint,
@@ -56,7 +56,7 @@ func selectBestClustersByRegion(spreadConstraintMap map[policyv1alpha1.SpreadFie
 	if restCnt > 0 {
 		sortClusters(candidateClusters, func(i *ClusterDetailInfo, j *ClusterDetailInfo) *bool {
 			if i.AvailableReplicas != j.AvailableReplicas {
-				return pointer.Bool(i.AvailableReplicas > j.AvailableReplicas)
+				return ptr.To[bool](i.AvailableReplicas > j.AvailableReplicas)
 			}
 			return nil
 		})
