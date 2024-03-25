@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: install Go
         uses: actions/setup-go@v3
         with:
@@ -37,7 +37,7 @@ jobs:
         working-directory: ${{ env.GOPATH }}/src/github.com/karmada-io/karmada
     steps:
       - name: checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ${{ env.GOPATH }}/src/github.com/karmada-io/karmada
       - name: install Go
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # Number of commits to fetch. 0 indicates all history for all branches and tags.
           # We need to guess version via git tags.
@@ -86,7 +86,7 @@ jobs:
       COLOR_GOTEST_ENABLED: enabled
     steps:
       - name: checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: install Go
         uses: actions/setup-go@v3
         with:
@@ -133,7 +133,7 @@ jobs:
           docker-images: false
           swap-storage: false
       - name: checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # Number of commits to fetch. 0 indicates all history for all branches and tags.
           # We need to guess version via git tags.
