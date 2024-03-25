@@ -2,11 +2,12 @@ version: 2
 updates:
 - package-ecosystem: "github-actions"
   directory: "/"
+  open-pull-requests-limit: 20
   schedule:
     # Check for updates to GitHub Actions every week
     interval: "weekly"
-  ignore:
-  - dependency-name: "*"
-    update-types: 
-    - version-update:semver-minor
-    - version-update:semver-patch
+  # ignore:
+  # - dependency-name: "*"
+  #   update-types: 
+  #   - version-update:semver-minor
+  #   - version-update:semver-patch
