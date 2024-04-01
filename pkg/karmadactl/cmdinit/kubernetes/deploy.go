@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"path"
@@ -65,6 +66,9 @@ var (
 	emptyByteSlice                 = make([]byte, 0)
 	externalEtcdCertSpecialization = map[string]func(*CommandInitOption) ([]byte, []byte, error){
 		options.EtcdCaCertAndKeyName: func(option *CommandInitOption) (cert, key []byte, err error) {
+			if option.ExternalEtcdCACertPath == "" {
+				return emptyByteSlice, emptyByteSlice, nil
+			}
 			cert, err = os.ReadFile(option.ExternalEtcdCACertPath)
 			key = emptyByteSlice
 			return
@@ -73,6 +77,9 @@ var (
 			return emptyByteSlice, emptyByteSlice, nil
 		},
 		options.EtcdClientCertAndKeyName: func(option *CommandInitOption) (cert, key []byte, err error) {
+			if option.ExternalEtcdClientCertPath == "" {
+				return emptyByteSlice, emptyByteSlice, nil
+			}
 			if cert, err = os.ReadFile(option.ExternalEtcdClientCertPath); err != nil {
 				return
 			}
@@ -215,6 +222,13 @@ func (i *CommandInitOption) validateExternalEtcd(_ string) error {
 
 func (i *CommandInitOption) isExternalEtcdProvided() bool {
 	return i.ExternalEtcdServers != ""
+}
+
+func (i *CommandInitOption) isExternalEtcdTLS() bool {
+	log.Println("i.ExternalEtcdCACertPath:", i.ExternalEtcdCACertPath)
+	log.Println("i.ExternalEtcdClientCertPath:", i.ExternalEtcdClientCertPath)
+	log.Println("i.ExternalEtcdClientKeyPath:", i.ExternalEtcdClientKeyPath)
+	return i.isExternalEtcdProvided() && (i.ExternalEtcdCACertPath != "" || i.ExternalEtcdClientCertPath != "" || i.ExternalEtcdClientKeyPath != "")
 }
 
 // Validate Check that there are enough flags to run the command.
