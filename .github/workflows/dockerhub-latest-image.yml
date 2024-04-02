@@ -9,6 +9,6 @@ jobs:
     name: publish to DockerHub
     uses: ./.github/workflows/build-publish-image.yml
     with:
-      username: ${{ secrets.DOCKERHUB_USER_NAME }}
-      password: ${{ secrets.DOCKERHUB_TOKEN }}
-      registry: docker.io/lypgcs
+      username: secrets.DOCKERHUB_USER_NAME
+      password: secrets.DOCKERHUB_TOKEN
+      registry: "docker.io/lypgcs"
