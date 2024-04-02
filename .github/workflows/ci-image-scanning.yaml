@@ -4,8 +4,10 @@ on:
 jobs:
   use-trivy-to-scan-image:
     name: image-scanning
-    if: ${{ github.repository == 'karmada-io/karmada' }}
+    # if: ${{ github.repository == 'karmada-io/karmada' }}
     runs-on: ubuntu-22.04
+    permissions:
+      security-events: write
     strategy:
       fail-fast: false
       matrix:
