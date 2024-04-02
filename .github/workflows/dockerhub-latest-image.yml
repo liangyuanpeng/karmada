@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - master
-      - reusable_workflow_images
+      - reusable_workflow_images_dev
 jobs:
   publish-image-to-dockerhub:
     name: publish to DockerHub
