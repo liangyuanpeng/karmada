@@ -15,12 +15,12 @@ on:
       registry:
         description: "registry"
         required: true
-        default: ""
+        default: "docker.io/karmada"
         type: string
       registryServerAddress:
         description: "registryServerAddress"
         required: false
-        default: "docker.io/karmada"
+        default: ""
         type: string
       imageTag:
         description: "imageTag"
