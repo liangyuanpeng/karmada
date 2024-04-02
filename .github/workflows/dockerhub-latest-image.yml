@@ -7,7 +7,7 @@ on:
 jobs:
   publish-image-to-dockerhub:
     name: publish to DockerHub
-    uses: ./.github/actions/build-publish-image.yml
+    uses: ./.github/workflows/build-publish-image.yml
     with:
       username: ${{ secrets.DOCKERHUB_USER_NAME }}
       password: ${{ secrets.DOCKERHUB_TOKEN }}
