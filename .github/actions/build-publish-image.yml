@@ -20,7 +20,7 @@ on:
       registryServerAddress:
         description: "registryServerAddress"
         required: false
-        default: ""
+        default: "docker.io/karmada"
         type: string
       imageTag:
         description: "imageTag"
@@ -79,12 +79,13 @@ jobs:
       - name: login to DockerHub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USER_NAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ inputs.username }}
+          password: ${{ inputs.password }}
       - name: build and publish images
         env:
-          REGISTRY: karmada
-          VERSION: latest
+          REGISTRY: ${{ inputs.registry }}
+          VERSION: ${{ inputs.imageTag }}
+          REGISTRY_SERVER_ADDRESS: ${{ inputs.registryServerAddress }}
           COSIGN_EXPERIMENTAL: 1
           SIGN_IMAGE: 1
         run: make mp-image-${{ matrix.target }}

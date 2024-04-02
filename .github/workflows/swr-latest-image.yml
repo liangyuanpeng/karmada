@@ -30,5 +30,4 @@ jobs:
           REGISTRY_PASSWORD: ${{secrets.SWR_REGISTRY_PASSWORD}}
           REGISTRY_SERVER_ADDRESS: ${{secrets.SWR_REGISTRY_SERVER_ADDRESS}}
           VERSION: latest
-
         run: make upload-images
