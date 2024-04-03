@@ -27,9 +27,7 @@ jobs:
           # We need to guess version via git tags.
           fetch-depth: 0
       - name: install Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.21.8
+        uses: actions/setup-go@v5
       - uses: helm/kind-action@v1.9.0
         with:
           version: "v0.20.0"
