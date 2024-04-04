@@ -18,6 +18,7 @@ package options
 
 import (
 	"context"
+	"log"
 
 	"github.com/spf13/pflag"
 	openapinamer "k8s.io/apiserver/pkg/endpoints/openapi"
@@ -75,6 +76,7 @@ func (o *Options) Config() (*metricsadapter.MetricsServer, error) {
 		klog.Errorf("Unable to build restConfig: %v", err)
 		return nil, err
 	}
+	log.Println("kubeconfig.opt:", restConfig.ContentType)
 
 	karmadaClient := karmadaclientset.NewForConfigOrDie(restConfig)
 	factory := informerfactory.NewSharedInformerFactory(karmadaClient, 0)
