@@ -77,6 +77,8 @@ kind load docker-image "${REGISTRY}/karmada-scheduler:${VERSION}" --name="${HOST
 kind load docker-image "${REGISTRY}/karmada-webhook:${VERSION}" --name="${HOST_CLUSTER_NAME}"
 kind load docker-image "${REGISTRY}/karmada-aggregated-apiserver:${VERSION}" --name="${HOST_CLUSTER_NAME}"
 
+export KARMADACTL_INIT_EXTRA_OPTS=${KARMADACTL_INIT_EXTRA_OPTS:-""}
+
 # init Karmada control plane
 echo "Start init karmada control plane..."
 ${BUILD_PATH}/karmadactl init --kubeconfig=${KUBECONFIG_PATH}/${HOST_CLUSTER_NAME}.config \
@@ -86,7 +88,8 @@ ${BUILD_PATH}/karmadactl init --kubeconfig=${KUBECONFIG_PATH}/${HOST_CLUSTER_NAM
     --karmada-aggregated-apiserver-image="${REGISTRY}/karmada-aggregated-apiserver:${VERSION}" \
     --karmada-data=${HOME}/karmada \
     --karmada-pki=${HOME}/karmada/pki \
-    --crds=./crds.tar.gz
+    --crds=./crds.tar.gz \
+    ${KARMADACTL_INIT_EXTRA_OPTS}
 
 # join cluster
 echo "Join member clusters..."
