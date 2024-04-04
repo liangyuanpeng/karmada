@@ -19,6 +19,7 @@ jobs:
         # the same as the End of Life of the Kubernetes release: https://kubernetes.io/releases/
         # Please remember to update the CI Schedule Workflow when we add a new version.
         k8s: [ v1.27.3, v1.28.0, v1.29.0 ]
+        extraEtcdVersion: [ "3.5.9-0", "" ]
     steps:
       - name: checkout code
         uses: actions/checkout@v3
@@ -37,6 +38,14 @@ jobs:
         run: |
           export CLUSTER_VERSION=kindest/node:${{ matrix.k8s }}
 
+          export KARMADACTL_INIT_EXTRA_OPTS=${KARMADACTL_INIT_EXTRA_OPTS:-""}
+
+          if [ ${{ matrix.extraEtcdVersion }} != "none" ];then 
+            docker run -p 2379:2379 -it -d --name etcd  registry.k8s.io/etcd:${{ matrix.extraEtcdVersion }}  etcd --data-dir /var/lib/etcd --experimental-watch-progress-notify-interval 1m --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379
+            export CNODE=`hostname`
+            KARMADACTL_INIT_EXTRA_OPTS=--external-etcd-servers=http://$CNODE:2379
+          fi
+
           # init e2e environment
           hack/cli-testing-environment.sh
 
@@ -44,6 +53,17 @@ jobs:
           export KUBECONFIG=${HOME}/karmada/karmada-apiserver.config
           GO111MODULE=on go install github.com/onsi/ginkgo/v2/ginkgo
           ginkgo -v --race --trace -p  --focus="[BasicPropagation] propagation testing deployment propagation testing"  ./test/e2e/
+      - name: check
+        if: ${{ matrix.extraEtcdVersion != '' }} 
+        run: |
+          kubectl --kubeconfig ~/.kube/karmada-host.config get pod -A -owide
+          
+          # would not deploy etcd when useing extra etcd.
+          KARMADA_ETCD_STS_COUNT=`kubectl --kubeconfig ~/.kube/karmada-host.config get sts -n karmada-system -l karmada.io/bootstrapping=app-defaults  -ojson | jq '.items | length'`
+          echo "KARMADA_ETCD_STS_COUNT:"$KARMADA_ETCD_STS_COUNT
+          if [ $KARMADA_ETCD_STS_COUNT -ne 0 ];then
+            exit -1
+          fi
       - uses: chainguard-dev/actions/kind-diag@main
         # Only upload logs on failure.
         if: ${{ failure() }}
