@@ -40,6 +40,12 @@ func TestAsqq(t *testing.T) {
 		panic(err)
 	}
 	log.Println("patchedData:", string(patchedData))
+	log.Println("patchBytes:", string(patchBytes))
+
+	patchBytes, err = yaml.YAMLToJSON(patchBytes)
+	if err != nil {
+		panic(err)
+	}
 
 	patchedData, err = strategicpatch.StrategicMergePatch(
 		patchedData,
@@ -47,7 +53,7 @@ func TestAsqq(t *testing.T) {
 		patchTarget.StrategicMergePatchObject,
 	)
 	if err != nil {
-		t.Fatal("")
+		t.Fatal("failed ptach!", err)
 		panic(err)
 	}
 	kubeletBytes, err := yaml.JSONToYAML(patchedData)
