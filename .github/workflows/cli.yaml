@@ -47,7 +47,17 @@ jobs:
           # run a single e2e
           export KUBECONFIG=${HOME}/karmada/karmada-apiserver.config
           GO111MODULE=on go install github.com/onsi/ginkgo/v2/ginkgo
-          ginkgo -v --race --trace -p  --focus="[BasicPropagation] propagation testing deployment propagation testing"  ./test/e2e/
+
+          export ARTIFACTS_PATH=${ARTIFACTS_PATH:-"${HOME}/karmadactl-test-logs"}
+          mkdir -p $ARTIFACTS_PATH
+
+          ginkgo --junit-report $ARTIFACTS_PATH/junit.xml -v --race --trace -p  --focus="[BasicPropagation] propagation testing deployment propagation testing"  ./test/e2e/
+      - name: upload logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: karmadactl_test_logs_${{ matrix.k8s }}
+          path: ${{ github.workspace }}/karmadactl-test-logs/${{ matrix.k8s }}/
       - uses: chainguard-dev/actions/kind-diag@main
         # Only upload logs on failure.
         if: ${{ failure() }}
