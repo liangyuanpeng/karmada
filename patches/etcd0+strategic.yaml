@@ -1,0 +1,4 @@
+spec:
+  containers:
+  - name: etcd
+    image: registry.k8s.io/etcd:v3.5.12

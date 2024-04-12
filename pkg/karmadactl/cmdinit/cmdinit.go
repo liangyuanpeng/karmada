@@ -162,6 +162,7 @@ func NewCmdInit(parentCommand string) *cobra.Command {
 	flags.StringVarP(&opts.KarmadaAggregatedAPIServerImage, "karmada-aggregated-apiserver-image", "", kubernetes.DefaultKarmadaAggregatedAPIServerImage, "Karmada aggregated apiserver image")
 	flags.Int32VarP(&opts.KarmadaAggregatedAPIServerReplicas, "karmada-aggregated-apiserver-replicas", "", 1, "Karmada aggregated apiserver replica set")
 	flags.IntVarP(&opts.WaitComponentReadyTimeout, "wait-component-ready-timeout", "", cmdinitoptions.WaitComponentReadyTimeout, "Wait for karmada component ready timeout. 0 means wait forever")
+	flags.StringVarP(&opts.PatchesDirectory, "wait-component-ready-timeout", "", cmdinitoptions.PatchesDirectory, "Wait for karmada component ready timeout. 0 means wait forever")
 	return cmd
 }
 

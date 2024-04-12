@@ -1,4 +1,0 @@
-spec:
-  containers:
-  - name: kube-scheduler
-    image: registry.k8s.io/kube-scheduler:v1.29.1

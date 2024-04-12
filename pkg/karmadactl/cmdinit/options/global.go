@@ -39,4 +39,5 @@ const (
 	KarmadaKubeConfigName = "karmada-apiserver.config"
 	// WaitComponentReadyTimeout wait component ready time
 	WaitComponentReadyTimeout = 120
+	PatchesDirectory          = "patches-directory"
 )

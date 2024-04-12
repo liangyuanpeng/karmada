@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"path"
@@ -170,6 +171,7 @@ type CommandInitOption struct {
 	KarmadaAPIServerIP                 []net.IP
 	HostClusterDomain                  string
 	WaitComponentReadyTimeout          int
+	PatchesDirectory                   string
 }
 
 func (i *CommandInitOption) validateLocalEtcd(parentCommand string) error {
@@ -461,7 +463,25 @@ func (i *CommandInitOption) initKarmadaAPIServer() error {
 	return nil
 }
 
+func (i *CommandInitOption) initPatch() error {
+	if i.PatchesDirectory != "" {
+		fs, err := os.ReadDir(i.PatchesDirectory)
+		if err != nil {
+			return err
+		}
+		for _, f := range fs {
+			log.Println("patch.file:", f.Name())
+		}
+	}
+	return nil
+}
+
 func (i *CommandInitOption) initKarmadaComponent() error {
+
+	if err := i.initPatch(); err != nil {
+		klog.Exitln(err)
+	}
+
 	deploymentClient := i.KubeClientSet.AppsV1().Deployments(i.Namespace)
 	// Create karmada-kube-controller-manager
 	// https://github.com/karmada-io/karmada/blob/master/artifacts/deploy/kube-controller-manager.yaml
