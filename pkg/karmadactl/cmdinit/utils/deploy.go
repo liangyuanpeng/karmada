@@ -29,11 +29,8 @@ import (
 
 // CreateDeployAndWait Create deployment and then waiting for ready
 func CreateDeployAndWait(kubeClientSet kubernetes.Interface, namespace string, deployment *appsv1.Deployment, waitComponentReadyTimeout int) error {
-	if _, err := kubeClientSet.AppsV1().Deployments(namespace).Create(context.TODO(), deployment, metav1.CreateOptions{}); err != nil {
+	if _, err := kubeClientSet.AppsV1().Deployments(deployment.GetNamespace()).Create(context.TODO(), deployment, metav1.CreateOptions{}); err != nil {
 		klog.Warning(err)
 	}
-	if err := util.WaitForDeploymentRollout(kubeClientSet, deployment, waitComponentReadyTimeout); err != nil {
-		return err
-	}
-	return nil
+	return util.WaitForDeploymentRollout(kubeClientSet, deployment, waitComponentReadyTimeout)
 }
