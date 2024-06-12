@@ -1,6 +1,9 @@
 name: image-scanning
 on:
   push:
+    branches-ignore:
+      - 'dependabot/**'
+      - '!dependabot/github_actions/aquasecurity/**'
 jobs:
   use-trivy-to-scan-image:
     name: image-scanning
