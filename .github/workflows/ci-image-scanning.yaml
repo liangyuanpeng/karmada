@@ -1,10 +1,9 @@
 name: image-scanning
 on:
   push:
-    # Exclude branches created by Dependabot to avoid triggering current workflow
-    # for PRs initiated by Dependabot.
     branches-ignore:
       - 'dependabot/**'
+      - '!dependabot/github_actions/aquasecurity/**'
 jobs:
   use-trivy-to-scan-image:
     name: image-scanning
@@ -34,7 +33,7 @@ jobs:
           export REGISTRY="docker.io/karmada"
           make image-${{ matrix.target }}
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.20.0
+        uses: aquasecurity/trivy-action@0.22.0
         with:
           image-ref: 'docker.io/karmada/${{ matrix.target }}:latest'
           format: 'sarif'
@@ -42,13 +41,14 @@ jobs:
           vuln-type: 'os,library'
           output: 'trivy-results.sarif'
       - name: display scan results
-        uses: aquasecurity/trivy-action@0.20.0
+        uses: aquasecurity/trivy-action@0.22.0
         with:
           image-ref: 'docker.io/karmada/${{ matrix.target }}:latest'
           format: 'table'
           ignore-unfixed: true
           vuln-type: 'os,library'
       - name: Upload Trivy scan results to GitHub Security tab
+        if: github.actor != 'dependabot[bot]'
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results.sarif'          
