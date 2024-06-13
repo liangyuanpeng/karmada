@@ -8,7 +8,7 @@ on:
 jobs:
   use-trivy-to-scan-image:
     name: image-scanning
-    if: ${{ github.repository == 'karmada-io/karmada' }}
+    # if: ${{ github.repository == 'karmada-io/karmada' }}
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -34,7 +34,7 @@ jobs:
           export REGISTRY="docker.io/karmada"
           make image-${{ matrix.target }}
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.21.0
+        uses: aquasecurity/trivy-action@0.20.0
         with:
           image-ref: 'docker.io/karmada/${{ matrix.target }}:latest'
           format: 'sarif'
@@ -42,7 +42,7 @@ jobs:
           vuln-type: 'os,library'
           output: 'trivy-results.sarif'
       - name: display scan results
-        uses: aquasecurity/trivy-action@0.21.0
+        uses: aquasecurity/trivy-action@0.20.0
         with:
           image-ref: 'docker.io/karmada/${{ matrix.target }}:latest'
           format: 'table'
