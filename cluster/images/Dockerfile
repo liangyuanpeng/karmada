@@ -1,4 +1,4 @@
-FROM alpine:3.18.5
+FROM alpine:3.20.1
 
 ARG BINARY
 
