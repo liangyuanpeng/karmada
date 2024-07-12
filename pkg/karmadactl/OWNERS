@@ -8,3 +8,7 @@ reviewers:
 approvers:
 - chaunceyjiang
 - lonelyCZ
+
+
+labels:
+  - area/karmadactl

@@ -6,3 +6,6 @@ approvers:
 - chaunceyjiang
 - jwcesign
 - Poor12
+
+labels:
+  - area/metrics-adapter

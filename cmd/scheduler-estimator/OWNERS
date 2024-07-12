@@ -2,3 +2,6 @@ reviewers:
 - Garrybest
 approvers:
 - Garrybest
+
+labels:
+  - area/scheduler-estimator
