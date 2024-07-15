@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tools
+  labels:
+    app: tools
+spec:
+  selector:
+    matchLabels:
+      app: tools
+  revisionHistoryLimit: 1
+  serviceName: tools
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: tools
+        test: world
+    spec:
+      # initContainers:
+      # - name: init
+      #   image: ghcr.io/liangyuanpeng/ubuntu:tools-v1
+      #   imagePullPolicy: IfNotPresent
+      #   restartPolicy: Always
+      #   command:
+      #   - sh
+      #   - -c
+      #   - |
+      #     date
+      containers:
+      - name: tools
+        image: ghcr.io/liangyuanpeng/ubuntu:tools-v1
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: HOST_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        command:
+        - sh
+        - -c
+        - |
+          sleep 99h
+          # kubectl  proxy --address 192.168.66.2 --accept-hosts 192.168.66.2
+          # curl '192.168.66.2:8001/api/v1/namespaces/default/pods?watch=true&allowWatchBookmarks=true&sendInitialEvents=true'
+          # etcdctl --endpoints https://${HOST_NODE_NAME}:2379  --key /tls/apiserver-etcd-client.key --cert /tls/apiserver-etcd-client.crt --cacert /tls/etcd/ca.crt get / --prefix --keys-only
+          # etcdctl --endpoints https://${HOST_NODE_NAME}:2379  --key /tls/apiserver-etcd-client.key --cert /tls/apiserver-etcd-client.crt --cacert /tls/etcd/ca.crt watch /registry/pods/ --prefix -wfields | tee watch.log
+          # etcdctl --endpoints https://${HOST_NODE_NAME}:2379  --key /tls/apiserver-etcd-client.key --cert /tls/apiserver-etcd-client.crt --cacert /tls/etcd/ca.crt watch /registry/ --prefix -wfields | tee watch.log
+          # etcdctl --endpoints https://${HOST_NODE_NAME}:2379  --key /tls/apiserver-etcd-client.key --cert /tls/apiserver-etcd-client.crt --cacert /tls/etcd/ca.crt watch /registry/ --prefix  | tee watch.log
+        volumeMounts:
+        - name: certs
+          mountPath: /tls
+      volumes:
+      - hostPath:
+          path: /etc/kubernetes/pki
+        name: certs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tools
+  labels:
+    app: tools
+spec:
+  ports:
+    - port: 2379
+      name: tools
+  type: ClusterIP
+  selector:
+    app: tools

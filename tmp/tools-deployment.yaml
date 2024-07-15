@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tools
+  labels:
+    app: tools
+spec:
+  selector:
+    matchLabels:
+      app: tools
+  revisionHistoryLimit: 1
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: tools
+    spec:
+      containers:
+      - name: tools
+        image: ghcr.io/liangyuanpeng/ubuntu:tools-v1
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: HOST_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        command:
+        - sh
+        - -c
+        - |
+          sleep 99h
+          # kubectl  proxy --address 192.168.66.2 --accept-hosts 192.168.66.2
+          # curl '192.168.66.2:8001/api/v1/namespaces/default/pods?watch=true&allowWatchBookmarks=true&sendInitialEvents=true'
+          # etcdctl --endpoints https://${HOST_NODE_NAME}:2379  --key /tls/apiserver-etcd-client.key --cert /tls/apiserver-etcd-client.crt --cacert /tls/etcd/ca.crt get / --prefix --keys-only
+          # etcdctl --endpoints https://${HOST_NODE_NAME}:2379  --key /tls/apiserver-etcd-client.key --cert /tls/apiserver-etcd-client.crt --cacert /tls/etcd/ca.crt watch /registry/pods/ --prefix -wfields | tee watch.log
+          # etcdctl --endpoints https://${HOST_NODE_NAME}:2379  --key /tls/apiserver-etcd-client.key --cert /tls/apiserver-etcd-client.crt --cacert /tls/etcd/ca.crt watch /registry/ --prefix -wfields | tee watch.log
+          # etcdctl --endpoints https://${HOST_NODE_NAME}:2379  --key /tls/apiserver-etcd-client.key --cert /tls/apiserver-etcd-client.crt --cacert /tls/etcd/ca.crt watch /registry/ --prefix  | tee watch.log
+        volumeMounts:
+        - name: certs
+          mountPath: /tls
+      volumes:
+      - hostPath:
+          path: /etc/kubernetes/pki
+        name: certs
