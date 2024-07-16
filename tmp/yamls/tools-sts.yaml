@@ -10,7 +10,7 @@ spec:
       app: tools
   revisionHistoryLimit: 1
   serviceName: tools
-  replicas: 3
+  replicas: 4
   template:
     metadata:
       labels:
