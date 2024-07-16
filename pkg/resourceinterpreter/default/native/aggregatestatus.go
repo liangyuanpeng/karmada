@@ -342,27 +342,36 @@ func aggregateStatefulSetStatus(object *unstructured.Unstructured, aggregatedSta
 	}
 	oldStatus := &statefulSet.Status
 	newStatus := &appsv1.StatefulSetStatus{}
+	observedLatestResourceTemplateGenerationCount := 0
 	for _, item := range aggregatedStatusItems {
 		if item.Status == nil {
 			continue
 		}
-		temp := &appsv1.StatefulSetStatus{}
-		if err = json.Unmarshal(item.Status.Raw, temp); err != nil {
+		member := &WrappedStatefulSetStatus{}
+		if err = json.Unmarshal(item.Status.Raw, member); err != nil {
 			return nil, err
 		}
 		klog.V(3).Infof("Grab statefulSet(%s/%s) status from cluster(%s), availableReplicas: %d, currentReplicas: %d, readyReplicas: %d, replicas: %d, updatedReplicas: %d",
-			statefulSet.Namespace, statefulSet.Name, item.ClusterName, temp.AvailableReplicas, temp.CurrentReplicas, temp.ReadyReplicas, temp.Replicas, temp.UpdatedReplicas)
+			statefulSet.Namespace, statefulSet.Name, item.ClusterName, member.AvailableReplicas, member.CurrentReplicas, member.ReadyReplicas, member.Replicas, member.UpdatedReplicas)
+
+		// `memberStatus.ObservedGeneration >= memberStatus.Generation` means the member's status corresponds the latest spec revision of the member statefulset.
+		// `memberStatus.ResourceTemplateGeneration >= deploy.Generation` means the member statefulset has been aligned with the latest spec revision of federated statefulset.
+		// If both conditions are met, we consider the member's status corresponds the latest spec revision of federated statefulset.
+		if member.ObservedGeneration >= member.Generation &&
+			member.ResourceTemplateGeneration >= member.Generation {
+			observedLatestResourceTemplateGenerationCount++
+		}
 
 		// always set 'observedGeneration' with current generation(.metadata.generation)
 		// which is the generation Karmada 'observed'.
 		// The 'observedGeneration' is mainly used by GitOps tools(like 'Argo CD') to assess the health status.
 		// For more details, please refer to https://argo-cd.readthedocs.io/en/stable/operator-manual/health/.
 		newStatus.ObservedGeneration = statefulSet.Generation
-		newStatus.AvailableReplicas += temp.AvailableReplicas
-		newStatus.CurrentReplicas += temp.CurrentReplicas
-		newStatus.ReadyReplicas += temp.ReadyReplicas
-		newStatus.Replicas += temp.Replicas
-		newStatus.UpdatedReplicas += temp.UpdatedReplicas
+		newStatus.AvailableReplicas += member.AvailableReplicas
+		newStatus.CurrentReplicas += member.CurrentReplicas
+		newStatus.ReadyReplicas += member.ReadyReplicas
+		newStatus.Replicas += member.Replicas
+		newStatus.UpdatedReplicas += member.UpdatedReplicas
 	}
 
 	if oldStatus.ObservedGeneration == newStatus.ObservedGeneration &&
