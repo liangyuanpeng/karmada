@@ -245,7 +245,6 @@ func reflectStatefulSetStatus(object *unstructured.Unstructured) (*runtime.RawEx
 		return nil, err
 	}
 
-	//TODO lan
 	statefulSetStatus := &appsv1.StatefulSetStatus{}
 	err = helper.ConvertToTypedObject(statusMap, statefulSetStatus)
 	if err != nil {

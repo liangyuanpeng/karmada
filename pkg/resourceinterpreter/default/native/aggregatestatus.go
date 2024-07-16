@@ -95,10 +95,9 @@ func aggregateDeploymentStatus(object *unstructured.Unstructured, aggregatedStat
 
 	// The 'observedGeneration' is mainly used by GitOps tools(like 'Argo CD') to assess the health status.
 	// For more details, please refer to https://argo-cd.readthedocs.io/en/stable/operator-manual/health/.
+	newStatus.ObservedGeneration = oldStatus.ObservedGeneration
 	if observedLatestResourceTemplateGenerationCount == len(aggregatedStatusItems) {
 		newStatus.ObservedGeneration = deploy.Generation
-	} else {
-		newStatus.ObservedGeneration = oldStatus.ObservedGeneration
 	}
 
 	if oldStatus.ObservedGeneration == newStatus.ObservedGeneration &&
@@ -311,12 +310,10 @@ func aggregateDaemonSetStatus(object *unstructured.Unstructured, aggregatedStatu
 
 	// The 'observedGeneration' is mainly used by GitOps tools(like 'Argo CD') to assess the health status.
 	// For more details, please refer to https://argo-cd.readthedocs.io/en/stable/operator-manual/health/.
+	newStatus.ObservedGeneration = oldStatus.ObservedGeneration
 	if observedLatestResourceTemplateGenerationCount == len(aggregatedStatusItems) {
 		newStatus.ObservedGeneration = daemonSet.Generation
-	} else {
-		newStatus.ObservedGeneration = oldStatus.ObservedGeneration
 	}
-
 	if equality.Semantic.DeepEqual(oldStatus, newStatus) {
 		klog.V(3).Infof("Ignore update daemonSet(%s/%s) status as up to date", daemonSet.Namespace, daemonSet.Name)
 		return object, nil
@@ -362,16 +359,18 @@ func aggregateStatefulSetStatus(object *unstructured.Unstructured, aggregatedSta
 			observedLatestResourceTemplateGenerationCount++
 		}
 
-		// always set 'observedGeneration' with current generation(.metadata.generation)
-		// which is the generation Karmada 'observed'.
-		// The 'observedGeneration' is mainly used by GitOps tools(like 'Argo CD') to assess the health status.
-		// For more details, please refer to https://argo-cd.readthedocs.io/en/stable/operator-manual/health/.
-		newStatus.ObservedGeneration = statefulSet.Generation
 		newStatus.AvailableReplicas += member.AvailableReplicas
 		newStatus.CurrentReplicas += member.CurrentReplicas
 		newStatus.ReadyReplicas += member.ReadyReplicas
 		newStatus.Replicas += member.Replicas
 		newStatus.UpdatedReplicas += member.UpdatedReplicas
+	}
+
+	// The 'observedGeneration' is mainly used by GitOps tools(like 'Argo CD') to assess the health status.
+	// For more details, please refer to https://argo-cd.readthedocs.io/en/stable/operator-manual/health/.
+	newStatus.ObservedGeneration = oldStatus.ObservedGeneration
+	if observedLatestResourceTemplateGenerationCount == len(aggregatedStatusItems) {
+		newStatus.ObservedGeneration = statefulSet.Generation
 	}
 
 	if oldStatus.ObservedGeneration == newStatus.ObservedGeneration &&
