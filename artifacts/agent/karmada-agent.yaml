@@ -21,7 +21,7 @@ spec:
           operator: Exists
       containers:
         - name: karmada-agent
-          image: docker.io/karmada/karmada-agent:latest
+          image: docker.io/karmada/karmada-agent:{{agent_version}}
           imagePullPolicy: {{image_pull_policy}}
           command:
             - /bin/karmada-agent
