@@ -117,8 +117,11 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       GH_TOKEN: ${{ github.token }}
+    outputs:
+      stableTag: ${{ steps.get.outputs.stableTag }}
     steps:
     - name: get
+      id: get
       run: |
         gh api repos/karmada-io/karmada/tags --paginate | jq -r '.[].name' | grep -Ev "alpha|beta|preview|rc" | sort -Vr | head -n 1
         export STABLE_TAG=`gh api repos/karmada-io/karmada/tags --paginate | jq -r '.[].name' | grep -Ev "alpha|beta|preview|rc" | sort -Vr | head -n 1`
