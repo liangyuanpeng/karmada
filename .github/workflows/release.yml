@@ -51,6 +51,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v4
+    - name: env
+      run: |
+        env
     - name: Rename the crds directory
       run: |
         mv ./charts/karmada/_crds ./charts/karmada/crds
