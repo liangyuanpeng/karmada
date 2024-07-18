@@ -115,6 +115,8 @@ jobs:
   get-stable-tag:
     name: Get Stable tag
     runs-on: ubuntu-22.04
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
     - name: get
       run: |
