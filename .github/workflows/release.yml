@@ -118,6 +118,7 @@ jobs:
     steps:
     - name: get
       run: |
+        gh api repos/karmada-io/karmada/tags --paginate | jq -r '.[].name' | grep -Ev "alpha|beta|preview|rc" | sort -Vr | head -n 1
         export STABLE_TAG=`gh api repos/karmada-io/karmada/tags --paginate | jq -r '.[].name' | grep -Ev "alpha|beta|preview|rc" | sort -Vr | head -n 1`
         echo "Got the stabe tag:$STABLE_TAG"
         echo ${{ github.event.release.tag_name }}
