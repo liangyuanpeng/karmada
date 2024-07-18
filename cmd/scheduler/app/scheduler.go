@@ -241,8 +241,28 @@ func serveHealthzAndMetrics(address string) {
 		WriteTimeout:      WriteTimeout,
 		ReadTimeout:       ReadTimeout,
 	}
+	// mux := NewServeMux()
 	if err := httpServer.ListenAndServe(); err != nil {
 		klog.Errorf("Failed to serve healthz and metrics: %v", err)
 		os.Exit(1)
 	}
+
+	// aMux := http.NewServeMux()
+    // aMux.HandleFunc("/a/", AHandler)
+    // server := &http.Server{
+    //     Addr:    ":9091",
+    //     Handler: aMux,
+    // }
+    // go server.ListenAndServe()
+
+    // bMux := http.NewServeMux()
+    // bMux.HandleFunc("/b/", BHandler)
+    // server = &http.Server{
+    //     Addr:    ":9093",
+    //     Handler: bMux,
+    // }
+    // go server.ListenAndServe()
+
+    // log.Fatal(server.ListenAndServe())
+
 }
