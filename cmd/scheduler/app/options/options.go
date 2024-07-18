@@ -52,9 +52,21 @@ type Options struct {
 	KubeConfig     string
 	Master         string
 	// BindAddress is the IP address on which to listen for the --secure-port port.
+	// Deprecated
 	BindAddress string
 	// SecurePort is the port that the server serves at.
+	// Deprecated
 	SecurePort int
+
+	// MetricsBindAddress is the TCP address that the controller should bind to
+	// for serving prometheus metrics.
+	// It can be set to "0" to disable the metrics serving.
+	MetricsBindAddress string
+
+	// HealthProbeBindAddress is the TCP address that the controller should bind to
+	// for serving health probes
+	// It can be set to "0" or "" to disable serving the health probe.
+	HealthProbeBindAddress string
 
 	// KubeAPIQPS is the QPS to use while talking with karmada-apiserver.
 	KubeAPIQPS float32
@@ -139,6 +151,8 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&o.Master, "master", o.Master, "The address of the Kubernetes API server. Overrides any value in KubeConfig. Only required if out-of-cluster.")
 	fs.StringVar(&o.BindAddress, "bind-address", defaultBindAddress, "The IP address on which to listen for the --secure-port port.")
 	fs.IntVar(&o.SecurePort, "secure-port", defaultPort, "The secure port on which to serve HTTPS.")
+	fs.StringVar(&o.MetricsBindAddress, "bind-address", defaultBindAddress, "MetricsBindAddress")
+	fs.StringVar(&o.HealthProbeBindAddress, "bind-address", defaultBindAddress, "HealthProbeBindAddress")
 	fs.Float32Var(&o.KubeAPIQPS, "kube-api-qps", 40.0, "QPS to use while talking with karmada-apiserver.")
 	fs.IntVar(&o.KubeAPIBurst, "kube-api-burst", 60, "Burst to use while talking with karmada-apiserver.")
 	fs.BoolVar(&o.EnableSchedulerEstimator, "enable-scheduler-estimator", false, "Enable calling cluster scheduler estimator for adjusting replicas.")

@@ -19,10 +19,8 @@ package app
 import (
 	"context"
 	"fmt"
-	"net"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -139,7 +137,7 @@ the most suitable cluster.`,
 
 func run(opts *options.Options, stopChan <-chan struct{}, registryOptions ...Option) error {
 	klog.Infof("karmada-scheduler version: %s", version.Get())
-	go serveHealthzAndMetrics(net.JoinHostPort(opts.BindAddress, strconv.Itoa(opts.SecurePort)))
+	go serveHealthzAndMetrics(opts.HealthProbeBindAddress)
 
 	profileflag.ListenAndServe(opts.ProfileOpts)
 
