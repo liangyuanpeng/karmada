@@ -128,7 +128,7 @@ jobs:
     needs: 
     - release-assests
     - get-latest-stable
-    if: needs.get-latest-stable.outputs.stableTag == $GITHUB_REF_NAME
+    # if: needs.get-latest-stable.outputs.stableTag == $GITHUB_REF_NAME
     name: Update krew-index
     runs-on: ubuntu-22.04
     steps:
