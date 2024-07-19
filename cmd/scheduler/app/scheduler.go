@@ -137,7 +137,7 @@ the most suitable cluster.`,
 
 func run(opts *options.Options, stopChan <-chan struct{}, registryOptions ...Option) error {
 	klog.Infof("karmada-scheduler version: %s", version.Get())
-	go serveHealthzAndMetrics(opts.HealthProbeBindAddress)
+	go serveHealthzAndMetrics(opts.HealthProbeBindAddress, opts.MetricsBindAddress)
 
 	profileflag.ListenAndServe(opts.ProfileOpts)
 
@@ -223,7 +223,7 @@ func run(opts *options.Options, stopChan <-chan struct{}, registryOptions ...Opt
 	return nil
 }
 
-func serveHealthzAndMetrics(address string) {
+func serveHealthzAndMetrics(healthAddress, metricsAddress string) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -235,7 +235,7 @@ func serveHealthzAndMetrics(address string) {
 	}))
 
 	httpServer := http.Server{
-		Addr:              address,
+		Addr:              healthAddress,
 		Handler:           mux,
 		ReadHeaderTimeout: ReadHeaderTimeout,
 		WriteTimeout:      WriteTimeout,
@@ -248,21 +248,21 @@ func serveHealthzAndMetrics(address string) {
 	}
 
 	// aMux := http.NewServeMux()
-    // aMux.HandleFunc("/a/", AHandler)
-    // server := &http.Server{
-    //     Addr:    ":9091",
-    //     Handler: aMux,
-    // }
-    // go server.ListenAndServe()
+	// aMux.HandleFunc("/a/", AHandler)
+	// server := &http.Server{
+	//     Addr:    ":9091",
+	//     Handler: aMux,
+	// }
+	// go server.ListenAndServe()
 
-    // bMux := http.NewServeMux()
-    // bMux.HandleFunc("/b/", BHandler)
-    // server = &http.Server{
-    //     Addr:    ":9093",
-    //     Handler: bMux,
-    // }
-    // go server.ListenAndServe()
+	// bMux := http.NewServeMux()
+	// bMux.HandleFunc("/b/", BHandler)
+	// server = &http.Server{
+	//     Addr:    ":9093",
+	//     Handler: bMux,
+	// }
+	// go server.ListenAndServe()
 
-    // log.Fatal(server.ListenAndServe())
+	// log.Fatal(server.ListenAndServe())
 
 }
