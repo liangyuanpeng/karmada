@@ -62,6 +62,9 @@ $(IMAGE_TARGET):
 
 images: $(IMAGE_TARGET)
 
+saveimgs: 
+	SAVE_IMG=1 hack/docker.sh ${TARGETS}
+
 # Build and push multi-platform image to DockerHub
 #
 # Example

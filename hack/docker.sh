@@ -85,6 +85,12 @@ function build_local_image() {
     docker push "${image_name}"
     signImage ${image_name}
   fi
+
+  if [[ $output_type == "local" ]]; then 
+    mkdir -p "${REPO_ROOT}/_output/images/${platform}"
+    docker save -o "${REPO_ROOT}/_output/images/${platform}/${target}.tar" "${image_name}"
+  fi
+
 }
 
 function build_cross_image() {
@@ -129,6 +135,14 @@ function isCross() {
     echo false
   else
     echo true
+  fi
+}
+
+function saveimage(){
+  if [ $SAVE_IMG = "1" ];then
+    local -r target=$1
+    echo ${target}
+    exit 0
   fi
 }
 
