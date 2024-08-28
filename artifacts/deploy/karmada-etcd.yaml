@@ -101,6 +101,8 @@ spec:
             - --key-file=/etc/karmada/pki/etcd-server.key
             - --trusted-ca-file=/etc/karmada/pki/etcd-ca.crt
             - --data-dir=/var/lib/etcd
+            - --experimental-initial-corrupt-check=true
+            - --experimental-watch-progress-notify-interval=5s
             - --snapshot-count=10000
             # Setting Golang's secure cipher suites as etcd's cipher suites.
             # They are obtained by the return value of the function CipherSuites() under the go/src/crypto/tls/cipher_suites.go package.
