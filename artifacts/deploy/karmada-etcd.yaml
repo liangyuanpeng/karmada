@@ -71,6 +71,9 @@ spec:
             - containerPort: 2380
               name: server
               protocol: TCP
+            - containerPort: 2381
+              name: metrics
+              protocol: TCP
           volumeMounts:
             - mountPath: /var/lib/etcd
               name: etcd-data
@@ -148,6 +151,10 @@ spec:
       port: 2380
       protocol: TCP
       targetPort: 2380
+    - name: metrics
+      port: 2381
+      protocol: TCP
+      targetPort: 2381
   clusterIP: None
   selector:
     app: etcd
