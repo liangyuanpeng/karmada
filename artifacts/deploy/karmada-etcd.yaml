@@ -92,6 +92,7 @@ spec:
             - https://etcd-client.karmada-system.svc.cluster.local:2379
             - --initial-cluster
             - etcd0=http://etcd-0.etcd.karmada-system.svc.cluster.local:2380
+            - --listen-metrics-urls=http://127.0.0.1:2381
             - --initial-cluster-state
             - new
             - --cert-file=/etc/karmada/pki/etcd-server.crt
