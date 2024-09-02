@@ -218,6 +218,6 @@ jobs:
         echo "latestTag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
     - uses: actions/checkout@v4
       if: steps.get-latest-tag.outputs.latestTag == github.event.release.tag_name
-    - name: Update new version in krew-index
-      if: steps.get-latest-tag.outputs.latestTag == github.event.release.tag_name
-      uses: rajatjindal/krew-release-bot@v0.0.46
+    # - name: Update new version in krew-index
+    #   if: steps.get-latest-tag.outputs.latestTag == github.event.release.tag_name
+    #   uses: rajatjindal/krew-release-bot@v0.0.46
