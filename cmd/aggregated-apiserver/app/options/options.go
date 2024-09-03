@@ -59,6 +59,7 @@ type Options struct {
 	Audit          *genericoptions.AuditOptions
 	Features       *genericoptions.FeatureOptions
 	CoreAPI        *genericoptions.CoreAPIOptions
+	Admission      *genericoptions.AdmissionOptions
 
 	// KubeAPIQPS is the QPS to use while talking with karmada-apiserver.
 	KubeAPIQPS float32
@@ -78,6 +79,7 @@ func NewOptions() *Options {
 		Audit:          genericoptions.NewAuditOptions(),
 		Features:       genericoptions.NewFeatureOptions(),
 		CoreAPI:        genericoptions.NewCoreAPIOptions(),
+		Admission:      genericoptions.NewAdmissionOptions(),
 	}
 	o.Etcd.StorageConfig.EncodeVersioner = runtime.NewMultiGroupVersioner(schema.GroupVersion{Group: clusterv1alpha1.GroupVersion.Group, Version: clusterv1alpha1.GroupVersion.Version}, schema.GroupKind{Group: clusterv1alpha1.GroupName})
 	return o
@@ -92,6 +94,7 @@ func (o *Options) AddFlags(flags *pflag.FlagSet) {
 	o.Audit.AddFlags(flags)
 	o.Features.AddFlags(flags)
 	o.CoreAPI.AddFlags(flags)
+	o.Admission.AddFlags(flags)
 
 	flags.Lookup("kubeconfig").Usage = "Path to karmada control plane kubeconfig file."
 
