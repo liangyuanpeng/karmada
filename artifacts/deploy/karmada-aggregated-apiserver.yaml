@@ -22,7 +22,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: karmada-aggregated-apiserver
-          image: docker.io/karmada/karmada-aggregated-apiserver:latest
+          image: ghcr.io/liangyuanpeng/karmada-aggregated-apiserver:aa_metrics
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: karmada-certs
@@ -65,6 +65,20 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 15
+        - name: tools
+          image: ghcr.io/liangyuanpeng/ubuntu:tools-v1
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: karmada-certs
+              mountPath: /etc/karmada/pki
+              readOnly: true
+            - name: kubeconfig
+              subPath: kubeconfig
+              mountPath: /etc/kubeconfig
+          command:
+          - /bin/sh
+          - -c
+          - sleep 9h
       volumes:
         - name: karmada-certs
           secret:
