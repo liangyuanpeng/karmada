@@ -953,5 +953,6 @@ func (i *CommandInitOption) makeKarmadaAggregatedAPIServerDeployment() *appsv1.D
 			MatchLabels: aggregatedAPIServerLabels,
 		},
 	}
+	//lan TODO 添加一个debug的container
 	return aa
 }
