@@ -12,7 +12,7 @@ spec:
     matchLabels:
       app: karmada-aggregated-apiserver
       apiserver: "true"
-  replicas: 2
+  replicas: 1
   template:
     metadata:
       labels:
@@ -78,7 +78,12 @@ spec:
           command:
           - /bin/sh
           - -c
-          - sleep 9h
+          - |
+            while true;do
+               sleep 10s
+              wget -O- --no-check-certificate  --certificate /etc/karmada/pki/karmada.crt --private-key /etc/karmada/pki/karmada.key https://localhost:443/metrics
+            done
+           
       volumes:
         - name: karmada-certs
           secret:
