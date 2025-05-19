@@ -199,15 +199,15 @@ func aggregateJobStatus(object *unstructured.Unstructured, aggregatedStatusItems
 		return nil, err
 	}
 
-	log.Println("GetJobFinishedStatus............................",job.Name)
+	log.Println("lan.GetJobFinishedStatus............................", job.Name)
 
 	// If a job is finished, we should never update status again.
 	if finished, _ := helper.GetJobFinishedStatus(&job.Status); finished {
-		log.Println("GetJobFinishedStatus finish............................",job.Name)
+		log.Println("GetJobFinishedStatus finish............................", job.Name)
 		return object, nil
-		
+
 	}
-	log.Println("GetJobFinishedStatus not finish............................",job.Name)
+	log.Println("lan.GetJobFinishedStatus not finish............................", job.Name)
 
 	newStatus, err := helper.ParsingJobStatus(job, aggregatedStatusItems)
 	if err != nil {

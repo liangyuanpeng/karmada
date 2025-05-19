@@ -149,7 +149,7 @@ func reflectIngressStatus(object *unstructured.Unstructured) (*runtime.RawExtens
 }
 
 func reflectJobStatus(object *unstructured.Unstructured) (*runtime.RawExtension, error) {
-	log.Println("reflectJobStatus............................")
+	log.Println("lan.reflectJobStatus............................")
 	statusMap, exist, err := unstructured.NestedMap(object.Object, "status")
 	if err != nil {
 		klog.Errorf("Failed to get status field from %s(%s/%s), error: %v",
