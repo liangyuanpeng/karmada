@@ -205,7 +205,6 @@ func aggregateJobStatus(object *unstructured.Unstructured, aggregatedStatusItems
 	if finished, _ := helper.GetJobFinishedStatus(&job.Status); finished {
 		log.Println("GetJobFinishedStatus finish............................", job.Name)
 		return object, nil
-
 	}
 	log.Println("lan.GetJobFinishedStatus not finish............................", job.Name)
 
@@ -222,7 +221,8 @@ func aggregateJobStatus(object *unstructured.Unstructured, aggregatedStatusItems
 	job.Status = *newStatus
 	now := metav1.Now()
 	for _, c := range job.Status.Conditions {
-		
+		if c.Type == batchv1.JobSuccessCriteriaMet {
+		}
 	}
 	if len(job.Status.Conditions)>0{
 		job.Status.Conditions = append(job.Status.Conditions, batchv1.JobCondition{
