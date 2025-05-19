@@ -224,7 +224,7 @@ func aggregateJobStatus(object *unstructured.Unstructured, aggregatedStatusItems
 		if c.Type == batchv1.JobSuccessCriteriaMet {
 		}
 	}
-	if len(job.Status.Conditions)>0{
+	if len(job.Status.Conditions)>=0{
 		job.Status.Conditions = append(job.Status.Conditions, batchv1.JobCondition{
 			Type:               batchv1.JobSuccessCriteriaMet,
 			Status:             corev1.ConditionTrue,
