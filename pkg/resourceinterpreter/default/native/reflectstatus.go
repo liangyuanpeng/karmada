@@ -19,6 +19,7 @@ package native
 import (
 	"bytes"
 	"fmt"
+	"log"
 
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv2 "k8s.io/api/autoscaling/v2"
@@ -148,6 +149,7 @@ func reflectIngressStatus(object *unstructured.Unstructured) (*runtime.RawExtens
 }
 
 func reflectJobStatus(object *unstructured.Unstructured) (*runtime.RawExtension, error) {
+	log.Println("reflectJobStatus............................")
 	statusMap, exist, err := unstructured.NestedMap(object.Object, "status")
 	if err != nil {
 		klog.Errorf("Failed to get status field from %s(%s/%s), error: %v",
