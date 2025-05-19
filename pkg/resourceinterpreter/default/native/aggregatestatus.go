@@ -220,6 +220,14 @@ func aggregateJobStatus(object *unstructured.Unstructured, aggregatedStatusItems
 	}
 
 	job.Status = *newStatus
+	now := metav1.Now()
+	job.Status.Conditions = append(job.Status.Conditions, batchv1.JobCondition{
+		Type:               batchv1.JobSuccessCriteriaMet,
+		Status:             corev1.ConditionTrue,
+		LastProbeTime:      now,
+		LastTransitionTime: now,
+	})
+
 	return helper.ToUnstructured(job)
 }
 

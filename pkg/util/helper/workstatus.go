@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"sort"
 
 	corev1 "k8s.io/api/core/v1"
@@ -61,6 +62,7 @@ func AggregateResourceBindingWorkStatus(
 	binding *workv1alpha2.ResourceBinding,
 	eventRecorder record.EventRecorder,
 ) error {
+	log.Println("lan.AggregateResourceBindingWorkStatus...............")
 	workList, err := GetWorksByBindingID(ctx, c, binding.Labels[workv1alpha2.ResourceBindingPermanentIDLabel], true)
 	if err != nil {
 		return err
