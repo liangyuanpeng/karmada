@@ -3,8 +3,5 @@ apiVersion: "kind.x-k8s.io/v1alpha4"
 networking:
   podSubnet: {{pod_cidr}}
   serviceSubnet: {{service_cidr}}
-featureGates:
-  "AllAlpha": true
-  "AllBeta": true
 nodes:
   - role: control-plane
