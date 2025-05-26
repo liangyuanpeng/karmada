@@ -19,6 +19,7 @@ package app
 import (
 	"context"
 	"flag"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -253,6 +254,24 @@ func init() {
 func startClusterController(ctx controllerscontext.Context) (enabled bool, err error) {
 	mgr := ctx.Mgr
 	opts := ctx.Opts
+
+	// 获取 Kubernetes 版本
+	discoveryClient := discovery.NewDiscoveryClientForConfigOrDie(mgr.GetConfig())
+	serverVersion, err := discoveryClient.ServerVersion()
+	if err != nil {
+		// 处理错误
+	}
+
+	// 检查是否为 v1.30
+	isV130 := strings.HasPrefix(serverVersion.GitVersion, "v1.30")
+
+	// 检查 feature gate A 是否关闭
+	// isFeatureADisabled := !features.FeatureGate.Enabled(features.YourFeatureA)
+
+	log.Println("serverVersion.GitVersion:",serverVersion.GitVersion)
+	// if isV130 && isFeatureADisabled {
+	// 	// 执行您的逻辑
+	// }
 
 	clusterController := &cluster.Controller{
 		Client:                             mgr.GetClient(),
