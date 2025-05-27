@@ -19,6 +19,7 @@ package app
 import (
 	"context"
 	"flag"
+	"log"
 	"strings"
 	"time"
 
@@ -267,8 +268,8 @@ func startClusterController(ctx controllerscontext.Context) (enabled bool, err e
 
 	// 检查 feature gate A 是否关闭
 	// isFeatureADisabled := !features.FeatureGate.Enabled(features.YourFeatureA)
-
-	log.Println("serverVersion.GitVersion:",serverVersion.GitVersion)
+ 
+	log.Println("serverVersion.GitVersion:", serverVersion.GitVersion,isV130)
 	// if isV130 && isFeatureADisabled {
 	// 	// 执行您的逻辑
 	// }
