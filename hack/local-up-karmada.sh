@@ -100,7 +100,7 @@ function print_success() {
 print_success
 export DEV=${DEV:-"0"}
 if [ "$DEV" = "1" ];then 
-  echo "kubectl scale deploy karmada-controller-manager -n karmada-system --replicas 0 "
+  echo "kubectl --kubeconfig ~/.kube/karmada.config scale deploy karmada-controller-manager -n karmada-system --replicas 0 "
   cp ~/.kube/karmada.config ~/.kube/karmada-apiserver.config
   kubectl --kubeconfig ~/.kube/karmada-apiserver.config config use-context karmada-apiserver
 fi
